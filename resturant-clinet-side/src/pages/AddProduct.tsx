@@ -46,8 +46,8 @@ function AddProduct() {
     });
   };
   return (
-    <div>
-      <SidebarHeader className="flex items-center justify-end">
+    <div className="px-4">
+      <SidebarHeader className="flex justify-end">
         <Power />
       </SidebarHeader>
       <Separator />
@@ -55,7 +55,7 @@ function AddProduct() {
 
       <form
         onSubmit={handleSubmit}
-        className="mr-4 rounded-lg border-2 px-4 pt-0 pb-6"
+        className="container mx-auto rounded-lg border-2 px-4 py-10"
       >
         <div className="border-b py-3">
           <Button>{<List />} Product List</Button>

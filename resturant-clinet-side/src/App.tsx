@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/features/ProtectedRoute";
 import Layout from "./components/features/Layout";
 import AllProduct from "./pages/AllProducts";
 import { FormSwitcherProvider } from "./context/FormSwitcherProvider";
+import AllDeals from "./pages/AllDeals";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ export function App() {
               <Route path="dashboard" element={<HomePage />} />
               <Route path="products/add" element={<AddProduct />} />
               <Route path="products" element={<AllProduct />} />
+              <Route path="deals" element={<AllDeals />} />
             </Route>
             <Route path="login" element={<LoginForm />} />
             <Route path="signup" element={<SignUpForm />} />

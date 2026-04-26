@@ -15,7 +15,7 @@ import {
 import { TypographyH2 } from "../Typography/Typography";
 import { useFormContext } from "@/hooks/useFormContext";
 
-const FileUploaderComp = () => {
+const FileUploaderComp = ({ fileHeading = "Product Image" }) => {
   const [files, setFiles] = React.useState<File[]>([]);
 
   const { enableVariations, dispatch } = useFormContext();
@@ -35,7 +35,9 @@ const FileUploaderComp = () => {
 
   return (
     <div className="mt-2">
-      <TypographyH2 className={"mb-6"}>Product Image</TypographyH2>
+      {fileHeading && (
+        <TypographyH2 className={"mb-6"}>Product Image</TypographyH2>
+      )}
       <FileUpload
         maxFiles={1}
         maxSize={5 * 1024 * 1024}

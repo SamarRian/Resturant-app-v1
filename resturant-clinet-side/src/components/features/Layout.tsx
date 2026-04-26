@@ -6,8 +6,8 @@ export default function Layout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarTrigger />
       <main className="flex-1">
+        <SidebarTrigger />
         <Outlet />
       </main>
     </SidebarProvider>

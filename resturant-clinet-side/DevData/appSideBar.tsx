@@ -8,12 +8,12 @@ import {
   Users,
   BarChart2,
   Package,
-  Table2,
   ShoppingBag,
   Receipt,
   UserCheck,
   Settings,
   FileText,
+  HandCoins,
 } from "lucide-react";
 
 // Data top Items
@@ -53,11 +53,11 @@ export const dropdownItems: dropdownItemsTypes[] = [
     ],
   },
   {
-    title: "Tables",
-    icon: Table2,
+    title: "Deals",
+    icon: HandCoins,
     children: [
-      { title: "All Tables", url: "/tables" },
-      { title: "Add Table", url: "/tables/add" },
+      { title: "All Deals", url: "/deals" },
+      { title: "Add Deals", url: "/deals/add" },
     ],
   },
   {

@@ -1,4 +1,4 @@
-import { columns } from "@/components/features/ProductTable/Columns";
+import { columns } from "@/components/features/ProductTable/ProductColumns";
 import { DataTable } from "@/components/features/ProductTable/DataTable";
 import { TypographyH2 } from "@/components/Typography/Typography";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,20 @@ function AllProduct() {
   if (isProductsLoading) return <FullPageSpinner />;
 
   return (
-    <div className="container mx-auto py-10 pr-7">
+    <div className="container mx-auto px-4 py-10">
       <div className="flex items-center justify-between">
         <TypographyH2>All Products</TypographyH2>
-        <Button onClick={() => navigate("/products/add")}>Add Products</Button>
+        <Button onClick={() => navigate("/products/add")}>
+          Create New Deal
+        </Button>
       </div>
-      <DataTable columns={columns} data={productsData} />
+      <DataTable
+        columns={columns}
+        data={productsData}
+        key={"product-table"}
+        searchColumn="name"
+        searchPlaceholder="Search by Name"
+      />
     </div>
   );
 }

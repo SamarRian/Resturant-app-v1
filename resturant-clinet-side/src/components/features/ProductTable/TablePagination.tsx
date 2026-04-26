@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { cn } from "../../../lib/utils"; // or your cn import path
+import { cn } from "../../../lib/utils";
 
 export default function TablePagination({ table, pagination, setPagination }) {
   const currentPage = pagination.pageIndex + 1;
