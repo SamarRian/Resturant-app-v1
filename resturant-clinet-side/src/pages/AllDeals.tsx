@@ -2,8 +2,9 @@ import { DataTable } from "@/components/features/ProductTable/DataTable";
 import { Button } from "@/components/ui/button";
 import { dealsColumns } from "@/components/features/DealsTable/DealsColumns";
 import { TypographyH2 } from "@/components/Typography/Typography";
-import DealsModel from "@/components/features/DealModel";
 import { useState } from "react";
+import AddDeal from "@/components/features/DealModel";
+import UpdateDeal from "@/components/features/UpdateDeal";
 
 export const dummyDealsData = [
   {
@@ -481,7 +482,8 @@ function AllDeals() {
         searchPlaceholder="Search by Deal Name"
         key={"deals-table"}
       />
-      <DealsModel open={isDialogOpen} onOpenchange={setIsDialogOpen} />
+      <AddDeal open={isDialogOpen} onOpenchange={setIsDialogOpen} />
+      <UpdateDeal />
     </div>
   );
 }

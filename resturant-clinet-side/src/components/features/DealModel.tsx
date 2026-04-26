@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "../ui/select";
 
-export default function DealsModel({ open, onOpenchange }) {
+export default function AddDeal({ open, onOpenchange }) {
   return (
     <Dialog open={open} onOpenChange={onOpenchange}>
       <form>
@@ -91,18 +91,15 @@ export default function DealsModel({ open, onOpenchange }) {
           <FieldGroup className="flex-row">
             <Field>
               <FieldLabel>Display in POS</FieldLabel>
-              <Select>
+              <Select defaultValue="yes">
                 <SelectTrigger className="w-full max-w-48">
-                  <SelectValue placeholder="Select a fruit" />
+                  <SelectValue placeholder="Yes or No" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Display in POS</SelectLabel>
-                    <SelectItem value="apple">Apple</SelectItem>
-                    <SelectItem value="banana">Banana</SelectItem>
-                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                    <SelectItem value="grapes">Grapes</SelectItem>
-                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                    <SelectItem value="yes">Yes</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -111,16 +108,14 @@ export default function DealsModel({ open, onOpenchange }) {
               <FieldLabel>Status</FieldLabel>
               <Select>
                 <SelectTrigger className="w-full max-w-48">
-                  <SelectValue placeholder="Select a fruit" />
+                  <SelectValue placeholder="Select a Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Status</SelectLabel>
-                    <SelectItem value="apple">Apple</SelectItem>
-                    <SelectItem value="banana">Banana</SelectItem>
-                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                    <SelectItem value="grapes">Grapes</SelectItem>
-                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                    <SelectItem value="pause">Pause</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
