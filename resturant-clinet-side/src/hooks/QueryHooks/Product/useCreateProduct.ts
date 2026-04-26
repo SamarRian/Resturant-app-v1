@@ -10,10 +10,10 @@ export function useCreateProduct() {
 
     onSuccess: (data) => {
       toast.success(data.message || "Product Created Successfully!");
-      
+      queryClient.invalidateQueries({ queryKey: ["allProducts"] });
     },
     onError: (error) => {
-      toast.error(error);
+      toast.error(error.message);
     },
   });
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   type SortingState,
   type ColumnDef,
@@ -28,6 +28,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import TablePagination from "./TablePagination";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -45,6 +46,11 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
   const table = useReactTable({
     data,
     columns,
@@ -56,13 +62,17 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
+
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      pagination,
     },
   });
+  const pageValue = table.getState().pagination.pageIndex + 1;
 
   return (
     <div>
@@ -152,7 +162,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      {/* <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
           size="sm"
@@ -169,6 +179,15 @@ export function DataTable<TData, TValue>({
         >
           Next
         </Button>
+      </div> */}
+
+      <div className="py-6">
+        <TablePagination
+          table={table}
+          pageValue={pageValue}
+          pagination={pagination}
+          setPagination={setPagination}
+        />
       </div>
     </div>
   );
