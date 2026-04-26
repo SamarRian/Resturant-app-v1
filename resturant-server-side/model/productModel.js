@@ -19,7 +19,7 @@ const productSchema = new mongoose.Schema(
     productCode: {
       type: String,
       default: "",
-      // ✅ unique nahi hai
+     
     },
     cost: {
       type: String, // ✅ cost add kiya
