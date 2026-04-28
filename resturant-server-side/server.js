@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import productRoute from "./routes/productRoutes.js";
+import dealsRoutes from "./routes/dealsRoutes.js";
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoute);
+// DEALS
+app.use("/api/deals", dealsRoutes);
 app.use("/images", express.static("assets/productImages"));
 // MongoDB Connect
 

@@ -63,7 +63,7 @@ function AddProduct() {
         <TypographyH2>Basic Information</TypographyH2>
         <ProductForm />
 
-        <FileUploaderComp />
+        <FileUploaderComp dispatch={dispatch} />
 
         <DynamicFields />
         <div>

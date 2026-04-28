@@ -19,10 +19,9 @@ const productSchema = new mongoose.Schema(
     productCode: {
       type: String,
       default: "",
-     
     },
     cost: {
-      type: String, // ✅ cost add kiya
+      type: String,
       default: "0",
     },
     price: {

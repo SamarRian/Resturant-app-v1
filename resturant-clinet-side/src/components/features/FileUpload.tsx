@@ -15,10 +15,10 @@ import {
 import { TypographyH2 } from "../Typography/Typography";
 import { useFormContext } from "@/hooks/useFormContext";
 
-const FileUploaderComp = ({ fileHeading = "Product Image" }) => {
+const FileUploaderComp = ({ fileHeading = "Product Image", dispatch }) => {
   const [files, setFiles] = React.useState<File[]>([]);
 
-  const { enableVariations, dispatch } = useFormContext();
+  const { enableVariations } = useFormContext();
 
   const handleFileChange = (newFiles: File[]) => {
     setFiles(newFiles);
@@ -29,7 +29,7 @@ const FileUploaderComp = ({ fileHeading = "Product Image" }) => {
     dispatch({
       type: "UPDATE_FIELD",
       field: "image",
-      value: file, //
+      value: file,
     });
   };
 

@@ -18,7 +18,7 @@ export async function createProduct(data) {
     });
     if (!res.ok) {
       const errorData = await res.json();
-      throw new Error(errorData.message || "Create Product Failed"); //
+      throw new Error(errorData.message || "Create Product Failed");
     }
     return res.json();
   } catch (error) {

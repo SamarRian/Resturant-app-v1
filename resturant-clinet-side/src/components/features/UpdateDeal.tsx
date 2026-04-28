@@ -29,16 +29,16 @@ import {
   SelectValue,
 } from "../ui/select";
 import { TypographyH3 } from "../Typography/Typography";
+import { PlusIcon } from "lucide-react";
+import { Separator } from "../ui/separator";
+import UpdateDealsTable from "./UpdateDealsTable";
+import { useFormContext } from "@/hooks/useFormContext";
 
 export default function UpdateDeal() {
+  const { isDialogeOpen, setOpenDialoge } = useFormContext();
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">Open Dialog</Button>
-      </DialogTrigger>
+    <Dialog open={isDialogeOpen} onOpenChange={setOpenDialoge}>
       <DialogContent className="sm:max-w-2xl md:max-w-3xl">
-        {" "}
-        {/* Wider for 3 columns */}
         <DialogHeader>
           <DialogTitle>Edit Deal</DialogTitle>
           <DialogDescription>
@@ -48,7 +48,7 @@ export default function UpdateDeal() {
         <form>
           <FieldGroup>
             <FieldSet>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 rounded-md border px-2 py-4 md:grid-cols-3">
                 <Field>
                   <FieldLabel htmlFor="product">Select Product</FieldLabel>
                   <Select defaultValue="">
@@ -101,6 +101,11 @@ export default function UpdateDeal() {
                     required
                   />
                 </Field>
+                <div>
+                  <Button>
+                    <PlusIcon /> Add Item
+                  </Button>
+                </div>
               </div>
             </FieldSet>
           </FieldGroup>
@@ -108,6 +113,10 @@ export default function UpdateDeal() {
             <TypographyH3 className={"m-0 py-0 text-lg font-light"}>
               Current Deals Data
             </TypographyH3>
+            <Separator />
+          </div>
+          <div>
+            <UpdateDealsTable />
           </div>
           <DialogFooter className="mt-6">
             <DialogClose asChild>
