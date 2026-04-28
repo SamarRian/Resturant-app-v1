@@ -65,7 +65,13 @@ export default function AddDeal({ open, onOpenchange }) {
     if (dealFormState.image) {
       dealForm.append("image", dealFormState.image);
     }
-    mutateDealFunction(dealForm);
+    mutateDealFunction(dealForm, {
+      onSuccess: () => {
+        dispatchDeal({
+          type: "RESET",
+        });
+      },
+    });
   };
 
   const regularPrice = dealFormState.dealCost - dealFormState.dealPrice;

@@ -16,10 +16,16 @@ export async function createDeal(deal) {
       method: "POST",
       body: deal,
     });
-    if (!res.ok) return;
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Failed to create deal");
+    }
+
     const data = await res.json();
+    return data;
   } catch (error) {
-    console.error(error.message);
+    console.error("Create deal error:", error.message);
     throw error;
   }
 }
