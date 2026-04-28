@@ -2,7 +2,7 @@ import Deals from "../model/dealsModel.js";
 
 export async function getAllDeals(req, res) {
   try {
-    const allDeals = await Deals.find().lean();
+    const allDeals = await Deals.find().sort({ _id: -1 }).lean();
 
     res.status(200).json({
       message: "Deals fetched successfully",

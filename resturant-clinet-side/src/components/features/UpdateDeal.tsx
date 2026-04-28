@@ -33,9 +33,20 @@ import { PlusIcon } from "lucide-react";
 import { Separator } from "../ui/separator";
 import UpdateDealsTable from "./UpdateDealsTable";
 import { useFormContext } from "@/hooks/useFormContext";
+import { useGetAllProducts } from "@/hooks/QueryHooks/Product/useGetAllProducts";
+import { FullPageSpinner } from "../ui/spinner";
+import { useGetSingleProduct } from "@/hooks/QueryHooks/Product/useSingleProduct";
+import { useState } from "react";
 
 export default function UpdateDeal() {
+  const [id, setId] = useState("");
+
   const { isDialogeOpen, setOpenDialoge } = useFormContext();
+  const { isProductsLoading, productsData } = useGetAllProducts();
+  const { singleProduct } = useGetSingleProduct(id);
+  console.log(singleProduct ? singleProduct : "no single product");
+
+  if (isProductsLoading) return <FullPageSpinner />;
   return (
     <Dialog open={isDialogeOpen} onOpenChange={setOpenDialoge}>
       <DialogContent className="sm:max-w-2xl md:max-w-3xl">
@@ -58,12 +69,13 @@ export default function UpdateDeal() {
                     <SelectContent className="max-h-50!" position="popper">
                       <SelectGroup>
                         <SelectLabel>Product List</SelectLabel>
-                        {[...Array(20)].map((_, i) => (
+                        {productsData?.map((product, index) => (
                           <SelectItem
-                            key={i}
-                            value={String(i + 1).padStart(2, "0")}
+                            key={index}
+                            value={product.name.toLowerCase()}
+                            onClick={() => setId(product._id)}
                           >
-                            {String(i + 1).padStart(2, "0")}
+                            {product.name}
                           </SelectItem>
                         ))}
                       </SelectGroup>
@@ -75,20 +87,28 @@ export default function UpdateDeal() {
                   <FieldLabel htmlFor="checkout-7j9-exp-year-f59">
                     Select Variation
                   </FieldLabel>
-                  <Select defaultValue="">
-                    <SelectTrigger id="checkout-7j9-exp-year-f59">
-                      <SelectValue placeholder="Select your variation" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-50!" position="popper">
-                      <SelectGroup>
-                        {[2024, 2025, 2026, 2027, 2028, 2029].map((year) => (
-                          <SelectItem key={year} value={String(year)}>
-                            {year}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  {singleProduct?.hasVariations && (
+                    <Select defaultValue="">
+                      <SelectTrigger id="checkout-7j9-exp-year-f59">
+                        <SelectValue placeholder="Select your variation" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-50!" position="popper">
+                        <SelectGroup>
+                          <SelectLabel>Variations List</SelectLabel>
+                          {singleProduct?.variations?.map(
+                            (variation, index) => (
+                              <SelectItem
+                                key={index}
+                                value={variation.variantName.toLowerCase()}
+                              >
+                                {variation.variantName}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </Field>
 
                 <Field>

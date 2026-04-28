@@ -98,7 +98,10 @@ export const useDealsColumns = (): ColumnDef<Deal>[] => {
       cell: ({ row }) => {
         const variants = row.getValue("variantsIncluded") as string | number;
         return (
-          <Badge className="bg-blue-200 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+          <Badge
+            onClick={toggleDialogue}
+            className="bg-blue-200 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+          >
             {variants ?? "0 Varients"}
           </Badge>
         );
@@ -184,12 +187,6 @@ export const useDealsColumns = (): ColumnDef<Deal>[] => {
 
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(deal.id)}
-              >
-                Copy Deal ID
-              </DropdownMenuItem>
 
               <DropdownMenuSeparator />
 

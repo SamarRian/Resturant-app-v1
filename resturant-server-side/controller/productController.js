@@ -134,3 +134,50 @@ export async function getAllProducts(req, res) {
     });
   }
 }
+
+export async function getProductById(req, res) {
+  console.log(req.params);
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid product ID format",
+      });
+    }
+
+    const singleProduct = await Product.findById(id).lean();
+
+    if (!singleProduct) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    const variations = await Variation.find({ product: id }).lean();
+
+    if (variations.length === 0 || variations === null) {
+      console.log("No variations found for this product");
+      return res.status(200).json({
+        message: "Variation not found",
+        singleProduct: singleProduct,
+        variations: variations,
+        hasVariations: variations.length > 0,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Single Product fetched successfully",
+      singleProduct: singleProduct,
+      variations: variations,
+      hasVariations: variations.length > 0,
+    });
+  } catch (error) {
+    console.error("Get product by ID error:", error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+      controllerError: `getProductById Failed ${error.message}`,
+    });
+  }
+}
