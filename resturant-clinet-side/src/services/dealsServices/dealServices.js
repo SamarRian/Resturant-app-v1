@@ -108,3 +108,22 @@ export async function deleteDealVariant(dealId, variantId) {
     throw error;
   }
 }
+
+export async function udpateDeal(id, updatedDealData) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/deals/update/${id}`, {
+      method: "PUT",
+      body: updatedDealData,
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to delete deal");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Update Deal error:", error.message);
+    throw error;
+  }
+}

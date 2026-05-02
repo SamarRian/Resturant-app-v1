@@ -33,7 +33,8 @@ export type Deal = {
 };
 
 export const useDealsColumns = (): ColumnDef<Deal>[] => {
-  const { toggleDialogue, handleDealID } = useFormContext();
+  const { toggleDialogue, handleDealID, toggleUpdateDialoge } =
+    useFormContext();
 
   const { deleteDealFN, isPending } = useDeleteDeal();
 
@@ -216,6 +217,14 @@ export const useDealsColumns = (): ColumnDef<Deal>[] => {
                 }}
               >
                 Add Variants
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  toggleUpdateDialoge();
+                  handleDealID(id);
+                }}
+              >
+                Update Deal
               </DropdownMenuItem>
 
               <DropdownMenuItem

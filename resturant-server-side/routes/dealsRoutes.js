@@ -8,6 +8,7 @@ import {
   getDealById,
   deleteDealById,
   deleteVariant,
+  updateDeal,
 } from "../controller/dealsController.js";
 import multer from "multer";
 
@@ -22,5 +23,5 @@ router.post("/post/:id", addVariationToDeal);
 router.get("/get/:id", getDealById);
 router.delete("/delete/:id", deleteDealById);
 router.delete("/delete/:dealId/variant/:variantId", deleteVariant);
-
+router.put("/update/:dealId", upload.single("image"), updateDeal);
 export default router;

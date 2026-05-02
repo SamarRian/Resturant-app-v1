@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Deals from "../model/dealsModel.js";
 
+import fs from "fs";
+
 export async function getAllDeals(req, res) {
   try {
     let allDeals = await Deals.find().sort({ _id: -1 }).lean();
@@ -246,7 +248,9 @@ export async function deleteVariant(req, res) {
     }
 
     // Find variant inside deal
-    let variantExists = deal.variantsIncluded.find((v) => v._id === variantId);
+    let variantExists = deal.variantsIncluded.find(
+      (v) => v._id.toString() === variantId,
+    );
 
     if (!variantExists) {
       return res.status(404).json({ message: "Variant not found" });
@@ -254,7 +258,7 @@ export async function deleteVariant(req, res) {
 
     // Delete variant
     deal.variantsIncluded = deal.variantsIncluded.filter(
-      (v) => v._id !== variantId,
+      (v) => v._id.toString() !== variantId,
     );
 
     await deal.save();
@@ -263,6 +267,54 @@ export async function deleteVariant(req, res) {
       message: "Variant Deleted Successfully",
       data: deal.variantsIncluded,
     });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+
+export async function updateDeal(req, res) {
+  try {
+    const { dealId } = req.params;
+    const { dealName, dealTitle, status, dealPrice, dealCost, displayPOS } =
+      req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(dealId)) {
+      return res.status(400).json({ message: "Invalid Deal ID" });
+    }
+
+    const existingDeal = await Deals.findById(dealId);
+    if (!existingDeal) {
+      return res.status(404).json({ message: "Deal not found" });
+    }
+
+    if (req.file && existingDeal.image) {
+      const oldImagePath = `assets/productImages/${existingDeal.image}`;
+
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath);
+        console.log("Old image deleted:", oldImagePath);
+      }
+    }
+
+    const imagePath = req.file ? req.file.filename : undefined;
+
+    const updates = {
+      ...(dealName && { dealName }),
+      ...(dealTitle && { dealTitle }),
+      ...(status && { status }),
+      ...(dealPrice && { dealPrice }),
+      ...(dealCost && { dealCost }),
+      ...(displayPOS && { displayPOS }),
+      ...(imagePath && { image: imagePath }),
+    };
+
+    const updated = await Deals.findByIdAndUpdate(
+      dealId,
+      { $set: updates },
+      { new: true },
+    );
+
+    return res.status(200).json({ data: updated });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

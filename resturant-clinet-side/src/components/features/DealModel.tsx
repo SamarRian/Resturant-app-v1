@@ -23,13 +23,38 @@ import {
 } from "../ui/select";
 import { useFormContext } from "../../hooks/useFormContext";
 import { useCreateDeal } from "@/hooks/QueryHooks/Deals/useCreateDeal";
+import { useUpdateSinlgeDeal } from "@/hooks/QueryHooks/Deals/useUpdateSingleDeal";
 import { Spinner } from "../ui/spinner";
 import { toast } from "sonner";
+import { useGetSingleDeal } from "@/hooks/QueryHooks/Deals/useGetSingleDeal";
+import { useEffect } from "react";
 
 export default function AddDeal({ open, onOpenchange }) {
-  const { dealFormState, dispatchDeal } = useFormContext();
+  const { dealFormState, dispatchDeal, dealId } = useFormContext();
 
-  const { mutateDealFunction, isPending } = useCreateDeal();
+  const { mutateDealFunction, isPending: isCreating } = useCreateDeal();
+  const { updateDealFN, isPending: isUpdating } = useUpdateSinlgeDeal();
+  const { data, isLoading } = useGetSingleDeal(dealId);
+
+  const singleDeal = data?.singleDeal;
+
+  // ✅ Jab singleDeal aaye — form fill karo
+  useEffect(() => {
+    if (dealId && singleDeal) {
+      dispatchDeal({
+        type: "SET_ALL",
+        payload: {
+          dealName: singleDeal.dealName || "",
+          dealTitle: singleDeal.dealTitle || "",
+          dealCost: singleDeal.dealCost || "",
+          dealPrice: singleDeal.dealPrice || "",
+          displayPOS: singleDeal.displayPOS || "",
+          status: singleDeal.status || "",
+          image: singleDeal.image || null,
+        },
+      });
+    }
+  }, [singleDeal, dealId]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatchDeal({
@@ -47,40 +72,64 @@ export default function AddDeal({ open, onOpenchange }) {
         value,
       });
     };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const dealForm = new FormData();
     if (!dealFormState.dealName || !dealFormState.dealTitle) {
       toast.error("Required fields missing");
       return;
     }
+
+    const dealForm = new FormData();
     dealForm.append("dealName", dealFormState.dealName);
     dealForm.append("dealTitle", dealFormState.dealTitle);
     dealForm.append("dealCost", dealFormState.dealCost);
     dealForm.append("dealPrice", dealFormState.dealPrice);
     dealForm.append("displayPOS", dealFormState.displayPOS);
     dealForm.append("status", dealFormState.status);
-
     if (dealFormState.image) {
       dealForm.append("image", dealFormState.image);
     }
-    mutateDealFunction(dealForm, {
-      onSuccess: () => {
-        dispatchDeal({
-          type: "RESET",
-        });
-      },
-    });
+
+    // ✅ dealId hai → Update, nahi hai → Create
+    if (dealId && singleDeal) {
+      updateDealFN(
+        { id: dealId, updatedDealData: dealForm },
+        {
+          onSuccess: () => {
+            dispatchDeal({ type: "RESET" });
+            onOpenchange(false);
+          },
+        }
+      );
+    } else {
+      mutateDealFunction(dealForm, {
+        onSuccess: () => {
+          dispatchDeal({ type: "RESET" });
+          onOpenchange(false);
+        },
+      });
+    }
   };
 
   const regularPrice = dealFormState.dealCost - dealFormState.dealPrice;
+  const isPending = isCreating || isUpdating; // Dono ka pending ek jagah
 
   return (
-    <Dialog open={open} onOpenChange={onOpenchange}>
+    // ✅ Dialog close hone pe form reset
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) dispatchDeal({ type: "RESET" });
+        onOpenchange(isOpen);
+      }}
+    >
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Create your Deal</DialogTitle>
+          <DialogTitle>
+            {dealId && singleDeal ? "Update Deal" : "Create your Deal"}
+          </DialogTitle>
           <DialogDescription>
             Fill in the details to create a new deal. Click submit when you're
             done.
@@ -154,7 +203,7 @@ export default function AddDeal({ open, onOpenchange }) {
                 disabled
                 id="regular-price"
                 name="regularPrice"
-                value={regularPrice}
+                value={dealId ? singleDeal?.regularPrice : ""}
               />
             </Field>
           </FieldGroup>
@@ -162,7 +211,12 @@ export default function AddDeal({ open, onOpenchange }) {
           <FieldGroup className="flex items-center gap-2">
             <Field>
               <FieldLabel>Deal Image</FieldLabel>
-              <FileUploaderComp fileHeading={false} dispatch={dispatchDeal} />
+              <FileUploaderComp
+                fileHeading={false}
+                dispatch={dispatchDeal}
+                dealId={dealId}
+                singleDeal={singleDeal}
+              />
             </Field>
           </FieldGroup>
 
@@ -170,7 +224,6 @@ export default function AddDeal({ open, onOpenchange }) {
             <Field>
               <FieldLabel>Display in POS</FieldLabel>
               <Select
-                required
                 value={dealFormState.displayPOS}
                 onValueChange={handleSelectChange("displayPOS")}
               >
@@ -190,7 +243,6 @@ export default function AddDeal({ open, onOpenchange }) {
             <Field>
               <FieldLabel>Status</FieldLabel>
               <Select
-                required
                 value={dealFormState.status}
                 onValueChange={handleSelectChange("status")}
               >
@@ -214,12 +266,25 @@ export default function AddDeal({ open, onOpenchange }) {
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? (
+
+            <Button type="submit" disabled={isPending || isLoading}>
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Spinner />
+                  <span>Loading...</span>
+                </div>
+              ) : isUpdating ? (
+                <div className="flex items-center gap-2">
+                  <Spinner />
+                  <span>Updating Deal...</span>
+                </div>
+              ) : isCreating ? (
                 <div className="flex items-center gap-2">
                   <Spinner />
                   <span>Submitting...</span>
                 </div>
+              ) : dealId && singleDeal ? (
+                "Update Deal"
               ) : (
                 "Submit Deal"
               )}

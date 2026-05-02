@@ -47,19 +47,19 @@ function formReducer(state: FormState, action: FormAction): FormState {
   }
 }
 
-// CREATE DEAL FORM INITIAL STATE.
-
+// CREATE DEAL FORM INITIAL STATE
 const createDealInitialState = {
   dealName: "",
   dealTitle: "",
   dealCost: 0,
   dealPrice: 0,
-  image: null as File | null,
+  image: null as File | null | string, // ✅ String bhi allow karo (DB se aayega)
   displayPOS: "",
   status: "",
 };
 
 type CreateDealState = typeof createDealInitialState;
+
 type CreateDealAction =
   | {
       type: "UPDATE_FIELD";
@@ -67,9 +67,9 @@ type CreateDealAction =
       value: string | number | boolean | File | null;
     }
   | { type: "RESET" }
-  | { type: "SET_ALL"; payload: Partial<CreateDealState> };
+  | { type: "SET_ALL"; payload: Partial<CreateDealState> }; // ✅ Ek hi type
 
-// Reducer CREATE DEAL
+// Reducer
 function createDealReducer(
   state: CreateDealState,
   action: CreateDealAction
@@ -78,11 +78,11 @@ function createDealReducer(
     case "UPDATE_FIELD":
       return { ...state, [action.field]: action.value };
 
-    case "RESET":
-      return createDealInitialState;
-
     case "SET_ALL":
       return { ...state, ...action.payload };
+
+    case "RESET":
+      return createDealInitialState;
 
     default:
       return state;
@@ -105,6 +105,10 @@ export function FormSwitcherProvider({
 
   const [isDialogeOpen, setOpenDialoge] = useState(false);
 
+  // UPDATE DEALS DIALOG
+
+  const [isUpdateDealOpen, setUpdateDealOpen] = useState(false);
+
   // UPDATE DEAL STATE
 
   const [updateDealData, seUpdateDealData] = useState({});
@@ -116,7 +120,11 @@ export function FormSwitcherProvider({
     setDealID(id);
   }
 
-  // ALL DEALS DIALOGE TOGGLE
+  // UPDATE DEALS DIALOGE TOGGLE
+
+  function toggleUpdateDialoge() {
+    setUpdateDealOpen((prev) => !prev);
+  }
 
   // update deal handler
 
@@ -148,6 +156,9 @@ export function FormSwitcherProvider({
         handleUpdateDeal,
         handleDealID,
         dealId,
+        toggleUpdateDialoge,
+        isUpdateDealOpen,
+        setUpdateDealOpen,
       }}
     >
       {children}

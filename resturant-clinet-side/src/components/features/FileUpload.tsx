@@ -15,7 +15,12 @@ import {
 import { TypographyH2 } from "../Typography/Typography";
 import { useFormContext } from "@/hooks/useFormContext";
 
-const FileUploaderComp = ({ fileHeading = "Product Image", dispatch }) => {
+const FileUploaderComp = ({
+  fileHeading = "Product Image",
+  dispatch,
+  dealId,
+  singleDeal,
+}) => {
   const [files, setFiles] = React.useState<File[]>([]);
 
   const { enableVariations } = useFormContext();
@@ -45,6 +50,7 @@ const FileUploaderComp = ({ fileHeading = "Product Image", dispatch }) => {
         value={files}
         onValueChange={handleFileChange}
         disabled={enableVariations}
+        defaultValue={dealId ? singleDeal?.image : ""}
       >
         <FileUploadDropzone className="flex-row flex-wrap border-dotted text-center">
           <CloudUpload className="size-4" />
