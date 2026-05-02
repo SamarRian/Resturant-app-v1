@@ -12,7 +12,7 @@ import {
   FileUploadList,
   FileUploadTrigger,
 } from "@/components/ui/file-upload";
-import { TypographyH2 } from "../Typography/Typography";
+import { TypographyH2 } from "../../Typography/Typography";
 import { useFormContext } from "@/hooks/useFormContext";
 
 const FileUploaderComp = ({

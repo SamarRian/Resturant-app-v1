@@ -8,10 +8,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup, FieldLabel } from "../ui/field";
-import { Input } from "../ui/input";
+import { Field, FieldGroup, FieldLabel } from "../../ui/field";
+import { Input } from "../../ui/input";
 import { WandSparkles } from "lucide-react";
-import FileUploaderComp from "./FileUpload";
+import FileUploaderComp from "../Products/FileUpload";
 import {
   Select,
   SelectContent,
@@ -20,11 +20,11 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { useFormContext } from "../../hooks/useFormContext";
+} from "../../ui/select";
+import { useFormContext } from "@/hooks/useFormContext";
 import { useCreateDeal } from "@/hooks/QueryHooks/Deals/useCreateDeal";
 import { useUpdateSinlgeDeal } from "@/hooks/QueryHooks/Deals/useUpdateSingleDeal";
-import { Spinner } from "../ui/spinner";
+import { Spinner } from "../../ui/spinner";
 import { toast } from "sonner";
 import { useGetSingleDeal } from "@/hooks/QueryHooks/Deals/useGetSingleDeal";
 import { useEffect } from "react";

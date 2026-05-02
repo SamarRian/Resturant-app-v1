@@ -1,11 +1,11 @@
-import { Field, FieldLabel } from "../ui/field";
+import { Field, FieldLabel } from "../../ui/field";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
+} from "../../ui/select";
 
 function Settings() {
   return (

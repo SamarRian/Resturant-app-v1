@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "../../ui/textarea";
 import { useFormContext } from "@/hooks/useFormContext";
 
 export function ProductForm() {

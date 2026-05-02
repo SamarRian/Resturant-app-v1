@@ -1,5 +1,5 @@
 import { MoreHorizontal } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +7,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "../../ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -17,9 +17,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "../../ui/table";
 import { useGetSingleDeal } from "@/hooks/QueryHooks/Deals/useGetSingleDeal";
-import { FullPageSpinner } from "../ui/spinner";
+import { FullPageSpinner } from "../../ui/spinner";
 import { UseDeleteVariant } from "@/hooks/QueryHooks/Deals/useDeleteVariant";
 
 export default function UpdateDealsTable({ dealId }) {

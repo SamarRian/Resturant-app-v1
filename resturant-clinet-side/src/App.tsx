@@ -12,6 +12,10 @@ import Layout from "./components/features/Layout";
 import AllProduct from "./pages/AllProducts";
 import { FormSwitcherProvider } from "./context/FormSwitcherProvider";
 import AllDeals from "./pages/AllDeals";
+import Table from "./pages/Table";
+import Staff from "./pages/Staff";
+import Category from "./pages/Category";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,6 +37,10 @@ export function App() {
               <Route path="products/add" element={<AddProduct />} />
               <Route path="products" element={<AllProduct />} />
               <Route path="deals" element={<AllDeals />} />
+              <Route path="table" element={<Table />} />
+              <Route path="staff" element={<Staff />} />
+              <Route path="category" element={<Category />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             <Route path="login" element={<LoginForm />} />
             <Route path="signup" element={<SignUpForm />} />

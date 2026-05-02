@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
-import { Field, FieldGroup, FieldLabel } from "../ui/field";
-import { TypographyH2, TypographyP } from "../Typography/Typography";
-import { Switch } from "../ui/switch";
+import { Field, FieldGroup, FieldLabel } from "../../ui/field";
+import { TypographyH2, TypographyP } from "../../Typography/Typography";
+import { Switch } from "../../ui/switch";
 import { useFormContext } from "@/hooks/useFormContext";
 
 const emptyRow = { name: "", cost: "", price: "", quantity: "", sku: "" };

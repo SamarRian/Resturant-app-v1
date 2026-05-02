@@ -27,6 +27,15 @@ export const topItems: NavItems[] = [
 // Data dropdown items
 export const dropdownItems: dropdownItemsTypes[] = [
   {
+    title: "Master Data",
+    icon: Users,
+    children: [
+      { title: "Tables", url: "/table" },
+      { title: "Staff", url: "/staff" },
+      { title: "Category", url: "/category" },
+    ],
+  },
+  {
     title: "Manage Users",
     icon: Users,
     children: [
@@ -89,7 +98,7 @@ export const dropdownItems: dropdownItemsTypes[] = [
     title: "Settings",
     icon: Settings,
     children: [
-      { title: "General", url: "/settings/general" },
+      { title: "General", url: "/settings" },
       { title: "Profile", url: "/settings/profile" },
     ],
   },

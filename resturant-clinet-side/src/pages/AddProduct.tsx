@@ -1,7 +1,7 @@
-import { DynamicFields } from "@/components/features/DynamicFields";
-import FileUploaderComp from "@/components/features/FileUpload";
-import { ProductForm } from "@/components/features/ProductForm";
-import Settings from "@/components/features/Settings";
+import { DynamicFields } from "@/components/features/Products/DynamicFields";
+import FileUploaderComp from "@/components/features/Products/FileUpload";
+import { ProductForm } from "@/components/features/Products/ProductForm";
+import Settings from "../components/features/Products/Settings";
 import { TypographyH2 } from "@/components/Typography/Typography";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";

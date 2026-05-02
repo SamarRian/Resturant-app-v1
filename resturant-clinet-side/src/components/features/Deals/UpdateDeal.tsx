@@ -18,14 +18,14 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { TypographyH3 } from "../Typography/Typography";
-import { Cross, PlusIcon } from "lucide-react";
-import { Separator } from "../ui/separator";
-import UpdateDealsTable from "./UpdateDealsTable";
+} from "../../ui/select";
+import { TypographyH3 } from "../../Typography/Typography";
+import { PlusIcon } from "lucide-react";
+import { Separator } from "../../ui/separator";
+import UpdateDealsTable from "@/components/features/Deals/UpdateDealsTable";
 import { useFormContext } from "@/hooks/useFormContext";
 import { useGetAllProducts } from "@/hooks/QueryHooks/Product/useGetAllProducts";
-import { FullPageSpinner } from "../ui/spinner";
+import { FullPageSpinner } from "../../ui/spinner";
 import { useGetSingleProduct } from "@/hooks/QueryHooks/Product/useSingleProduct";
 import { useState } from "react";
 import { useUpdateDealVariant } from "@/hooks/QueryHooks/Deals/useUpdateDealVariant";
