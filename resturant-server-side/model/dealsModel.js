@@ -19,6 +19,7 @@ const dealSchema = mongoose.Schema({
     default: "",
     trim: true,
   },
+
   image: {
     type: String,
     default: "",
@@ -30,6 +31,10 @@ const dealSchema = mongoose.Schema({
   status: {
     type: String,
     default: "",
+  },
+  regularPrice: {
+    type: String,
+    default: "0",
   },
   variantsIncluded: {
     type: Array,

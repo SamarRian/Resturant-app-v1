@@ -31,14 +31,32 @@ export async function createProduct(data) {
 
 export async function getSingleProduct(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/product/${id}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    const res = await fetch(`http://localhost:5000/api/product/${id}`, {
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    clearTimeout(timeoutId);
+
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Create Product Failed");
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `Failed to fetch product (Status: ${res.status})`
+      );
     }
+
     const data = await res.json();
     return data;
   } catch (error) {
+    if (error.name === "AbortError") {
+      console.error("Request timeout for product:", id);
+      throw new Error("Request timeout - server took too long to respond");
+    }
     console.error("Single product error:", error.message);
     throw error;
   }

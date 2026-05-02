@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useFormContext } from "@/hooks/useFormContext";
+import { useDeleteDeal } from "@/hooks/QueryHooks/Deals/useDeleteDeal";
 
 export type Deal = {
   id: string;
@@ -32,7 +33,9 @@ export type Deal = {
 };
 
 export const useDealsColumns = (): ColumnDef<Deal>[] => {
-  const { toggleDialogue } = useFormContext();
+  const { toggleDialogue, handleDealID } = useFormContext();
+
+  const { deleteDealFN, isPending } = useDeleteDeal();
 
   return [
     {
@@ -92,17 +95,18 @@ export const useDealsColumns = (): ColumnDef<Deal>[] => {
       accessorKey: "dealTitle",
       header: "Title",
     },
+
     {
       accessorKey: "variantsIncluded",
       header: "Variants Included",
       cell: ({ row }) => {
-        const variants = row.getValue("variantsIncluded") as string | number;
+        const variants = row.getValue("variantsIncluded") as any[];
+
         return (
-          <Badge
-            onClick={toggleDialogue}
-            className="bg-blue-200 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-          >
-            {variants ?? "0 Varients"}
+          <Badge className="bg-blue-200 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+            {variants?.length > 0
+              ? `${variants?.length} Variants`
+              : "0 Variants"}
           </Badge>
         );
       },
@@ -135,26 +139,28 @@ export const useDealsColumns = (): ColumnDef<Deal>[] => {
         </Button>
       ),
       cell: ({ row }) => {
-        // const price = row.getValue("regularPrice") as number;
-        // return <div>{price.toFixed(2)}</div>;
-        <div>Regular price</div>;
+        const price = row.getValue("regularPrice") as number;
+
+        return <div>{price}</div>;
       },
     },
     {
       accessorKey: "saving",
       header: "Saving",
       cell: ({ row }) => {
-        // const saving = row.getValue("saving") as number;
+        const regularPrice = row.original.regularPrice;
 
+        const dealPrice = row.original.dealPrice;
+
+        const saving = regularPrice - dealPrice;
         return (
           <Badge
             className={cn(
-              "bg-accent/50 dark:bg-accent/70 dark:text-white/80",
-              "text-red-600"
+              "bg-red-500 dark:bg-accent/70 dark:text-white/80",
+              "text-white"
             )}
           >
-            {/* Save {saving.amount.toFixed(2)} ({saving.percentage.toFixed(2)}%) */}
-            saving amount
+            Save {saving}
           </Badge>
         );
       },
@@ -164,19 +170,31 @@ export const useDealsColumns = (): ColumnDef<Deal>[] => {
       header: "Status",
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
-        return <Badge variant="destructive">{status}</Badge>;
+        return (
+          <Badge
+            className={cn(
+              "",
+              status === "active" ? "bg-green-500" : "bg-red-400"
+            )}
+          >
+            {status}
+          </Badge>
+        );
       },
     },
     {
       accessorKey: "createdBy",
       header: "Created By",
+      cell: () => {
+        return <span>Admin</span>;
+      },
     },
+
     {
       id: "actions",
       header: "Action",
       cell: ({ row }) => {
-        const deal = row.original;
-
+        const id = row.original._id;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -190,12 +208,21 @@ export const useDealsColumns = (): ColumnDef<Deal>[] => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem onClick={toggleDialogue}>
-                Update Deal
+              <DropdownMenuItem
+                onClick={() => {
+                  toggleDialogue();
+
+                  handleDealID(id);
+                }}
+              >
+                Add Variants
               </DropdownMenuItem>
 
-              <DropdownMenuItem className="text-red-600">
-                Delete Deal
+              <DropdownMenuItem
+                onClick={() => deleteDealFN(id)}
+                className="text-red-600"
+              >
+                {isPending ? "Deleting..." : "Delete Deal"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

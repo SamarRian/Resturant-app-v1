@@ -105,7 +105,24 @@ export function FormSwitcherProvider({
 
   const [isDialogeOpen, setOpenDialoge] = useState(false);
 
+  // UPDATE DEAL STATE
+
+  const [updateDealData, seUpdateDealData] = useState({});
+
+  // deal id
+  const [dealId, setDealID] = useState("");
+
+  function handleDealID(id) {
+    setDealID(id);
+  }
+
   // ALL DEALS DIALOGE TOGGLE
+
+  // update deal handler
+
+  function handleUpdateDeal(combinedData) {
+    seUpdateDealData(combinedData);
+  }
 
   const toggleDialogue = () => {
     setOpenDialoge((prev) => !prev);
@@ -127,6 +144,10 @@ export function FormSwitcherProvider({
         isDialogeOpen,
         dealFormState,
         dispatchDeal,
+        updateDealData,
+        handleUpdateDeal,
+        handleDealID,
+        dealId,
       }}
     >
       {children}

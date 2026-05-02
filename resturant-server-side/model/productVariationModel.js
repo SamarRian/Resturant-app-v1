@@ -13,18 +13,20 @@ const variationSchema = new mongoose.Schema(
       trim: true,
     },
     price: {
-      type: String,
+      type: Number,
       required: [true, "Price required hai"],
       min: 0,
+      default: 0,
     },
     quantity: {
-      type: String,
+      type: Number,
       default: 0,
     },
     cost: {
-      type: String,
+      type: Number,
       required: [true, "Cost required hai"],
       min: 0,
+      default: 0,
     },
   },
   { timestamps: true },

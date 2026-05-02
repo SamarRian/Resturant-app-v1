@@ -1,4 +1,4 @@
-import { MoreHorizontal, Trash } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -18,88 +18,23 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { useGetSingleDeal } from "@/hooks/QueryHooks/Deals/useGetSingleDeal";
+import { FullPageSpinner } from "../ui/spinner";
+import { UseDeleteVariant } from "@/hooks/QueryHooks/Deals/useDeleteVariant";
 
-const dealsData = [
-  {
-    product: "Wireless Headphones",
-    variation: "Black / Bluetooth 5.0",
-    price: 99.99,
-    quantity: 2,
-    total: 199.98,
-  },
-  {
-    product: "Smart Watch",
-    variation: "Silver / 44mm",
-    price: 249.99,
-    quantity: 1,
-    total: 249.99,
-  },
-  {
-    product: "Gaming Keyboard",
-    variation: "RGB / Mechanical",
-    price: 149.99,
-    quantity: 3,
-    total: 449.97,
-  },
-  {
-    product: "Wireless Mouse",
-    variation: "White / Silent Click",
-    price: 39.99,
-    quantity: 4,
-    total: 159.96,
-  },
-  {
-    product: "USB-C Hub",
-    variation: "7-in-1 / 4K",
-    price: 79.99,
-    quantity: 2,
-    total: 159.98,
-  },
-  {
-    product: "Laptop Stand",
-    variation: "Aluminum / Adjustable",
-    price: 49.99,
-    quantity: 1,
-    total: 49.99,
-  },
-  {
-    product: "Noise Cancellation Earbuds",
-    variation: "White / ANC",
-    price: 129.99,
-    quantity: 2,
-    total: 259.98,
-  },
-  {
-    product: "Phone Charger",
-    variation: "20W / USB-C",
-    price: 19.99,
-    quantity: 5,
-    total: 99.95,
-  },
-  {
-    product: "Monitor 24 Inch",
-    variation: "1080p / 75Hz",
-    price: 179.99,
-    quantity: 1,
-    total: 179.99,
-  },
-  {
-    product: "Desk Lamp",
-    variation: "LED / Touch Control",
-    price: 34.99,
-    quantity: 2,
-    total: 69.98,
-  },
-  {
-    product: "External SSD",
-    variation: "1TB / USB 3.2",
-    price: 119.99,
-    quantity: 1,
-    total: 119.99,
-  },
-];
+export default function UpdateDealsTable({ dealId }) {
+  const { data, isLoading } = useGetSingleDeal(dealId);
 
-export default function UpdateDealsTable() {
+  const { DeleteVarinat } = UseDeleteVariant();
+
+  const singleDeal = data?.singleDeal?.variantsIncluded;
+
+  const total = singleDeal?.reduce((sum, curEl) => {
+    return sum + curEl.price * curEl.dealQuantity;
+  }, 0);
+
+  if (isLoading) return <FullPageSpinner />;
+
   return (
     <div className="h-36 overflow-y-auto rounded-lg border">
       <Table>
@@ -115,39 +50,56 @@ export default function UpdateDealsTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {dealsData.map((deal, index) => (
-            <TableRow key={index}>
-              <TableCell>{deal.product}</TableCell>
-              <TableCell>{deal.variation}</TableCell>
-              <TableCell>{deal.price}</TableCell>
-              <TableCell>{deal.quantity}</TableCell>
-              <TableCell>{deal.total}</TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem>Copy Deal ID</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuItem className="text-red-600">
-                      Delete Deal
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+          {singleDeal.length > 0 ? (
+            singleDeal?.map((deal, index) => (
+              <TableRow key={deal._id || index}>
+                <TableCell>{deal.name}</TableCell>
+                <TableCell>
+                  {deal.variantName ? deal.variantName : "No Variants"}
+                </TableCell>
+                <TableCell>{deal.price}</TableCell>
+                <TableCell>{deal.dealQuantity}</TableCell>
+                <TableCell>{deal.price * deal.dealQuantity}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() =>
+                          DeleteVarinat({ dealId, variantId: deal._id })
+                        }
+                        className="text-red-600"
+                      >
+                        Delete Variant
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={6}
+                className="text-center text-muted-foreground"
+              >
+                No Results
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
         <TableFooter className="bg-accent/50">
           <TableRow>
-            <TableCell colSpan={5}>Total</TableCell>
-            <TableCell className="text-left">$2,500.00</TableCell>
+            <TableCell colSpan={4}>Total</TableCell>
+            <TableCell>{total}</TableCell>
+            <TableCell></TableCell>
           </TableRow>
         </TableFooter>
       </Table>

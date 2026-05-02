@@ -17,19 +17,19 @@ const productSchema = new mongoose.Schema(
       required: [true, "Category is required"],
     },
     productCode: {
-      type: String,
-      default: "",
+      type: Number,
+      default: 0,
     },
     cost: {
-      type: String,
-      default: "0",
+      type: Number,
+      default: 0,
     },
     price: {
-      type: String,
-      default: "0",
+      type: Number,
+      default: 0,
     },
     quantity: {
-      type: String,
+      type: Number,
       default: "0",
     },
     description: {
