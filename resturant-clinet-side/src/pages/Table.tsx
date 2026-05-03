@@ -3,53 +3,43 @@ import { TableColumns } from "@/components/features/TablesTable/TableColumns";
 import { TypographyH2 } from "@/components/Typography/Typography";
 import { Button } from "@/components/ui/button";
 import SingleInputDialoge from "@/components/ui/SingleInputDialoge";
-import { useState } from "react";
-
-export const tableStaticData = [
-  { tableName: "Electronics Deals" },
-  { tableName: "Winter Collection" },
-  { tableName: "Summer Sale" },
-  { tableName: "Mobile Accessories" },
-  { tableName: "Fashion Discounts" },
-  { tableName: "Laptop Offers" },
-  { tableName: "Gaming Zone" },
-  { tableName: "Home Appliances" },
-  { tableName: "Kitchen Essentials" },
-  { tableName: "Fitness Gear" },
-  { tableName: "Beauty Products" },
-  { tableName: "Kids Collection" },
-  { tableName: "Office Supplies" },
-  { tableName: "Shoes Sale" },
-  { tableName: "Travel Accessories" },
-];
+import { FullPageSpinner } from "@/components/ui/spinner";
+import { useGetAllTables } from "@/hooks/QueryHooks/Tables/useGetAllTables";
+import { useFormContext } from "@/hooks/useFormContext";
 
 function Table() {
-  const [isTableDialog, setTableDialog] = useState(false);
+  const { toggleSingleDialog, handleTableID } = useFormContext();
+  const { isLoading, data } = useGetAllTables();
 
-  function toggleTableDialog() {
-    setTableDialog((prev) => !prev);
-  }
+  const tablesData = data?.tablesData;
 
   const columns = TableColumns();
-
+  if (isLoading) return <FullPageSpinner />;
   return (
     <div className="container mx-auto px-4 sm:py-2 md:py-6 lg:py-10">
       <div className="flex items-center justify-between">
         <TypographyH2>Table Management</TypographyH2>
-        <Button onClick={toggleTableDialog}>Add New Table</Button>
+        <Button
+          onClick={() => {
+            handleTableID("");
+            toggleSingleDialog();
+          }}
+        >
+          Add New Table
+        </Button>
       </div>
       <div className="overflow-x-auto overflow-y-auto">
         <DataTable
           columns={columns}
-          data={tableStaticData}
+          data={tablesData ? tablesData : []}
           key={"table-table"}
           searchColumn="tableName"
           searchPlaceholder="Search by Table Name"
         />
         <SingleInputDialoge
+          key={"single-input-table"}
           title={"Table"}
-          open={isTableDialog}
-          onOpenChange={setTableDialog}
+          submitionKey={"table-single-dialog"}
         />
       </div>
     </div>

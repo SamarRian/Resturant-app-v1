@@ -100,6 +100,11 @@ export function FormSwitcherProvider({
     createDealReducer,
     createDealInitialState
   );
+
+  // SINGLE INPUT DIALOGE
+
+  const [isSingleDialog, setIsSingleDialog] = useState(false);
+
   const [enableVariations, setEnableDynamicFields] = useState(false);
   // ALL DEALS DIALOGUE
 
@@ -115,6 +120,24 @@ export function FormSwitcherProvider({
 
   // deal id
   const [dealId, setDealID] = useState("");
+  // TABLE ID
+  const [tableId, setTableId] = useState("");
+
+  // STaff id
+  const [staffID, setStaffID] = useState("");
+  const [categoryID, setCategoryID] = useState("");
+
+  function handleCategoryId(id) {
+    setCategoryID(id);
+  }
+
+  function handleStaffID(id) {
+    setStaffID(id);
+  }
+
+  function handleTableID(id) {
+    setTableId(id);
+  }
 
   function handleDealID(id) {
     setDealID(id);
@@ -140,6 +163,10 @@ export function FormSwitcherProvider({
     setEnableDynamicFields((prev) => !prev);
   };
 
+  // Single Input Dialog
+  function toggleSingleDialog() {
+    setIsSingleDialog((prev) => !prev);
+  }
   return (
     <FormSwitcherContext.Provider
       value={{
@@ -159,6 +186,16 @@ export function FormSwitcherProvider({
         toggleUpdateDialoge,
         isUpdateDealOpen,
         setUpdateDealOpen,
+        isSingleDialog,
+        setIsSingleDialog,
+        toggleSingleDialog,
+        tableId,
+        setTableId,
+        handleTableID,
+        handleStaffID,
+        staffID,
+        categoryID,
+        handleCategoryId,
       }}
     >
       {children}

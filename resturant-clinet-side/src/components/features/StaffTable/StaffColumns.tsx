@@ -8,6 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDeleteStaff } from "@/hooks/QueryHooks/Staff/useDeleteStaff";
+import { useFormContext } from "@/hooks/useFormContext";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
@@ -16,6 +18,9 @@ export type staffTypes = {
 };
 
 export const StaffColumns = (): ColumnDef<staffTypes>[] => {
+  const { toggleSingleDialog, handleStaffID, staffID } = useFormContext();
+
+  const { deleteStaffFN, isPending: isStaffDeleting } = useDeleteStaff();
   return [
     {
       id: "select",
@@ -68,6 +73,7 @@ export const StaffColumns = (): ColumnDef<staffTypes>[] => {
       id: "actions",
       header: "Action",
       cell: ({ row }) => {
+        const id = row.original?._id;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -81,8 +87,22 @@ export const StaffColumns = (): ColumnDef<staffTypes>[] => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>Add Variants</DropdownMenuItem>
-              <DropdownMenuItem>Update Deal</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  toggleSingleDialog();
+                  handleStaffID(id);
+                }}
+              >
+                Update
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => {
+                  deleteStaffFN(id);
+                }}
+              >
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );

@@ -3,6 +3,9 @@ import { DataTable } from "@/components/features/ProductTable/DataTable";
 import { TypographyH2 } from "@/components/Typography/Typography";
 import { Button } from "@/components/ui/button";
 import SingleInputDialoge from "@/components/ui/SingleInputDialoge";
+import { FullPageSpinner } from "@/components/ui/spinner";
+import { useGetAllCategory } from "@/hooks/QueryHooks/Category/useGetAllCategory";
+import { useFormContext } from "@/hooks/useFormContext";
 import { useState } from "react";
 
 export const tableStaticData = [
@@ -24,29 +27,40 @@ export const tableStaticData = [
 ];
 
 function Category() {
-  const [isCategoryDialog, setCategoryDialog] = useState(false);
-  function toggleCategoryDialog() {
-    setCategoryDialog((prev) => !prev);
-  }
+  const { toggleSingleDialog, handleCategoryId } = useFormContext();
+  const { Category, isCategoryLoading } = useGetAllCategory();
+  console.log("CATEGORY TABLE LOGS", Category);
+
+  const categoryData = Category?.categoryData;
+
   const columns = CategoryColumns();
+
+  if (isCategoryLoading) return <FullPageSpinner />;
   return (
     <div className="container mx-auto px-4 sm:py-2 md:py-6 lg:py-10">
       <div className="flex items-center justify-between">
         <TypographyH2>Category Management</TypographyH2>
-        <Button onClick={toggleCategoryDialog}>Add New Category</Button>
+        <Button
+          onClick={() => {
+            handleCategoryId("");
+            toggleSingleDialog();
+          }}
+        >
+          Add New Category
+        </Button>
       </div>
       <div className="overflow-x-auto overflow-y-auto">
         <DataTable
           columns={columns}
-          data={tableStaticData}
+          data={categoryData}
           key={"category-table"}
           searchColumn="categoryName"
           searchPlaceholder="Search by Category Name"
         />
         <SingleInputDialoge
+          submitionKey={"category-single-dialog"}
+          key={"single-input-categiry"}
           title="Category"
-          open={isCategoryDialog}
-          onOpenChange={setCategoryDialog}
         />
       </div>
     </div>

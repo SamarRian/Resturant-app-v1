@@ -8,6 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDeleteTable } from "@/hooks/QueryHooks/Tables/useDeleteTable";
+import { useFormContext } from "@/hooks/useFormContext";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
@@ -16,6 +18,10 @@ export type tableTypes = {
 };
 
 export const TableColumns = (): ColumnDef<tableTypes>[] => {
+  const { handleTableID, toggleSingleDialog } = useFormContext();
+
+  const { deleteTableFN, isDeleting } = useDeleteTable();
+
   return [
     {
       id: "select",
@@ -68,6 +74,7 @@ export const TableColumns = (): ColumnDef<tableTypes>[] => {
       id: "actions",
       header: "Action",
       cell: ({ row }) => {
+        const id = row.original?._id;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -81,8 +88,22 @@ export const TableColumns = (): ColumnDef<tableTypes>[] => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>Add Variants</DropdownMenuItem>
-              <DropdownMenuItem>Update Deal</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  toggleSingleDialog();
+                  handleTableID(id);
+                }}
+              >
+                Update
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => {
+                  deleteTableFN(id);
+                }}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );

@@ -5,6 +5,9 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import productRoute from "./routes/productRoutes.js";
 import dealsRoutes from "./routes/dealsRoutes.js";
+import tableRouter from "./routes/tableRoutes.js";
+import staffRouter from "./routes/staffRoutes.js";
+import categoryRouter from "./routes/categoryRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +22,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoute);
 // DEALS
 app.use("/api/deals", dealsRoutes);
+// TABLE
+app.use("/api/tables", tableRouter);
+// STAFF
+app.use("/api/staff", staffRouter);
+// CATEGORY
+app.use("/api/category", categoryRouter);
 app.use("/images", express.static("assets/productImages"));
 // MongoDB Connect
 

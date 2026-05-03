@@ -38,7 +38,6 @@ export default function AddDeal({ open, onOpenchange }) {
 
   const singleDeal = data?.singleDeal;
 
-  // ✅ Jab singleDeal aaye — form fill karo
   useEffect(() => {
     if (dealId && singleDeal) {
       dispatchDeal({
@@ -54,7 +53,7 @@ export default function AddDeal({ open, onOpenchange }) {
         },
       });
     }
-  }, [singleDeal, dealId]);
+  }, [singleDeal, dealId, dispatchDeal]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatchDeal({

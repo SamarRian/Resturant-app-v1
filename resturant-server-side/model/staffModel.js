@@ -1,0 +1,13 @@
+import mongoose from "mongoose";
+
+const staffSchema = mongoose.Schema(
+  {
+    personName: {
+      type: String,
+      default: "0",
+    },
+  },
+  { timestamps: true },
+);
+const Staff = mongoose.model("Staff", staffSchema);
+export default Staff;

@@ -8,14 +8,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDeleteCategory } from "@/hooks/QueryHooks/Category/useDeleteCategory";
+import { useFormContext } from "@/hooks/useFormContext";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 export type categoryTypes = {
-  tableName: string;
+  categoryName: string;
 };
 
 export const CategoryColumns = (): ColumnDef<categoryTypes>[] => {
+  const { toggleSingleDialog, handleCategoryId, categoryID } = useFormContext();
+
+  const { deleteCategoryFN, isCategoryDeleting } = useDeleteCategory();
   return [
     {
       id: "select",
@@ -68,6 +73,7 @@ export const CategoryColumns = (): ColumnDef<categoryTypes>[] => {
       id: "actions",
       header: "Action",
       cell: ({ row }) => {
+        const id = row.original?._id;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -81,8 +87,22 @@ export const CategoryColumns = (): ColumnDef<categoryTypes>[] => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>Add Variants</DropdownMenuItem>
-              <DropdownMenuItem>Update Deal</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  handleCategoryId(id);
+                  toggleSingleDialog();
+                }}
+              >
+                Update
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => {
+                  deleteCategoryFN(id);
+                }}
+              >
+                Delete
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );

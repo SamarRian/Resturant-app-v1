@@ -10,13 +10,9 @@ import {
   deleteVariant,
   updateDeal,
 } from "../controller/dealsController.js";
-import multer from "multer";
-
-// const upload = multer();
 
 const router = express.Router();
 
-// Public routes
 router.post("/post", upload.single("image"), createDeal);
 router.get("/all", getAllDeals);
 router.post("/post/:id", addVariationToDeal);
