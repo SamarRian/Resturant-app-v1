@@ -16,6 +16,7 @@ import Table from "./pages/Table";
 import Staff from "./pages/Staff";
 import Category from "./pages/Category";
 import Settings from "./pages/Settings";
+import Pos from "./pages/Pos";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ export function App() {
             </Route>
             <Route path="login" element={<LoginForm />} />
             <Route path="signup" element={<SignUpForm />} />
+            <Route path="pos" element={<Pos />} />
           </Routes>
         </BrowserRouter>
 

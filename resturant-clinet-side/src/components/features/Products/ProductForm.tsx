@@ -9,9 +9,15 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "../../ui/textarea";
 import { useFormContext } from "@/hooks/useFormContext";
+import { useGetAllCategory } from "@/hooks/QueryHooks/Category/useGetAllCategory";
 
 export function ProductForm() {
   const { enableVariations, formState, dispatch } = useFormContext();
+
+  const { Category, isCategoryLoading } = useGetAllCategory();
+  console.log(Category);
+
+  const categories = Category?.categoryData;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({
@@ -88,11 +94,18 @@ export function ProductForm() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pizza">Pizza</SelectItem>
+                {/* <SelectItem value="pizza">Pizza</SelectItem>
                 <SelectItem value="burger">Burger</SelectItem>
                 <SelectItem value="pasta">Pasta</SelectItem>
                 <SelectItem value="cake">Cake</SelectItem>
-                <SelectItem value="salad">Salad</SelectItem>
+                <SelectItem value="salad">Salad</SelectItem> */}
+                {categories?.map((el, i) => {
+                  return (
+                    <SelectItem value={el.categoryName}>
+                      {el.categoryName}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </Field>

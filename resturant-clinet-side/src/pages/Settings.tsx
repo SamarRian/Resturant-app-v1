@@ -7,8 +7,19 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ImageIcon, Plus, X } from "lucide-react";
 import { TypographyH2, TypographyP } from "@/components/Typography/Typography";
+import { useCreateSettings } from "@/hooks/QueryHooks/Settings/useCreateSettings";
+import { useGetAllSettings } from "@/hooks/QueryHooks/Settings/useGetAllSettings";
+import { useUpdateSettings } from "@/hooks/QueryHooks/Settings/useUpdateSettings";
 
 export default function Settings() {
+  const { createSettingsFN, isPending: isCreating } = useCreateSettings();
+  const { updateSettingsFN, isPending: isUpdating } = useUpdateSettings();
+  const { data, isSettingsLoading } = useGetAllSettings();
+
+  const settings = data?.settingsData[0];
+  const isUpdateMode = !!settings;
+  const isPending = isCreating || isUpdating;
+
   const [businessName, setBusinessName] = useState("");
   const [logo, setLogo] = useState(/** @type {File|null} */ null);
   const [logoPreview, setLogoPreview] = useState(
@@ -50,28 +61,49 @@ export default function Settings() {
     setPhoneNumbers((prev) => prev.filter((_, i) => i !== index));
   }
 
-  // ── Submit / Reset ────────────────────────────────────────────────────────
+  // ── Submit ────────────────────────────────────────────────────────────────
 
   function handleSave() {
-    if (!businessName.trim()) {
-      toast.error("Please enter a business name");
-      return;
+    if (!isUpdateMode) {
+      if (!businessName.trim()) {
+        toast.error("Please enter a business name");
+        return;
+      }
+      if (!logo) {
+        toast.error("Please upload a logo");
+        return;
+      }
+      if (!deliveryCharge) {
+        toast.error("Please enter delivery charge per km");
+        return;
+      }
+      if (!freeRange) {
+        toast.error("Please enter free delivery range");
+        return;
+      }
+      if (phoneNumbers.every((p) => p.trim() === "")) {
+        toast.error("Please enter at least one phone number");
+        return;
+      }
     }
 
-    const payload = {
-      businessName: businessName.trim(),
-      logo,
-      deliveryChargePerKm:
-        deliveryCharge === "" ? null : Number(deliveryCharge),
-      freeDeliveryRange: freeRange === "" ? null : Number(freeRange),
-      phoneNumbers: phoneNumbers.filter((p) => p.trim() !== ""),
-    };
+    const formData = new FormData();
 
-    console.log("Saving settings:", payload);
-    // TODO: replace with your API call, e.g.:
-    // await fetch("/api/settings", { method: "POST", body: JSON.stringify(payload) })
+    if (businessName.trim())
+      formData.append("buisnessName", businessName.trim());
+    if (deliveryCharge) formData.append("deliveryChargePerKM", deliveryCharge);
+    if (freeRange) formData.append("freeDeliveryRange", freeRange);
+    if (logo) formData.append("logoImage", logo);
 
-    toast.success("Settings saved successfully");
+    phoneNumbers
+      .filter((p) => p.trim() !== "")
+      .forEach((number) => formData.append("phoneNumbers", number));
+
+    if (isUpdateMode) {
+      updateSettingsFN({ id: settings._id, formData });
+    } else {
+      createSettingsFN(formData);
+    }
   }
 
   function handleReset() {
@@ -92,13 +124,11 @@ export default function Settings() {
       <div>
         <TypographyH2 className={"mb-2 p-0"}>Settings</TypographyH2>
         <TypographyP className="mb-2">
-          {" "}
           Configure your business information and delivery preferences
         </TypographyP>
       </div>
       <Card>
         <CardHeader></CardHeader>
-
         <CardContent className="space-y-6">
           {/* ── Business Name ── */}
           <div className="space-y-2">
@@ -106,7 +136,9 @@ export default function Settings() {
             <Input
               id="business-name"
               type="text"
-              placeholder="e.g. Sunrise Grocers"
+              placeholder={
+                isUpdateMode ? settings?.buisnessName : "e.g. Sunrise Grocers"
+              }
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
             />
@@ -129,7 +161,7 @@ export default function Settings() {
               {logoPreview ? (
                 <>
                   <img
-                    src={logoPreview}
+                    src={`http://localhost:5000/images/${settings?.logoImage}`}
                     alt="Logo preview"
                     className="h-16 w-16 rounded-lg border bg-white object-contain"
                   />
@@ -140,11 +172,14 @@ export default function Settings() {
                 </>
               ) : (
                 <>
-                  {/* Upload icon */}
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg border bg-background">
                     <ImageIcon className="h-5 w-5 text-muted-foreground" />
                   </div>
-                  <p className="text-sm font-medium">Click to upload logo</p>
+                  <p className="text-sm font-medium">
+                    {isUpdateMode && settings?.logoImage
+                      ? `Current: ${settings.logoImage}`
+                      : "Click to upload logo"}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     PNG, JPG, SVG — max 2 MB
                   </p>
@@ -168,7 +203,11 @@ export default function Settings() {
                   type="number"
                   min={0}
                   step={0.01}
-                  placeholder="0.00"
+                  placeholder={
+                    isUpdateMode
+                      ? String(settings?.deliveryChargePerKM ?? "0.00")
+                      : "0.00"
+                  }
                   className="pl-7 font-mono"
                   value={deliveryCharge}
                   onChange={(e) => setDeliveryCharge(e.target.value)}
@@ -187,7 +226,11 @@ export default function Settings() {
                   type="number"
                   min={0}
                   step={0.1}
-                  placeholder="5.0"
+                  placeholder={
+                    isUpdateMode
+                      ? String(settings?.freeDeliveryRange ?? "5.0")
+                      : "5.0"
+                  }
                   className="pr-10 font-mono"
                   value={freeRange}
                   onChange={(e) => setFreeRange(e.target.value)}
@@ -210,39 +253,35 @@ export default function Settings() {
             <div className="space-y-2">
               {phoneNumbers.map((phone, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  {/* Badge */}
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
                     {index + 1}
                   </span>
-
                   <Input
                     type="tel"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder={
+                      isUpdateMode
+                        ? (settings?.phoneNumbers?.[index] ??
+                          "+1 (555) 000-0000")
+                        : "+1 (555) 000-0000"
+                    }
                     value={phone}
                     onChange={(e) => updatePhone(index, e.target.value)}
                   />
-
-                  {/* Remove button — always show so first can also be cleared */}
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
                     className="shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => {
-                      if (phoneNumbers.length === 1) {
-                        updatePhone(0, "");
-                      } else {
-                        removePhone(index);
-                      }
+                      if (phoneNumbers.length === 1) updatePhone(0, "");
+                      else removePhone(index);
                     }}
-                    aria-label="Remove phone number"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
             </div>
-
             <Button
               type="button"
               variant="outline"
@@ -253,7 +292,6 @@ export default function Settings() {
               <Plus className="h-4 w-4" />
               Add phone number
             </Button>
-
             <p className="text-xs text-muted-foreground">
               Add all contact numbers for your business
             </p>
@@ -263,11 +301,22 @@ export default function Settings() {
 
           {/* ── Footer Actions ── */}
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={handleReset}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleReset}
+              disabled={isPending}
+            >
               Reset
             </Button>
-            <Button type="button" onClick={handleSave}>
-              Save settings
+            <Button type="button" onClick={handleSave} disabled={isPending}>
+              {isPending
+                ? isUpdateMode
+                  ? "Updating..."
+                  : "Saving..."
+                : isUpdateMode
+                  ? "Update Settings"
+                  : "Save Settings"}
             </Button>
           </div>
         </CardContent>

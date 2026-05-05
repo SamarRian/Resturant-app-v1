@@ -8,12 +8,14 @@ import dealsRoutes from "./routes/dealsRoutes.js";
 import tableRouter from "./routes/tableRoutes.js";
 import staffRouter from "./routes/staffRoutes.js";
 import categoryRouter from "./routes/categoryRoutes.js";
+import settingsRouter from "./routes/settingsRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
 // Middleware
+app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 
@@ -28,6 +30,9 @@ app.use("/api/tables", tableRouter);
 app.use("/api/staff", staffRouter);
 // CATEGORY
 app.use("/api/category", categoryRouter);
+// SETTINGS
+app.use("/api/settings", settingsRouter);
+
 app.use("/images", express.static("assets/productImages"));
 // MongoDB Connect
 

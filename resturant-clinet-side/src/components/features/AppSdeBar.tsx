@@ -24,13 +24,39 @@ import { NavUser } from "./NavUser.tsx";
 import { Separator } from "../ui/separator.tsx";
 
 import { topItems, dropdownItems } from "../../../DevData/appSideBar.tsx";
+import { useGetAllSettings } from "@/hooks/QueryHooks/Settings/useGetAllSettings.ts";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar.tsx";
+import { Skeleton } from "../ui/skeleton.tsx";
 
 export function AppSidebar() {
+  const { data, isSettingsLoading } = useGetAllSettings();
+
+  const settings = data?.settingsData[0];
+  // console.log("SDIE BAR LOOGSS",);
+
   return (
     <Sidebar>
       <SidebarHeader className="items-center">
-        <img src="/logo.jfif" alt="Logo" className="h-10 w-10 rounded-full" />
-        <h2 className="text-lg font-semibold">Food Engine</h2>
+        {/* <img src="/logo.jfif" alt="Logo" className="h-10 w-10 rounded-full" /> */}
+        {isSettingsLoading ? (
+          <>
+            <Skeleton className="h-10 w-10 rounded-full" />{" "}
+            <Skeleton className="h-5 w-24" />
+          </>
+        ) : (
+          // ⬅️ Data loaded
+          <>
+            <Avatar className="h-10 w-10">
+              <AvatarImage
+                src={`http://localhost:5000/images/${settings?.logoImage}`}
+              />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <h2 className="text-lg font-semibold">
+              {settings?.buisnessName ?? "Food Engine"}
+            </h2>
+          </>
+        )}
       </SidebarHeader>
 
       <Separator className="bg-sidebar-border" />
