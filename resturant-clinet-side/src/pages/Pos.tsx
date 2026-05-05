@@ -9,8 +9,14 @@ import type {
   OrderType,
   Product,
 } from "../../DevData/Types/Postypes";
+import { useGetAllProducts } from "@/hooks/QueryHooks/Product/useGetAllProducts";
 
 export default function PosPage() {
+  // Data FETCHING
+
+  const { isProductsLoading, productsData } = useGetAllProducts();
+  console.log("PRODUCTS DATA", productsData);
+
   // ── Order state ──────────────────────────────────────────────────────────
   const [orderNo] = useState(14);
   const [orderType, setOrderType] = useState<OrderType>("dine-in");
@@ -40,22 +46,22 @@ export default function PosPage() {
     // Toggle selected highlight
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(product.id)) next.delete(product.id);
-      else next.add(product.id);
+      if (next.has(product._id)) next.delete(product._id);
+      else next.add(product._id);
       return next;
     });
 
     // Add to order or increment qty
     setItems((prev) => {
-      const existing = prev.find((it) => it.id === product.id);
+      const existing = prev.find((it) => it._id === product._id);
       if (existing) {
         return prev.map((it) =>
-          it.id === product.id ? { ...it, qty: it.qty + 1 } : it
+          it._id === product._id ? { ...it, qty: it.qty + 1 } : it
         );
       }
       return [
         ...prev,
-        { id: product.id, name: product.name, price: product.price, qty: 1 },
+        { id: product._id, name: product.name, price: product.price, qty: 1 },
       ];
     });
   };

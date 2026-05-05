@@ -1,6 +1,14 @@
-import { Clock, Wallet, TrendingUp, ShoppingBag, Power } from "lucide-react";
+import {
+  Clock,
+  Wallet,
+  TrendingUp,
+  ShoppingBag,
+  Power,
+  Dot,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
 
 interface PosHeaderProps {
   balance?: number;
@@ -15,16 +23,29 @@ export function PosHeader({
   orders = 0,
   onEndSession,
 }: PosHeaderProps) {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-  const timeStr = now.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const [dateTime, setDateTime] = useState({ dateStr: "", timeStr: "" });
+
+  useEffect(function () {
+    function updateTimeAndDate() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+      const timeStr = now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      setDateTime({ dateStr, timeStr });
+    }
+    updateTimeAndDate();
+
+    const interval = setInterval(updateTimeAndDate, 1000);
+
+    return () => clearInterval(interval); // cleanup
+  }, []);
 
   return (
     <header className="shrink-0 border-b border-border bg-card shadow-sm">
@@ -42,14 +63,15 @@ export function PosHeader({
               Active Session
             </p>
             <p className="text-xs font-bold text-foreground">
-              {dateStr} · {timeStr}
+              {dateTime.dateStr} · {dateTime.timeStr}
             </p>
           </div>
           <Badge
             variant="outline"
-            className="border-accent/40 bg-accent/10 text-[10px] text-accent"
+            className="flex items-center gap-1 border-accent/40 bg-accent/10 text-accent"
           >
             Live
+            <Dot className="h-3 w-3 fill-accent" />
           </Badge>
         </div>
 

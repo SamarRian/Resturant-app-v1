@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { CATEGORIES, PRODUCTS } from "../../../../DevData/PosData";
 import type { Product } from "../../../../DevData/Types/Postypes";
 import { PosCustomDialoge } from "./PosCustomDialoge";
+import { useGetAllProducts } from "@/hooks/QueryHooks/Product/useGetAllProducts";
 
 interface PosMenuPanelProps {
   customer: string;
@@ -29,11 +30,14 @@ export function PosMenuPanel({
   onProductClick,
   setItems,
 }: PosMenuPanelProps) {
+  // DATA FETCHING
+  const { isProductsLoading, productsData: Products } = useGetAllProducts();
+
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
 
   const [customDialogOpen, setCustomDialog] = useState(false);
-  const filteredProducts = PRODUCTS.filter((p) => {
+  const filteredProducts = Products?.filter((p) => {
     const matchCat = activeCategory === "all" || p.category === activeCategory;
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
@@ -112,14 +116,14 @@ export function PosMenuPanel({
       {/* ── Scrollable product grid ── */}
       <ScrollArea className="min-h-0 flex-1">
         <div className="grid grid-cols-3 gap-2.5 p-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-          {filteredProducts.length === 0 ? (
+          {filteredProducts?.length === 0 ? (
             <div className="col-span-full flex flex-col items-center gap-2 py-16">
               <Search className="h-8 w-8 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">No products found</p>
             </div>
           ) : (
-            filteredProducts.map((product) => {
-              const isSelected = selectedIds.has(product.id);
+            filteredProducts?.map((product) => {
+              const isSelected = selectedIds.has(product._id);
               return (
                 <button
                   key={product.id}
@@ -133,9 +137,9 @@ export function PosMenuPanel({
                 >
                   {/* Product image */}
                   <div className="relative w-full overflow-hidden bg-muted/40 pt-[72%]">
-                    {product.imageUrl ? (
+                    {product.image ? (
                       <img
-                        src={product.imageUrl}
+                        src={`http://localhost:5000/images/${product.image}`}
                         alt={product.name}
                         loading="lazy"
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"

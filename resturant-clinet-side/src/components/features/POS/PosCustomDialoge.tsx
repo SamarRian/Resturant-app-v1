@@ -17,8 +17,7 @@ import { useState } from "react";
 export function PosCustomDialoge({ open, onOpenChange, setItems }) {
   const [ProductName, setProductName] = useState("");
   const [price, setPrice] = useState(0);
-  const [quantity, setQuantity] = useState(0);
-  const [description, setDescription] = useState(0);
+  const [cost, setCost] = useState(0);
   function handleSubmit() {
     // const dataObject = {
     //   name: ProductName,
@@ -45,7 +44,7 @@ export function PosCustomDialoge({ open, onOpenChange, setItems }) {
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
-            <Field>
+            <Field className="mt-2">
               <Label htmlFor="name-1">Product Name</Label>
               <Input
                 id="name-1"
@@ -53,6 +52,18 @@ export function PosCustomDialoge({ open, onOpenChange, setItems }) {
                 placeholder="Gold Leaf"
                 value={ProductName}
                 onChange={(e) => setProductName(e.target.value)}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="cost-1">Cost</Label>
+              <Input
+                className="m-0!"
+                value={cost}
+                onChange={(e) => setCost(Number(e.target.value))}
+                type="number"
+                id="cost-1"
+                name="cost"
+                placeholder="1"
               />
             </Field>
             <Field>
@@ -65,18 +76,7 @@ export function PosCustomDialoge({ open, onOpenChange, setItems }) {
                 name="price"
                 defaultValue="1"
                 placeholder="RS 20"
-              />
-            </Field>
-
-            <Field>
-              <Label htmlFor="quantity-1">Quantity</Label>
-              <Input
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                type="number"
-                id="quantity-1"
-                name="Quantity"
-                placeholder="1"
+                className="mb-2"
               />
             </Field>
           </FieldGroup>
