@@ -1,9 +1,20 @@
-import { Power, Clock, Wallet, ShoppingBag, TrendingUp } from "lucide-react";
-import { Button } from "../../ui/button";
-import { Separator } from "../../ui/separator";
-import { Badge } from "../../ui/badge";
+import { Clock, Wallet, TrendingUp, ShoppingBag, Power } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-function PosHeader() {
+interface PosHeaderProps {
+  balance?: number;
+  sales?: number;
+  orders?: number;
+  onEndSession?: () => void;
+}
+
+export function PosHeader({
+  balance = 0,
+  sales = 0,
+  orders = 0,
+  onEndSession,
+}: PosHeaderProps) {
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-US", {
     weekday: "short",
@@ -16,97 +27,82 @@ function PosHeader() {
   });
 
   return (
-    <header className="w-full rounded-xl border border-border bg-card shadow-sm">
-      {/* Top accent bar */}
-      <div className="h-1 w-full rounded-t-xl bg-red-500" />
+    <header className="shrink-0 border-b border-border bg-card shadow-sm">
+      {/* Top accent line */}
+      <div className="h-0.5 w-full bg-accent" />
 
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3">
-        {/* Session Info */}
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/15 dark:bg-accent/20">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5">
+        {/* Session info */}
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/15">
             <Clock className="h-4 w-4 text-accent" />
           </div>
-          <div className="flex flex-col">
-            <span className="text-[11px] font-medium tracking-widest text-muted-foreground uppercase">
+          <div>
+            <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
               Active Session
-            </span>
-            <span className="text-sm font-semibold text-foreground">
+            </p>
+            <p className="text-xs font-bold text-foreground">
               {dateStr} · {timeStr}
-            </span>
+            </p>
           </div>
           <Badge
             variant="outline"
-            className="ml-1 border-accent/40 bg-accent/10 text-accent"
+            className="border-accent/40 bg-accent/10 text-[10px] text-accent"
           >
             Live
           </Badge>
         </div>
 
-        {/* Stats + End Session group — wraps together on small screens */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-          {/* Stats */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            {/* Balance */}
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/8 dark:bg-primary/15">
-                <Wallet className="h-4 w-4 text-primary dark:text-foreground" />
+        {/* Stats */}
+        <div className="flex flex-wrap items-center gap-4">
+          {[
+            {
+              icon: Wallet,
+              label: "Balance",
+              value: balance.toFixed(2),
+              prefix: "$",
+            },
+            {
+              icon: TrendingUp,
+              label: "Sales",
+              value: sales.toFixed(2),
+              prefix: "$",
+            },
+            {
+              icon: ShoppingBag,
+              label: "Orders",
+              value: String(orders),
+              prefix: "",
+            },
+          ].map(({ icon: Icon, label, value, prefix }) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted">
+                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-[11px] font-medium tracking-widest text-muted-foreground uppercase">
-                  Balance
-                </span>
-                <span className="text-sm font-bold text-foreground tabular-nums">
-                  $0.00
-                </span>
-              </div>
-            </div>
-
-            <Separator orientation="vertical" className="h-8" />
-
-            {/* Sales */}
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-accent/10 dark:bg-accent/15">
-                <TrendingUp className="h-4 w-4 text-accent" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[11px] font-medium tracking-widest text-muted-foreground uppercase">
-                  Sales
-                </span>
-                <span className="text-sm font-bold text-foreground tabular-nums">
-                  $0.00
-                </span>
-              </div>
-            </div>
-
-            <Separator orientation="vertical" className="h-8" />
-
-            {/* Orders */}
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary">
-                <ShoppingBag className="h-4 w-4 text-secondary-foreground" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[11px] font-medium tracking-widest text-muted-foreground uppercase">
-                  Orders
-                </span>
-                <span className="text-sm font-bold text-foreground tabular-nums">
-                  0
-                </span>
+              <div>
+                <p className="text-[10px] font-medium tracking-widest text-muted-foreground uppercase">
+                  {label}
+                </p>
+                <p className="text-xs font-bold text-foreground tabular-nums">
+                  {prefix}
+                  {value}
+                </p>
               </div>
             </div>
-          </div>
-
-          <Separator orientation="vertical" className="hidden h-10 sm:block" />
-
-          {/* End Session */}
-          <Button variant="destructive" size="sm" className="gap-2">
-            <Power className="h-4 w-4" />
-            <span>End Session</span>
-          </Button>
+          ))}
         </div>
+
+        {/* End Session */}
+        <Button
+          variant="destructive"
+          size="sm"
+          className="gap-1.5"
+          onClick={onEndSession}
+        >
+          <Power className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">End Session</span>
+        </Button>
       </div>
     </header>
   );
 }
-
-export default PosHeader;
