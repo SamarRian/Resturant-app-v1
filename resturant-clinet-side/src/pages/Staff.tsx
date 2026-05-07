@@ -7,24 +7,6 @@ import { FullPageSpinner } from "@/components/ui/spinner";
 import { useGetAllStaff } from "@/hooks/QueryHooks/Staff/useGetallStaff";
 import { useFormContext } from "@/hooks/useFormContext";
 
-export const tableStaticData = [
-  { personName: "Electronics Deals" },
-  { personName: "Winter Collection" },
-  { personName: "Summer Sale" },
-  { personName: "Mobile Accessories" },
-  { personName: "Fashion Discounts" },
-  { personName: "Laptop Offers" },
-  { personName: "Gaming Zone" },
-  { personName: "Home Appliances" },
-  { personName: "Kitchen Essentials" },
-  { personName: "Fitness Gear" },
-  { personName: "Beauty Products" },
-  { personName: "Kids Collection" },
-  { personName: "Office Supplies" },
-  { personName: "Shoes Sale" },
-  { personName: "samar rian" },
-];
-
 function Staff() {
   const { toggleSingleDialog, handleStaffID } = useFormContext();
 

@@ -11,10 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { CATEGORIES, PRODUCTS } from "../../../../DevData/PosData";
+import { CATEGORIES } from "../../../../DevData/PosData";
 import type { Product } from "../../../../DevData/Types/Postypes";
 import { PosCustomDialoge } from "./PosCustomDialoge";
 import { useGetAllProducts } from "@/hooks/QueryHooks/Product/useGetAllProducts";
+import { useGetDeals } from "@/hooks/QueryHooks/Deals/useGetDeals";
+import { PosDealsDialog } from "./PosDealsDialoge";
+import { usePosContext } from "@/hooks/usePosContext";
 
 interface PosMenuPanelProps {
   customer: string;
@@ -29,15 +32,42 @@ export function PosMenuPanel({
   onCustomerChange,
   onProductClick,
   setItems,
+  items,
 }: PosMenuPanelProps) {
   // DATA FETCHING
   const { isProductsLoading, productsData: Products } = useGetAllProducts();
+  const { dealsData, isDealLoading } = useGetDeals();
+
+  // POS CONTEXT
+  const {
+    IsPosDealDialogOpen,
+    setPosDealDialog,
+    togglePosDealDialog,
+    handleCurrentDealProduct,
+  } = usePosContext();
+  // DATA RENAMING
+  const renamedDealData = dealsData?.map((deal, index) => {
+    return {
+      name: deal.dealName,
+      cost: deal.dealCost,
+      price: deal.dealPrice,
+      _id: deal._id,
+      status: deal.status,
+      image: deal.image,
+      description: `Deal with ${deal.variantsIncluded.length} variations`,
+      isDeal: true,
+      dealVariations: deal.variantsIncluded,
+      regularPrice: deal.regularPrice,
+    };
+  });
+
+  const combinedData = [...(renamedDealData ?? []), ...(Products ?? [])];
 
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
 
   const [customDialogOpen, setCustomDialog] = useState(false);
-  const filteredProducts = Products?.filter((p) => {
+  const filteredProducts = combinedData?.filter((p) => {
     const matchCat = activeCategory === "all" || p.category === activeCategory;
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
@@ -45,6 +75,17 @@ export function PosMenuPanel({
 
   function handleCustomDialog() {
     setCustomDialog((prev) => !prev);
+  }
+
+  function checkCurrentProduct(product) {
+    // console.log("CHECK CURRENT PRODUCT LOGS", product);
+
+    if (product.isDeal === true) {
+      handleCurrentDealProduct(product);
+      togglePosDealDialog();
+    } else {
+      onProductClick(product);
+    }
   }
 
   return (
@@ -126,8 +167,10 @@ export function PosMenuPanel({
               const isSelected = selectedIds.has(product._id);
               return (
                 <button
-                  key={product.id}
-                  onClick={() => onProductClick(product)}
+                  key={product._id}
+                  onClick={() => {
+                    checkCurrentProduct(product);
+                  }}
                   className={cn(
                     "group flex flex-col overflow-hidden rounded-xl border bg-background text-left transition-all hover:-translate-y-0.5 hover:shadow-md active:scale-95",
                     isSelected
@@ -174,9 +217,16 @@ export function PosMenuPanel({
         </div>
       </ScrollArea>
       <PosCustomDialoge
+        items={items}
         setItems={setItems}
         open={customDialogOpen}
         onOpenChange={setCustomDialog}
+        onProductClicks={onProductClick}
+      />
+      <PosDealsDialog
+        open={IsPosDealDialogOpen}
+        onOpenChange={setPosDealDialog}
+        onProductClicks={onProductClick}
       />
     </div>
   );

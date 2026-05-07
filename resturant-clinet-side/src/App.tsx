@@ -17,6 +17,7 @@ import Staff from "./pages/Staff";
 import Category from "./pages/Category";
 import Settings from "./pages/Settings";
 import Pos from "./pages/Pos";
+import PosProvider from "./context/PosContext/PosProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,29 +30,31 @@ const queryClient = new QueryClient({
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <FormSwitcherProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route index element={<Navigate replace to="dashboard" />} />
-              <Route path="dashboard" element={<HomePage />} />
-              <Route path="products/add" element={<AddProduct />} />
-              <Route path="products" element={<AllProduct />} />
-              <Route path="deals" element={<AllDeals />} />
-              <Route path="table" element={<Table />} />
-              <Route path="staff" element={<Staff />} />
-              <Route path="category" element={<Category />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-            <Route path="login" element={<LoginForm />} />
-            <Route path="signup" element={<SignUpForm />} />
-            <Route path="pos" element={<Pos />} />
-          </Routes>
-        </BrowserRouter>
+      <PosProvider>
+        <FormSwitcherProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route index element={<Navigate replace to="dashboard" />} />
+                <Route path="dashboard" element={<HomePage />} />
+                <Route path="products/add" element={<AddProduct />} />
+                <Route path="products" element={<AllProduct />} />
+                <Route path="deals" element={<AllDeals />} />
+                <Route path="table" element={<Table />} />
+                <Route path="staff" element={<Staff />} />
+                <Route path="category" element={<Category />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+              <Route path="login" element={<LoginForm />} />
+              <Route path="signup" element={<SignUpForm />} />
+              <Route path="pos" element={<Pos />} />
+            </Routes>
+          </BrowserRouter>
 
-        <Toaster />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </FormSwitcherProvider>
+          <Toaster />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </FormSwitcherProvider>
+      </PosProvider>
     </QueryClientProvider>
   );
 }

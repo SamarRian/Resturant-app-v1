@@ -9,33 +9,34 @@ import type {
   OrderType,
   Product,
 } from "../../DevData/Types/Postypes";
-import { useGetAllProducts } from "@/hooks/QueryHooks/Product/useGetAllProducts";
+import { usePosContext } from "@/hooks/usePosContext";
 
 export default function PosPage() {
-  // Data FETCHING
+  // Pos context
 
-  const { isProductsLoading, productsData } = useGetAllProducts();
-  console.log("PRODUCTS DATA", productsData);
+  const { togglePosDealDialog } = usePosContext();
 
   // ── Order state ──────────────────────────────────────────────────────────
   const [orderNo] = useState(14);
   const [orderType, setOrderType] = useState<OrderType>("dine-in");
   const [customer, setCustomer] = useState("Walk-in Customer");
-  const [items, setItems] = useState<OrderItem[]>(INITIAL_ORDER_ITEMS);
+  const [items, setItems] = useState<OrderItem[]>([]);
 
   // ── Menu state ───────────────────────────────────────────────────────────
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleQtyChange = (id: number, delta: number) =>
     setItems((prev) =>
       prev.map((it) =>
-        it.id === id ? { ...it, qty: Math.max(1, it.qty + delta) } : it
+        it._id === id
+          ? { ...it, quantity: Math.max(1, it.quantity + delta) }
+          : it
       )
     );
 
   const handleRemove = (id: number) =>
-    setItems((prev) => prev.filter((it) => it.id !== id));
+    setItems((prev) => prev.filter((it) => it._id !== id));
 
   const handleNewOrder = () => {
     setItems([]);
@@ -56,18 +57,24 @@ export default function PosPage() {
       const existing = prev.find((it) => it._id === product._id);
       if (existing) {
         return prev.map((it) =>
-          it._id === product._id ? { ...it, qty: it.qty + 1 } : it
+          it._id === product._id ? { ...it, quantity: it.quantity + 1 } : it
         );
       }
       return [
         ...prev,
-        { id: product._id, name: product.name, price: product.price, qty: 1 },
+        {
+          _id: product._id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          description: product.description,
+        },
       ];
     });
   };
 
   // ── Calculations ─────────────────────────────────────────────────────────
-  const subtotal = items.reduce((s, it) => s + it.price * it.qty, 0);
+  const subtotal = items.reduce((s, it) => s + it.price * it.quantity, 0);
   const discount = 0;
   const service = 0;
   const tax = 0;
@@ -100,10 +107,12 @@ export default function PosPage() {
         />
 
         <PosMenuPanel
+          items={items}
           customer={customer}
           selectedIds={selectedIds}
           onCustomerChange={setCustomer}
           onProductClick={handleProductClick}
+          setItems={setItems}
         />
       </main>
 

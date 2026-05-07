@@ -14,29 +14,43 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 
-export function PosCustomDialoge({ open, onOpenChange, setItems }) {
-  const [ProductName, setProductName] = useState("");
-  const [price, setPrice] = useState(0);
-  const [cost, setCost] = useState(0);
-  function handleSubmit() {
-    // const dataObject = {
-    //   name: ProductName,
-    //   price: price,
-    //   qty: quantity,
-    //   description,
-    // };
+export function PosCustomDialoge({
+  open,
+  onOpenChange,
+  setItems,
+  items,
+  onProductClicks,
+}) {
+  const [productName, setProductName] = useState("");
+  const [price, setPrice] = useState("");
+  const [cost, setCost] = useState("");
+  const [_id, setId] = useState("");
 
-    setItems((prev) => {
-      return [
-        ...prev,
-        { name: ProductName, price: price, qty: quantity, description, id: 1 },
-      ];
-    });
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    const dataObject = {
+      name: productName,
+      price: Number(price),
+      cost: Number(cost),
+      description: "Custom Product",
+      _id: `custom_${Date.now()}`,
+    };
+
+    onProductClicks(dataObject);
+
+    setProductName("");
+    setPrice(0);
+    setCost(0);
+    onOpenChange(false);
   }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <form onSubmit={handleSubmit}>
+          {" "}
+          {/* ✅ sirf yahan */}
           <DialogHeader>
             <DialogTitle>Enter Product Details</DialogTitle>
             <DialogDescription>
@@ -48,21 +62,18 @@ export function PosCustomDialoge({ open, onOpenChange, setItems }) {
               <Label htmlFor="name-1">Product Name</Label>
               <Input
                 id="name-1"
-                name="ProductName"
                 placeholder="Gold Leaf"
-                value={ProductName}
+                value={productName}
                 onChange={(e) => setProductName(e.target.value)}
               />
             </Field>
             <Field>
               <Label htmlFor="cost-1">Cost</Label>
               <Input
-                className="m-0!"
                 value={cost}
-                onChange={(e) => setCost(Number(e.target.value))}
+                onChange={(e) => setCost(e.target.value)}
                 type="number"
                 id="cost-1"
-                name="cost"
                 placeholder="1"
               />
             </Field>
@@ -71,10 +82,8 @@ export function PosCustomDialoge({ open, onOpenChange, setItems }) {
               <Input
                 value={price}
                 type="number"
-                onChange={(e) => setPrice(Number(e.target.value))}
+                onChange={(e) => setPrice(e.target.value)}
                 id="price-1"
-                name="price"
-                defaultValue="1"
                 placeholder="RS 20"
                 className="mb-2"
               />
@@ -84,7 +93,7 @@ export function PosCustomDialoge({ open, onOpenChange, setItems }) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit">Submit</Button>
+            <Button type="submit">Submit</Button> {/* ✅ onClick hataya */}
           </DialogFooter>
         </form>
       </DialogContent>

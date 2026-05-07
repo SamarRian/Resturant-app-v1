@@ -354,24 +354,24 @@ export const PRODUCTS: Product[] = [
 
 export const INITIAL_ORDER_ITEMS: OrderItem[] = [
   {
-    id: 1,
+    _id: 1,
     name: "[DEAL] Teacher Deal",
     description: "Soft Drink (H-Liter +120), Arabic Broast Half (+1100)",
     price: 999,
-    qty: 1,
+    quantity: 1,
   },
   {
-    id: 2,
+    _id: 2,
     name: "Chicken Fajita",
     description: "Size: Medium (+1050.00)",
     price: 1050,
-    qty: 1,
+    quantity: 1,
   },
   {
-    id: 3,
+    _id: 3,
     name: "Soft Drink",
     description: "Size: 350ML (+100.00)",
     price: 100,
-    qty: 1,
+    quantity: 1,
   },
 ];

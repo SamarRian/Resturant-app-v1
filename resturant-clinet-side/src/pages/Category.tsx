@@ -6,25 +6,6 @@ import SingleInputDialoge from "@/components/ui/SingleInputDialoge";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { useGetAllCategory } from "@/hooks/QueryHooks/Category/useGetAllCategory";
 import { useFormContext } from "@/hooks/useFormContext";
-import { useState } from "react";
-
-export const tableStaticData = [
-  { categoryName: "Electronics Deals" },
-  { categoryName: "Winter Collection" },
-  { categoryName: "Summer Sale" },
-  { categoryName: "Mobile Accessories" },
-  { categoryName: "Fashion Discounts" },
-  { categoryName: "Laptop Offers" },
-  { categoryName: "Gaming Zone" },
-  { categoryName: "Home Appliances" },
-  { categoryName: "Kitchen Essentials" },
-  { categoryName: "Fitness Gear" },
-  { categoryName: "Beauty Products" },
-  { categoryName: "Kids Collection" },
-  { categoryName: "Office Supplies" },
-  { categoryName: "Shoes Sale" },
-  { categoryName: "Travel Accessories" },
-];
 
 function Category() {
   const { toggleSingleDialog, handleCategoryId } = useFormContext();

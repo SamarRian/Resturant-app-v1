@@ -131,26 +131,26 @@ export function PosOrderPanel({
                 {/* Price + controls */}
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
                   <span className="text-xs font-bold text-accent tabular-nums">
-                    {(item.price * item.qty).toFixed(2)}
+                    {(item.price * item.quantity).toFixed(2)}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => onQtyChange(item.id, -1)}
+                      onClick={() => onQtyChange(item._id, -1)}
                       className="flex h-5 w-5 items-center justify-center rounded border border-border bg-background text-foreground transition-colors hover:bg-muted"
                     >
                       <Minus className="h-2.5 w-2.5" />
                     </button>
                     <span className="w-5 text-center text-xs font-bold tabular-nums">
-                      {item.qty}
+                      {item.quantity}
                     </span>
                     <button
-                      onClick={() => onQtyChange(item.id, 1)}
+                      onClick={() => onQtyChange(item._id, 1)}
                       className="flex h-5 w-5 items-center justify-center rounded border border-accent/50 bg-accent/10 text-accent transition-colors hover:bg-accent/20"
                     >
                       <Plus className="h-2.5 w-2.5" />
                     </button>
                     <button
-                      onClick={() => onRemove(item.id)}
+                      onClick={() => onRemove(item._id)}
                       className="ml-0.5 flex h-5 w-5 items-center justify-center rounded border border-destructive/40 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
                     >
                       <Trash2 className="h-2.5 w-2.5" />
