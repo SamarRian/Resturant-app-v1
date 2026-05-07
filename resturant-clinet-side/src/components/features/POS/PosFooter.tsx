@@ -5,9 +5,11 @@ import {
   Tag,
   Percent,
   CreditCard,
+  Bike,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { usePosContext } from "@/hooks/usePosContext";
 
 interface PosFooterProps {
   subtotal: number;
@@ -25,8 +27,17 @@ const ACTION_BUTTONS = [
   { label: "Discount", icon: Tag, color: "bg-violet-600" },
   { label: "Service", icon: Percent, color: "bg-slate-600" },
   { label: "Tax", icon: Percent, color: "bg-slate-500" },
+  { label: "Delivery", icon: Bike, color: "bg-yellow-500" },
   { label: "Payment", icon: CreditCard, color: "bg-cyan-500" },
 ];
+
+const blockedActions = new Set([
+  "Payment",
+  "Kitchen",
+  "Print KOT",
+  "Unpaid",
+  "Delivery",
+]);
 
 export function PosFooter({
   subtotal,
@@ -34,8 +45,12 @@ export function PosFooter({
   service,
   tax,
   total,
-  onAction,
 }: PosFooterProps) {
+  const {
+    handleCalculationType,
+    togglePosCalculationDialog,
+    togglePosPaymentDialog,
+  } = usePosContext();
   return (
     <footer className="shrink-0 border-t border-border bg-card shadow-[0_-1px_4px_rgba(0,0,0,0.06)]">
       {/* ── Totals row ── */}
@@ -75,7 +90,14 @@ export function PosFooter({
           {ACTION_BUTTONS.map(({ label, icon: Icon, color }) => (
             <Button
               key={label}
-              onClick={() => onAction?.(label)}
+              onClick={() => {
+                if (!blockedActions.has(label)) {
+                  handleCalculationType(label);
+                  togglePosCalculationDialog();
+                } else if (label === "Payment") {
+                  togglePosPaymentDialog();
+                }
+              }}
               className={cn(
                 "rounded-md px-2 py-2 font-semibold text-white transition-all hover:opacity-90",
                 color

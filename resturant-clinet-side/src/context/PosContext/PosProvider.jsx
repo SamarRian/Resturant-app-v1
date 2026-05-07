@@ -1,17 +1,46 @@
 import { useState } from "react";
 import { PosContext } from "./PosContext";
 function PosProvider({ children }) {
-  const [IsPosDealDialogOpen, setPosDealDialog] = useState(false);
+  // POS PAYMENT TABS VALUES
 
-  const [currentDealProduct, seCurrentDealProduct] = useState(null);
+  const [paymentTab, setPaymentTab] = useState("");
+
+  function handlePaymentTabs(value) {
+    setPaymentTab(value);
+  }
+
+  // POS PAYMENT DIALOG
+
+  const [isPosPaymentDialog, setPosPaymentDialog] = useState(false);
+
+  function togglePosPaymentDialog() {
+    setPosPaymentDialog((prev) => !prev);
+  }
+
+  // POS CALCULATION DIALOG
+
+  const [isPosCalculationsDialog, setPosCalculationDialog] = useState(false);
+
+  const [calculationType, setCalculationType] = useState("");
+
+  function togglePosCalculationDialog() {
+    setPosCalculationDialog((prev) => !prev);
+  }
+  function handleCalculationType(type) {
+    setCalculationType(type);
+  }
 
   // handle current deal product
+  const [currentDealProduct, seCurrentDealProduct] = useState(null);
 
   function handleCurrentDealProduct(currentProduct) {
     seCurrentDealProduct(currentProduct);
   }
 
   // toggle pos deal dialoge
+
+  const [IsPosDealDialogOpen, setPosDealDialog] = useState(false);
+
   function togglePosDealDialog() {
     setPosDealDialog((prev) => !prev);
   }
@@ -24,6 +53,17 @@ function PosProvider({ children }) {
         togglePosDealDialog,
         currentDealProduct,
         handleCurrentDealProduct,
+        isPosCalculationsDialog,
+        setPosCalculationDialog,
+        togglePosCalculationDialog,
+        calculationType,
+        handleCalculationType,
+        isPosPaymentDialog,
+        setPosPaymentDialog,
+        togglePosPaymentDialog,
+        paymentTab,
+        setPaymentTab,
+        handlePaymentTabs,
       }}
     >
       {children}

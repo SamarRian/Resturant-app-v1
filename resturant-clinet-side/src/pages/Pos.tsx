@@ -123,7 +123,6 @@ export default function PosPage() {
         service={service}
         tax={tax}
         total={total}
-        onAction={(action) => console.log("Action:", action)}
       />
     </div>
   );

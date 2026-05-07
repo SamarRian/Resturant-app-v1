@@ -18,6 +18,8 @@ import { useGetAllProducts } from "@/hooks/QueryHooks/Product/useGetAllProducts"
 import { useGetDeals } from "@/hooks/QueryHooks/Deals/useGetDeals";
 import { PosDealsDialog } from "./PosDealsDialoge";
 import { usePosContext } from "@/hooks/usePosContext";
+import { PosCalculationsDialog } from "./PosCalculationsDialog";
+import PosPaymentDialog from "./PosPaymentDialog";
 
 interface PosMenuPanelProps {
   customer: string;
@@ -61,7 +63,12 @@ export function PosMenuPanel({
     };
   });
 
-  const combinedData = [...(renamedDealData ?? []), ...(Products ?? [])];
+  const updatedProducts = Products?.map((product) => ({
+    ...product,
+    isDeal: false,
+  }));
+
+  const combinedData = [...(renamedDealData ?? []), ...(updatedProducts ?? [])];
 
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -81,6 +88,9 @@ export function PosMenuPanel({
     // console.log("CHECK CURRENT PRODUCT LOGS", product);
 
     if (product.isDeal === true) {
+      handleCurrentDealProduct(product);
+      togglePosDealDialog();
+    } else if (product.isDeal === false && product.variations.length !== 0) {
       handleCurrentDealProduct(product);
       togglePosDealDialog();
     } else {
@@ -216,6 +226,8 @@ export function PosMenuPanel({
           )}
         </div>
       </ScrollArea>
+
+      {/* DIALOGS */}
       <PosCustomDialoge
         items={items}
         setItems={setItems}
@@ -228,6 +240,8 @@ export function PosMenuPanel({
         onOpenChange={setPosDealDialog}
         onProductClicks={onProductClick}
       />
+      <PosCalculationsDialog />
+      <PosPaymentDialog />
     </div>
   );
 }
