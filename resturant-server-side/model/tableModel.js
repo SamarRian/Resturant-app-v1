@@ -6,6 +6,10 @@ const tableSchema = mongoose.Schema(
       type: String,
       default: "0",
     },
+    status: {
+      type: String,
+      default: "available",
+    },
   },
   { timestamps: true },
 );

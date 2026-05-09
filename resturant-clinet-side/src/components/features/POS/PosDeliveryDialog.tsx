@@ -58,12 +58,12 @@ export default function PosDeliveryDialog() {
           <div className="px-6 py-4">
             <FieldGroup>
               <Field>
-                <Label htmlFor="vehical">Rider Name</Label>
+                <Label htmlFor="vehical">Rider's Name</Label>
                 <Select>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select A Rider..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-40" position="popper">
                     <SelectGroup>
                       <SelectLabel>Rider Name</SelectLabel>
                       <SelectItem value="apple">Apple</SelectItem>
@@ -83,11 +83,11 @@ export default function PosDeliveryDialog() {
                     <RadioGroup defaultValue="option-one">
                       <div className="flex items-center gap-3">
                         <RadioGroupItem value="option-one" id="option-one" />
-                        <Label htmlFor="option-one">Option One</Label>
+                        <Label htmlFor="option-one">Address 1</Label>
                       </div>
                       <div className="flex items-center gap-3">
                         <RadioGroupItem value="option-two" id="option-two" />
-                        <Label htmlFor="option-two">Option Two</Label>
+                        <Label htmlFor="option-two">Address 2</Label>
                       </div>
                     </RadioGroup>
                   </ScrollArea>
@@ -134,7 +134,7 @@ export default function PosDeliveryDialog() {
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select A Vehicle Number.." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-40" position="popper">
                     <SelectGroup>
                       <SelectLabel>Vehicle Number</SelectLabel>
                       <SelectItem value="apple">Apple</SelectItem>
