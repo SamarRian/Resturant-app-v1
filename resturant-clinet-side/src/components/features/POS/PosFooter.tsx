@@ -50,7 +50,20 @@ export function PosFooter({
     handleCalculationType,
     togglePosCalculationDialog,
     togglePosPaymentDialog,
+    togglePosDeliveryDialog,
   } = usePosContext();
+
+  function handleDialogs(label) {
+    if (!blockedActions.has(label)) {
+      handleCalculationType(label);
+      togglePosCalculationDialog();
+    } else if (label === "Payment") {
+      togglePosPaymentDialog();
+    } else if (label === "Delivery") {
+      togglePosDeliveryDialog();
+    }
+  }
+
   return (
     <footer className="shrink-0 border-t border-border bg-card shadow-[0_-1px_4px_rgba(0,0,0,0.06)]">
       {/* ── Totals row ── */}
@@ -91,12 +104,7 @@ export function PosFooter({
             <Button
               key={label}
               onClick={() => {
-                if (!blockedActions.has(label)) {
-                  handleCalculationType(label);
-                  togglePosCalculationDialog();
-                } else if (label === "Payment") {
-                  togglePosPaymentDialog();
-                }
+                handleDialogs(label);
               }}
               className={cn(
                 "rounded-md px-2 py-2 font-semibold text-white transition-all hover:opacity-90",

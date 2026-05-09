@@ -26,17 +26,35 @@ export default function PosPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // ── Handlers ─────────────────────────────────────────────────────────────
-  const handleQtyChange = (id: number, delta: number) =>
-    setItems((prev) =>
-      prev.map((it) =>
-        it._id === id
-          ? { ...it, quantity: Math.max(1, it.quantity + delta) }
-          : it
-      )
-    );
 
-  const handleRemove = (id: number) =>
-    setItems((prev) => prev.filter((it) => it._id !== id));
+  const handleQtyChange = (id: string, delta: number, variationId?: string) => {
+    setItems((prev) =>
+      prev
+        .map((it) => {
+          const isMatch = variationId
+            ? it._id === id && it.selectedProductVariaton?._id === variationId
+            : it._id === id;
+
+          if (!isMatch) return it;
+
+          return { ...it, quantity: it.quantity + delta };
+        })
+        .filter((it) => it.quantity > 0)
+    );
+  };
+
+  // ✅ Remove handler
+  const handleRemove = (id: string, variationId?: string) => {
+    setItems((prev) =>
+      prev.filter((it) => {
+        const isMatch = variationId
+          ? it._id === id && it.selectedProductVariaton?._id === variationId
+          : it._id === id;
+
+        return !isMatch;
+      })
+    );
+  };
 
   const handleNewOrder = () => {
     setItems([]);
@@ -44,7 +62,6 @@ export default function PosPage() {
   };
 
   const handleProductClick = (product: Product) => {
-    // Toggle selected highlight
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(product._id)) next.delete(product._id);
@@ -52,22 +69,44 @@ export default function PosPage() {
       return next;
     });
 
-    // Add to order or increment qty
     setItems((prev) => {
-      const existing = prev.find((it) => it._id === product._id);
-      if (existing) {
-        return prev.map((it) =>
-          it._id === product._id ? { ...it, quantity: it.quantity + 1 } : it
+      const existing = prev.find((it) => {
+        if (!product.variant) return it._id === product._id;
+
+        return (
+          it._id === product._id &&
+          it.selectedProductVariaton?._id ===
+            product.selectedProductVariaton?._id
         );
+      });
+
+      if (existing) {
+        return prev.map((it) => {
+          if (!product.variant) {
+            return it._id === product._id
+              ? { ...it, quantity: it.quantity + 1 }
+              : it;
+          }
+
+          return it._id === product._id &&
+            it.selectedProductVariaton?._id ===
+              product.selectedProductVariaton?._id
+            ? { ...it, quantity: it.quantity + 1 }
+            : it;
+        });
       }
+
       return [
         ...prev,
         {
           _id: product._id,
           name: product.name,
-          price: product.price,
+          price: product.price || product?.selectedProductVariaton.price,
           quantity: 1,
           description: product.description,
+          isDeal: product?.isDeal,
+          isVariant: product?.variant,
+          selectedProductVariaton: product?.selectedProductVariaton,
         },
       ];
     });

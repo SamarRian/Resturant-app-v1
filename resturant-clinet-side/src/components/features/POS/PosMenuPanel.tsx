@@ -20,6 +20,8 @@ import { PosDealsDialog } from "./PosDealsDialoge";
 import { usePosContext } from "@/hooks/usePosContext";
 import { PosCalculationsDialog } from "./PosCalculationsDialog";
 import PosPaymentDialog from "./PosPaymentDialog";
+import PosProductDialog from "./PosProductDialog";
+import PosDeliveryDialog from "./PosDeliveryDialog";
 
 interface PosMenuPanelProps {
   customer: string;
@@ -46,6 +48,7 @@ export function PosMenuPanel({
     setPosDealDialog,
     togglePosDealDialog,
     handleCurrentDealProduct,
+    togglePosProductDialog,
   } = usePosContext();
   // DATA RENAMING
   const renamedDealData = dealsData?.map((deal, index) => {
@@ -92,7 +95,7 @@ export function PosMenuPanel({
       togglePosDealDialog();
     } else if (product.isDeal === false && product.variations.length !== 0) {
       handleCurrentDealProduct(product);
-      togglePosDealDialog();
+      togglePosProductDialog();
     } else {
       onProductClick(product);
     }
@@ -132,7 +135,7 @@ export function PosMenuPanel({
 
       {/* ── Customer + Search row ── */}
       <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border px-3 py-2">
-        <div className="relative min-w-[160px] flex-1">
+        <div className="relative min-w-40 flex-1">
           <Input
             value={customer}
             onChange={(e) => onCustomerChange(e.target.value)}
@@ -153,7 +156,7 @@ export function PosMenuPanel({
           Custom
         </Button>
 
-        <div className="relative min-w-[180px] flex-1">
+        <div className="relative min-w-45 flex-1">
           <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
@@ -242,6 +245,9 @@ export function PosMenuPanel({
       />
       <PosCalculationsDialog />
       <PosPaymentDialog />
+
+      <PosProductDialog onProductClicks={onProductClick} />
+      <PosDeliveryDialog />
     </div>
   );
 }

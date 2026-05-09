@@ -1,6 +1,21 @@
 import { useState } from "react";
 import { PosContext } from "./PosContext";
+
 function PosProvider({ children }) {
+  // POS DEVLIERY DIALOG
+  const [PosDeliveryDialog, setPosDeliveryDialog] = useState(false);
+
+  function togglePosDeliveryDialog() {
+    setPosDeliveryDialog((prev) => !prev);
+  }
+
+  // POS PRODUCT DIALOG
+  const [PosProductDialog, setPosProductDialog] = useState(false);
+
+  function togglePosProductDialog() {
+    setPosProductDialog((prev) => !prev);
+  }
+
   // POS PAYMENT TABS VALUES
 
   const [paymentTab, setPaymentTab] = useState("");
@@ -64,6 +79,12 @@ function PosProvider({ children }) {
         paymentTab,
         setPaymentTab,
         handlePaymentTabs,
+        PosProductDialog,
+        setPosProductDialog,
+        togglePosProductDialog,
+        PosDeliveryDialog,
+        setPosDeliveryDialog,
+        togglePosDeliveryDialog,
       }}
     >
       {children}
