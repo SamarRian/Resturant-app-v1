@@ -9,25 +9,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useDeleteTable } from "@/hooks/QueryHooks/Tables/useDeleteTable";
-import { useUpdateStatus } from "@/hooks/QueryHooks/Tables/useUpateStatus";
+import { useDeleteVehical } from "@/hooks/QueryHooks/Vehical/useDeleteVehical";
+import { useUpdateVehical } from "@/hooks/QueryHooks/Vehical/useUpdateVehical";
 import { useFormContext } from "@/hooks/useFormContext";
+
 import { cn } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
 
-export type tableTypes = {
-  tableName: string;
+export type vehicaltypes = {
+  vehicalNumber: string;
   status: string;
 };
 
-export const TableColumns = (): ColumnDef<tableTypes>[] => {
-  const { handleTableID, toggleSingleDialog } = useFormContext();
+export const VehicalColumns = (): ColumnDef<vehicaltypes>[] => {
+  const { handleVehicalId, toggleSingleDialog } = useFormContext();
 
-  const { deleteTableFN, isDeleting } = useDeleteTable();
-  const { updateStatusFN } = useUpdateStatus();
+  const { updateVehicalFN } = useUpdateVehical();
 
+  const { deleteVehicalFN, isPending } = useDeleteVehical();
   return [
     {
       id: "select",
@@ -56,20 +56,20 @@ export const TableColumns = (): ColumnDef<tableTypes>[] => {
     },
 
     {
-      accessorKey: "tableName",
+      accessorKey: "vehicalNumber",
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Table Name
+          Vehical Number
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
     },
     {
       accessorKey: "status",
-      header: () => <span>Table Status</span>,
+      header: () => <span>Vehical Status</span>,
       cell: ({ row }) => {
         const status = row.original?.status;
         const statusBoolean = status === "Available";
@@ -78,9 +78,9 @@ export const TableColumns = (): ColumnDef<tableTypes>[] => {
         return (
           <Badge
             onClick={() => {
-              updateStatusFN({
+              updateVehicalFN({
                 id,
-                status: statusBoolean ? "Reserved" : "Available",
+                status: statusBoolean ? "Busy" : "Available",
               });
             }}
             className={cn(
@@ -123,18 +123,19 @@ export const TableColumns = (): ColumnDef<tableTypes>[] => {
               <DropdownMenuItem
                 onClick={() => {
                   toggleSingleDialog();
-                  handleTableID(id);
+                  handleVehicalId(id);
                 }}
               >
                 Update
               </DropdownMenuItem>
               <DropdownMenuItem
-                variant="destructive"
                 onClick={() => {
-                  deleteTableFN(id);
+                  deleteVehicalFN(id);
                 }}
+                variant="destructive"
               >
-                {isDeleting ? "Deleting..." : "Delete"}
+                {/* {isDeleting ? "Deleting..." : "Delete"} */}
+                delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

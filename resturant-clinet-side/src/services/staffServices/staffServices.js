@@ -96,3 +96,29 @@ export async function getSingleStaff(id) {
     throw error;
   }
 }
+
+export async function updateStaffStatus(id, status) {
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/staff/update/${id}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to update staff status");
+    }
+
+    return data?.data;
+  } catch (error) {
+    console.error("updateStaffStatus Error:", error.message);
+    throw error;
+  }
+}

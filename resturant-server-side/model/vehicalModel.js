@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-const tableSchema = mongoose.Schema(
+const vehicalSchema = mongoose.Schema(
   {
-    tableName: {
+    vehicalNumber: {
       type: String,
       default: "0",
     },
@@ -13,5 +13,5 @@ const tableSchema = mongoose.Schema(
   },
   { timestamps: true },
 );
-const Table = mongoose.model("Table", tableSchema);
-export default Table;
+const Vehical = mongoose.model("Vehical", vehicalSchema);
+export default Vehical;

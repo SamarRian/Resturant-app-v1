@@ -118,6 +118,10 @@ export function FormSwitcherProvider({
 
   const [updateDealData, seUpdateDealData] = useState({});
 
+  // VEHICAL ID
+
+  const [vehicalId, setVehicalID] = useState("");
+
   // deal id
   const [dealId, setDealID] = useState("");
   // TABLE ID
@@ -126,6 +130,10 @@ export function FormSwitcherProvider({
   // STaff id
   const [staffID, setStaffID] = useState("");
   const [categoryID, setCategoryID] = useState("");
+
+  function handleVehicalId(id) {
+    setVehicalID(id);
+  }
 
   function handleCategoryId(id) {
     setCategoryID(id);
@@ -196,6 +204,8 @@ export function FormSwitcherProvider({
         staffID,
         categoryID,
         handleCategoryId,
+        vehicalId,
+        handleVehicalId,
       }}
     >
       {children}

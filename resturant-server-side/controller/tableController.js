@@ -29,7 +29,7 @@ export async function getAllTables(req, res) {
 
 export async function createTable(req, res) {
   try {
-    const { tableName } = req.body;
+    const { tableName, status } = req.body;
 
     if (!tableName || tableName.trim() === "") {
       return res.status(400).json({
@@ -37,7 +37,7 @@ export async function createTable(req, res) {
       });
     }
 
-    const existingTable = await Table.findOne({ tableName: tableName.trim() });
+    const existingTable = await Table.findOne({ tableName: tableName?.trim() });
 
     if (existingTable) {
       return res.status(409).json({
@@ -46,7 +46,8 @@ export async function createTable(req, res) {
     }
 
     const newTable = await Table.create({
-      tableName: tableName.trim(),
+      tableName: tableName?.trim(),
+      status: status?.trim() ?? "Available",
     });
 
     return res.status(201).json({
@@ -100,7 +101,7 @@ export async function deleteTableById(req, res) {
 export async function updateTableById(req, res) {
   try {
     const { id } = req.params;
-    const { tableName } = req.body;
+    const { tableName, status } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
@@ -116,7 +117,7 @@ export async function updateTableById(req, res) {
 
     const updatedTable = await Table.findByIdAndUpdate(
       id,
-      { tableName: tableName.trim() },
+      { tableName: tableName?.trim(), status: status?.trim() ?? "Available" },
       { new: true },
     );
 
@@ -140,7 +141,44 @@ export async function updateTableById(req, res) {
     });
   }
 }
+// ✅ Sirf status update karne ka alag controller
+export async function updateTableStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid table ID." });
+    }
+
+    if (!status || status.trim() === "") {
+      return res.status(400).json({ message: "Status is required." });
+    }
+
+    const updatedTable = await Table.findByIdAndUpdate(
+      id,
+      { status: status.trim() },
+      { new: true },
+    );
+
+    if (!updatedTable) {
+      return res
+        .status(404)
+        .json({ message: `Table with ID "${id}" not found.` });
+    }
+
+    return res.status(200).json({
+      message: "Table status updated successfully.",
+      data: updatedTable,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+      controllerError: `updateStatusById Failed: ${error.message}`,
+    });
+  }
+}
 export async function getSingleTable(req, res) {
   try {
     const { id } = req.params;

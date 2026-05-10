@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -9,18 +10,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDeleteStaff } from "@/hooks/QueryHooks/Staff/useDeleteStaff";
+import { useUpdateStaffStatus } from "@/hooks/QueryHooks/Staff/useUpdateStaffStatus";
 import { useFormContext } from "@/hooks/useFormContext";
+import { cn } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 export type staffTypes = {
   personName: string;
+  status: string;
 };
 
 export const StaffColumns = (): ColumnDef<staffTypes>[] => {
-  const { toggleSingleDialog, handleStaffID, staffID } = useFormContext();
+  const { toggleSingleDialog, handleStaffID } = useFormContext();
 
   const { deleteStaffFN, isPending: isStaffDeleting } = useDeleteStaff();
+
+  const { updateStaffStatusFN } = useUpdateStaffStatus();
   return [
     {
       id: "select",
@@ -59,6 +65,32 @@ export const StaffColumns = (): ColumnDef<staffTypes>[] => {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
+    },
+    {
+      accessorKey: "status",
+      header: () => <span>Staff Status</span>,
+      cell: ({ row }) => {
+        const status = row.original?.status;
+        const statusBoolean = status === "Available";
+        const id = row.original?._id;
+
+        return (
+          <Badge
+            onClick={() => {
+              updateStaffStatusFN({
+                id,
+                status: statusBoolean ? "Busy" : "Available",
+              });
+            }}
+            className={cn(
+              "cursor-pointer!",
+              statusBoolean ? "bg-accent" : "bg-red-700"
+            )}
+          >
+            {status}
+          </Badge>
+        );
+      },
     },
 
     {

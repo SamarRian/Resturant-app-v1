@@ -6,6 +6,10 @@ const staffSchema = mongoose.Schema(
       type: String,
       default: "0",
     },
+    status: {
+      type: String,
+      default: "Available",
+    },
   },
   { timestamps: true },
 );

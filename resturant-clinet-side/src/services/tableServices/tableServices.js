@@ -58,6 +58,32 @@ export async function updateTableById(id, tableName) {
     throw error;
   }
 }
+export async function updateTableStatusById(id, status) {
+  console.log("UDPATETABLE id", id);
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/tables/update/${id}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to update table status");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("updateTableStatus Error:", error.message);
+    throw error;
+  }
+}
 
 export async function deleteTable(id) {
   try {

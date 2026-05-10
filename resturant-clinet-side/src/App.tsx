@@ -18,6 +18,7 @@ import Category from "./pages/Category";
 import Settings from "./pages/Settings";
 import Pos from "./pages/Pos";
 import PosProvider from "./context/PosContext/PosProvider";
+import Vehical from "./pages/Vehical";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ export function App() {
                 <Route path="deals" element={<AllDeals />} />
                 <Route path="table" element={<Table />} />
                 <Route path="staff" element={<Staff />} />
+                <Route path="vehical" element={<Vehical />} />
                 <Route path="category" element={<Category />} />
                 <Route path="settings" element={<Settings />} />
               </Route>

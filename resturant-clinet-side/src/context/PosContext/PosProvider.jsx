@@ -2,6 +2,11 @@ import { useState } from "react";
 import { PosContext } from "./PosContext";
 
 function PosProvider({ children }) {
+  // POS CUSTOMER DETAULS DIALOG
+  const [PosCustomerDetailDialog, setPosCustomerDetailDialog] = useState(false);
+  function togglePosCustomerDetailDialog() {
+    setPosCustomerDetailDialog((prev) => !prev);
+  }
   // POS DEVLIERY DIALOG
   const [PosDeliveryDialog, setPosDeliveryDialog] = useState(false);
 
@@ -85,6 +90,9 @@ function PosProvider({ children }) {
         PosDeliveryDialog,
         setPosDeliveryDialog,
         togglePosDeliveryDialog,
+        PosCustomerDetailDialog,
+        setPosCustomerDetailDialog,
+        togglePosCustomerDetailDialog,
       }}
     >
       {children}

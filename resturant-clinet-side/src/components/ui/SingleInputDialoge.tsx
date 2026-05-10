@@ -23,6 +23,9 @@ import { useGetSingleStaff } from "@/hooks/QueryHooks/Staff/useGetSingleStaff";
 import { useCreateCategory } from "@/hooks/QueryHooks/Category/useCreateCategory";
 import { useUpdateCategory } from "@/hooks/QueryHooks/Category/useUpdateCategory";
 import { useGetSingleCategory } from "@/hooks/QueryHooks/Category/useGetSingleCategory";
+import { useCreateVehical } from "@/hooks/QueryHooks/Vehical/useCreateVehical";
+import { useUpdateVehical } from "@/hooks/QueryHooks/Vehical/useUpdateVehical";
+import { useGetSingleVehical } from "@/hooks/QueryHooks/Vehical/useGetSingleVehical";
 
 function SingleInputDialoge({ title, submitionKey }) {
   const {
@@ -32,6 +35,7 @@ function SingleInputDialoge({ title, submitionKey }) {
     tableId,
     staffID,
     categoryID,
+    vehicalId,
   } = useFormContext();
   //STaff data fetching
 
@@ -58,6 +62,15 @@ function SingleInputDialoge({ title, submitionKey }) {
   const { isCategoryUpdating, updateCategoryFN } = useUpdateCategory();
   const { singleCategoryData, isSingleCategoryLoading } = useGetSingleCategory(
     categoryID ? categoryID : ""
+  );
+  // VEHICAL DATA FETCHING
+
+  const { createVehicalFN, isPending: isVehicalCreating } = useCreateVehical();
+
+  const { isPending: isVehicalUpdating, updateVehicalFN } = useUpdateVehical();
+
+  const { isVehicalLoading, vehicalData } = useGetSingleVehical(
+    vehicalId ?? ""
   );
 
   const singleCategory = singleCategoryData?.category;
@@ -89,6 +102,14 @@ function SingleInputDialoge({ title, submitionKey }) {
       setSingleInput("");
     }
   }, [singleCategory, categoryID]);
+  // VEHICAL USE EFFECT
+  useEffect(() => {
+    if (vehicalData?.vehicalNumber) {
+      setSingleInput(vehicalData.vehicalNumber);
+    } else {
+      setSingleInput("");
+    }
+  }, [vehicalData, vehicalId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -133,7 +154,6 @@ function SingleInputDialoge({ title, submitionKey }) {
     }
 
     if (tableId && submitionKey === "table-single-dialog") {
-      // ✅ Update
       updateTableFN(
         { id: tableId, tableName: singleInput },
         {
@@ -150,6 +170,27 @@ function SingleInputDialoge({ title, submitionKey }) {
           setSingleInput("");
           toggleSingleDialog();
           toast.success("Table created successfully!");
+        },
+      });
+    }
+
+    // vehical id
+
+    if (vehicalId && submitionKey === "vehical-single-dialog") {
+      updateVehicalFN(
+        { id: vehicalId, vehicalNumber: singleInput },
+        {
+          onSuccess: () => {
+            setSingleInput("");
+            toggleSingleDialog();
+          },
+        }
+      );
+    } else if (submitionKey === "vehical-single-dialog") {
+      createVehicalFN(singleInput, {
+        onSuccess: () => {
+          setSingleInput("");
+          toggleSingleDialog();
         },
       });
     }

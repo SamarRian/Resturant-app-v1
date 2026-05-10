@@ -62,14 +62,14 @@ export async function getSingleStaff(req, res) {
 // ✅ CREATE STAFF
 export async function createStaff(req, res) {
   try {
-    const { personName } = req.body;
+    const { personName, status } = req.body;
 
     if (!personName || personName.trim() === "") {
       return res.status(400).json({ message: "Person name is required." });
     }
 
     const existingStaff = await Staff.findOne({
-      personName: personName.trim(),
+      personName: personName?.trim(),
     });
 
     if (existingStaff) {
@@ -78,7 +78,7 @@ export async function createStaff(req, res) {
       });
     }
 
-    const newStaff = await Staff.create({ personName: personName.trim() });
+    const newStaff = await Staff.create({ personName: personName?.trim() });
 
     return res.status(201).json({
       message: "Staff created successfully.",
@@ -108,15 +108,15 @@ export async function updateStaffById(req, res) {
       return res.status(400).json({ message: "Person name is required." });
     }
 
-    // const existingStaff = await Staff.findOne({
-    //   personName: personName.trim(),
-    // });
+    const existingStaff = await Staff.findOne({
+      personName: personName.trim(),
+    });
 
-    // if (existingStaff) {
-    //   return res.status(409).json({
-    //     message: `Staff with name "${personName}" already exists.`,
-    //   });
-    // }
+    if (existingStaff) {
+      return res.status(409).json({
+        message: `Staff with name "${personName}" already exists.`,
+      });
+    }
 
     const updatedStaff = await Staff.findByIdAndUpdate(
       id,
@@ -171,6 +171,43 @@ export async function deleteStaffById(req, res) {
       message: "Server error",
       error: error.message,
       controllerError: `deleteStaffById Failed: ${error.message}`,
+    });
+  }
+}
+export async function updateStaffStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid staff ID." });
+    }
+
+    if (!status || status?.trim() === "") {
+      return res.status(400).json({ message: "Status is required." });
+    }
+
+    const updatedStaff = await Staff.findByIdAndUpdate(
+      id,
+      { status: status?.trim() },
+      { new: true },
+    );
+
+    if (!updatedStaff) {
+      return res
+        .status(404)
+        .json({ message: `Staff with ID "${id}" not found.` });
+    }
+
+    return res.status(200).json({
+      message: "Staff status updated successfully.",
+      data: updatedStaff,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+      controllerError: `updateStaffStatus Failed: ${error.message}`,
     });
   }
 }

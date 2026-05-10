@@ -9,12 +9,9 @@ import type {
   OrderType,
   Product,
 } from "../../DevData/Types/Postypes";
-import { usePosContext } from "@/hooks/usePosContext";
 
 export default function PosPage() {
   // Pos context
-
-  const { togglePosDealDialog } = usePosContext();
 
   // ── Order state ──────────────────────────────────────────────────────────
   const [orderNo] = useState(14);

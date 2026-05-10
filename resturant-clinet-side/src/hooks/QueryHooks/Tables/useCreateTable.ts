@@ -1,5 +1,6 @@
 import { createTable } from "@/services/tableServices/tableServices";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function useCreateTable() {
   const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export function useCreateTable() {
     },
 
     onError: (error) => {
-      console.error("Error:", error.message);
+      toast.error(`Error: ${error.message}`);
     },
   });
   return { createTableFN, isPending, data };

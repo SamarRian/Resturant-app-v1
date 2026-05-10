@@ -22,6 +22,7 @@ import { PosCalculationsDialog } from "./PosCalculationsDialog";
 import PosPaymentDialog from "./PosPaymentDialog";
 import PosProductDialog from "./PosProductDialog";
 import PosDeliveryDialog from "./PosDeliveryDialog";
+import PosCustomerDetailsDialog from "./PosCustomerDetallsDialog";
 
 interface PosMenuPanelProps {
   customer: string;
@@ -49,6 +50,7 @@ export function PosMenuPanel({
     togglePosDealDialog,
     handleCurrentDealProduct,
     togglePosProductDialog,
+    togglePosCustomerDetailDialog,
   } = usePosContext();
   // DATA RENAMING
   const renamedDealData = dealsData?.map((deal, index) => {
@@ -142,7 +144,10 @@ export function PosMenuPanel({
             className="h-8 pr-8 text-sm"
             placeholder="Walk-in Customer"
           />
-          <button className="absolute top-1/2 right-2 -translate-y-1/2 text-accent hover:text-accent/80">
+          <button
+            onClick={togglePosCustomerDetailDialog}
+            className="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer text-accent hover:text-accent/80"
+          >
             <UserPlus className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -248,6 +253,8 @@ export function PosMenuPanel({
 
       <PosProductDialog onProductClicks={onProductClick} />
       <PosDeliveryDialog />
+
+      <PosCustomerDetailsDialog />
     </div>
   );
 }

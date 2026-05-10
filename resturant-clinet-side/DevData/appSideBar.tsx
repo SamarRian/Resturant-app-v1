@@ -31,6 +31,7 @@ export const dropdownItems: dropdownItemsTypes[] = [
     icon: Users,
     children: [
       { title: "Tables", url: "/table" },
+      { title: "Vehical", url: "/vehical" },
       { title: "Staff", url: "/staff" },
       { title: "Category", url: "/category" },
     ],
