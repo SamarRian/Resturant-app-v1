@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,11 +26,149 @@ import {
 } from "@/components/ui/select";
 import { usePosContext } from "@/hooks/usePosContext";
 import { PosTaxTabs } from "./PosTaxTabs";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+
+function CalculationForm({
+  calculationType,
+  initialValues,
+  onSubmit,
+  onCancel,
+}) {
+  const [localValues, setLocalValues] = useState({
+    type: initialValues.type || "",
+    amount: initialValues.amount ? String(initialValues.amount) : "",
+
+    taxtype: initialValues.taxtype || "inclusive",
+  });
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!localValues.type || !localValues.amount) return;
+
+    onSubmit({
+      ...localValues,
+      amount: Number(localValues.amount),
+
+      taxtype: calculationType === "Tax" ? localValues.taxtype : "",
+    });
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-4 p-4">
+        <FieldGroup>
+          {calculationType === "Tax" && (
+            <Field>
+              <Label>Tax Type</Label>
+              {/* ✅ value aur onValueChange pass kar rahe hain */}
+              <PosTaxTabs
+                value={localValues.taxtype}
+                onValueChange={(val) =>
+                  setLocalValues((prev) => ({ ...prev, taxtype: val }))
+                }
+              />
+            </Field>
+          )}
+
+          <Field>
+            <Label htmlFor="calcType-1">
+              {calculationType} Calculation Method
+            </Label>
+            <Select
+              value={localValues.type}
+              onValueChange={(value) =>
+                setLocalValues((prev) => ({ ...prev, type: value }))
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={`${calculationType} method...`} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>
+                    {calculationType} Calculation Method
+                  </SelectLabel>
+                  <SelectItem value="percentage">Percentage</SelectItem>
+                  <SelectItem value="fixed">Fixed</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field>
+            <Label htmlFor="calcValue-1">{calculationType} Value</Label>
+            <InputGroup>
+              <InputGroupInput
+                id="calcValue-1"
+                placeholder={`Enter ${calculationType} value...`}
+                className="px-2"
+                type="number"
+                value={localValues.amount}
+                onChange={(e) =>
+                  setLocalValues((prev) => ({
+                    ...prev,
+                    amount: e.target.value,
+                  }))
+                }
+              />
+              <InputGroupAddon className="border-r-2 pr-2">PKR</InputGroupAddon>
+            </InputGroup>
+          </Field>
+        </FieldGroup>
+      </div>
+
+      <DialogFooter className="mb-1.5 px-8">
+        <DialogClose asChild>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        </DialogClose>
+        <Button
+          type="submit"
+          className={cn(
+            calculationType === "Tax" && "bg-yellow-500 hover:bg-yellow-500/80"
+          )}
+        >
+          Save changes
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
 
 export function PosCalculationsDialog() {
-  const { isPosCalculationsDialog, setPosCalculationDialog, calculationType } =
-    usePosContext();
+  const {
+    isPosCalculationsDialog,
+    setPosCalculationDialog,
+    calculationType,
+    calculatePosDiscount,
+    setCalculatePosDiscount,
+    calculatePosService,
+    setCalculatePosService,
+    calculatePosTax,
+    setCalculatePosTax,
+  } = usePosContext();
+
+  // ✅ Current type ki already saved values — dialog open hone pe pre-fill hongi
+  const initialValues =
+    calculationType === "Discount"
+      ? calculatePosDiscount
+      : calculationType === "Service"
+        ? calculatePosService
+        : calculatePosTax;
+
+  function handleSubmit(localValues) {
+    // ✅ Sirf us type ka data update hoga — baaki types untouched
+    if (calculationType === "Discount") {
+      setCalculatePosDiscount(localValues);
+    } else if (calculationType === "Service") {
+      setCalculatePosService(localValues);
+    } else if (calculationType === "Tax") {
+      setCalculatePosTax(localValues);
+    }
+    setPosCalculationDialog(false);
+  }
+
   return (
     <Dialog
       open={isPosCalculationsDialog}
@@ -39,7 +178,6 @@ export function PosCalculationsDialog() {
         <DialogHeader
           className={cn(
             "flex flex-row items-center justify-between bg-linear-to-r from-cyan-500 to-cyan-600 px-6 py-3 text-white",
-
             calculationType === "Tax" &&
               "bg-linear-to-r from-yellow-500 to-yellow-600"
           )}
@@ -49,74 +187,13 @@ export function PosCalculationsDialog() {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 p-4">
-          <FieldGroup>
-            {calculationType === "Tax" && (
-              <Field>
-                <Label>Tax Type</Label>
-                <PosTaxTabs />
-              </Field>
-            )}
-
-            <Field>
-              <Label htmlFor="discountType-1">
-                {calculationType} Calculation Method
-              </Label>
-
-              <Select name="calculationType">
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={`${calculationType} method...`} />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>
-                      {calculationType} Calculation Method
-                    </SelectLabel>
-
-                    <SelectItem value="percentage">Percentage</SelectItem>
-
-                    <SelectItem value="fixed">Fixed</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
-
-            <Field>
-              <Label htmlFor="discountValue-1">{calculationType} Value</Label>
-
-              <InputGroup>
-                <InputGroupInput
-                  id="discountValue-1"
-                  name="calculationValue"
-                  placeholder={`Enter ${calculationType} Value...`}
-                  className="px-2"
-                  type="number"
-                />
-
-                <InputGroupAddon className="border-r-2 pr-2">
-                  PKR
-                </InputGroupAddon>
-              </InputGroup>
-            </Field>
-          </FieldGroup>
-        </div>
-
-        <DialogFooter className="mb-1.5 px-8">
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-
-          <Button
-            type="submit"
-            className={cn(
-              calculationType === "Tax" &&
-                "bg-yellow-500 hover:bg-yellow-500/80"
-            )}
-          >
-            Save changes
-          </Button>
-        </DialogFooter>
+        <CalculationForm
+          key={`${calculationType}-${isPosCalculationsDialog}`}
+          calculationType={calculationType}
+          initialValues={initialValues}
+          onSubmit={handleSubmit}
+          onCancel={() => setPosCalculationDialog(false)}
+        />
       </DialogContent>
     </Dialog>
   );

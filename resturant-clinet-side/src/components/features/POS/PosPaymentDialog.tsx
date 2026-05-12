@@ -25,10 +25,25 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { useState } from "react";
 
-export default function PosPaymentDialog() {
+export default function PosPaymentDialog({
+  subtotal,
+  discount,
+  service,
+  tax,
+  total,
+}) {
   const { isPosPaymentDialog, setPosPaymentDialog, paymentTab, setPaymentTab } =
     usePosContext();
+
+  const [amountPaid, setAmountPaid] = useState();
+
+  const change = amountPaid ? amountPaid - subtotal : 0;
+  console.log(subtotal, discount, tax, total, amountPaid);
+
+  const balanceDue = amountPaid ? subtotal - amountPaid : 0;
+
   return (
     <Dialog open={isPosPaymentDialog} onOpenChange={setPosPaymentDialog}>
       <DialogContent className="max-w-4xl gap-0 overflow-hidden border-0 p-0">
@@ -107,6 +122,9 @@ export default function PosPaymentDialog() {
                     <InputGroup className="flex overflow-hidden rounded-md border bg-background">
                       <InputGroupInput
                         type="number"
+                        defaultValue={subtotal}
+                        value={amountPaid}
+                        onChange={(e) => setAmountPaid(Number(e.target.value))}
                         placeholder="2431.55"
                         className="border-0 shadow-none focus-visible:ring-0"
                       />
@@ -146,25 +164,25 @@ export default function PosPaymentDialog() {
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Subtotal:</span>
 
-                  <span className="font-semibold">2549.00</span>
+                  <span className="font-semibold">{subtotal}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Discount:</span>
 
-                  <span className="font-semibold text-red-500">-127.45</span>
+                  <span className="font-semibold text-red-500">{discount}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Service Charge:</span>
 
-                  <span className="font-semibold">10.00</span>
+                  <span className="font-semibold">{service}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Tax:</span>
 
-                  <span className="font-semibold">0.00</span>
+                  <span className="font-semibold">{tax}</span>
                 </div>
 
                 <div className="border-t pt-4">
@@ -172,7 +190,7 @@ export default function PosPaymentDialog() {
                     <span className="text-base font-bold">Total Payable:</span>
 
                     <span className="text-xl font-bold text-green-600">
-                      2431.55
+                      {total}
                     </span>
                   </div>
                 </div>
@@ -183,19 +201,21 @@ export default function PosPaymentDialog() {
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Amount Paid:</span>
 
-                  <span className="font-bold">2431.55</span>
+                  <span className="font-bold">
+                    {amountPaid ? amountPaid : 0}
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Balance Due:</span>
 
-                  <span className="font-bold text-red-500">0.00</span>
+                  <span className="font-bold text-red-500">{balanceDue}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Change:</span>
 
-                  <span className="font-bold text-green-600">0.00</span>
+                  <span className="font-bold text-green-600">{change}</span>
                 </div>
               </div>
             </CardContent>

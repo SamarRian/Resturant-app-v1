@@ -1,9 +1,9 @@
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export function PosTaxTabs() {
+export function PosTaxTabs({ value, onValueChange }) {
   return (
-    <Tabs defaultValue="overview" className="w-100">
+    <Tabs value={value} onValueChange={onValueChange} className="w-100">
       <TabsList>
         <TabsTrigger
           value="inclusive"
@@ -12,12 +12,13 @@ export function PosTaxTabs() {
           Inclusive
         </TabsTrigger>
         <TabsTrigger
-          className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white"
           value="exclusive"
+          className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white"
         >
           Exclusive
         </TabsTrigger>
       </TabsList>
+
       <TabsContent value="inclusive">
         <Card>
           <CardHeader>

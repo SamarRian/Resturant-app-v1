@@ -2,6 +2,39 @@ import { useState } from "react";
 import { PosContext } from "./PosContext";
 
 function PosProvider({ children }) {
+  // POS RNNING ORDERS DIALOG
+
+  const [isPosRunningDialog, setIsPosRunningDialog] = useState(false);
+
+  function togglePosRunningDialog() {
+    setIsPosRunningDialog((prev) => !prev);
+  }
+
+  // POS END SESSION DIALOG
+
+  const [isPosEndSessionDialog, setPosEndSessionDialog] = useState(false);
+
+  function togglePosEndSessionDialog() {
+    setPosEndSessionDialog((prev) => !prev);
+  }
+
+  // POS FOOTER CALCULATIONS
+  const [calculateValue, setCalculateValue] = useState({});
+
+  const [calculatePosDiscount, setCalculatePosDiscount] = useState({
+    type: "",
+    amount: "",
+  });
+  const [calculatePosService, setCalculatePosService] = useState({
+    type: "",
+    amount: "",
+  });
+  const [calculatePosTax, setCalculatePosTax] = useState({
+    type: "",
+    amount: "",
+    taxtype: "",
+  });
+
   // POS CUSTOMER DETAULS DIALOG
   const [PosCustomerDetailDialog, setPosCustomerDetailDialog] = useState(false);
   function togglePosCustomerDetailDialog() {
@@ -93,6 +126,20 @@ function PosProvider({ children }) {
         PosCustomerDetailDialog,
         setPosCustomerDetailDialog,
         togglePosCustomerDetailDialog,
+        calculateValue,
+        setCalculateValue,
+        calculatePosDiscount,
+        setCalculatePosDiscount,
+        calculatePosService,
+        setCalculatePosService,
+        calculatePosTax,
+        setCalculatePosTax,
+        isPosEndSessionDialog,
+        setPosEndSessionDialog,
+        togglePosEndSessionDialog,
+        isPosRunningDialog,
+        setIsPosRunningDialog,
+        togglePosRunningDialog,
       }}
     >
       {children}

@@ -9,10 +9,16 @@ import type {
   OrderType,
   Product,
 } from "../../DevData/Types/Postypes";
+import { usePosContext } from "@/hooks/usePosContext";
+import { StartPosSessionDialog } from "@/components/features/POS/StartPosSessionDialog";
+import PosRunningOrdersButton from "@/components/features/POS/PosRunningOrdersButton";
 
 export default function PosPage() {
-  // Pos context
+  const [startPosSession, setStartPosSession] = useState(false);
 
+  // Pos context
+  const { calculatePosDiscount, calculatePosService, calculatePosTax } =
+    usePosContext();
   // ── Order state ──────────────────────────────────────────────────────────
   const [orderNo] = useState(14);
   const [orderType, setOrderType] = useState<OrderType>("dine-in");
@@ -109,26 +115,37 @@ export default function PosPage() {
     });
   };
 
-  // ── Calculations ─────────────────────────────────────────────────────────
-  const subtotal = items.reduce((s, it) => s + it.price * it.quantity, 0);
-  const discount = 0;
-  const service = 0;
-  const tax = 0;
-  const total = subtotal + service + tax - discount;
+  const subtotal = items.reduce((s, it) => {
+    const price = it.isVariant
+      ? (it.selectedProductVariaton?.price ?? 0)
+      : (it.price ?? 0);
+    return s + price * it.quantity;
+  }, 0);
 
+  // ✅ Har ek independently calculate ho raha hai
+  // ✅ Property names bhi sahi hain: type aur amount
+  const discount =
+    calculatePosDiscount.type === "percentage"
+      ? (subtotal * (calculatePosDiscount.amount || 0)) / 100
+      : calculatePosDiscount.amount || 0;
+
+  const service =
+    calculatePosService.type === "percentage"
+      ? (subtotal * (calculatePosService.amount || 0)) / 100
+      : calculatePosService.amount || 0;
+
+  const tax =
+    calculatePosTax.type === "percentage"
+      ? calculatePosTax.taxtype === "inclusive"
+        ? subtotal - subtotal / (1 + calculatePosTax.amount / 100) // inclusive
+        : (subtotal * calculatePosTax.amount) / 100 // exclusive
+      : calculatePosTax.amount || 0; // fixed
+  const total = subtotal + service + tax - discount;
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    // Full viewport — no page-level scroll
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      {/* Fixed top header */}
-      <PosHeader
-        balance={0}
-        sales={subtotal}
-        orders={items.length}
-        onEndSession={() => console.log("Session ended")}
-      />
+      <PosHeader balance={0} sales={subtotal} orders={items.length} />
 
-      {/* Scrollable middle — order panel + menu panel */}
       <main className="flex min-h-0 flex-1 gap-2 p-2">
         <PosOrderPanel
           orderNo={orderNo}
@@ -149,6 +166,11 @@ export default function PosPage() {
           onCustomerChange={setCustomer}
           onProductClick={handleProductClick}
           setItems={setItems}
+          subtotal={subtotal}
+          discount={discount}
+          service={service}
+          tax={tax}
+          total={total}
         />
       </main>
 
@@ -160,6 +182,12 @@ export default function PosPage() {
         tax={tax}
         total={total}
       />
+
+      <StartPosSessionDialog
+        open={startPosSession}
+        onOpenChange={setStartPosSession}
+      />
+      <PosRunningOrdersButton />
     </div>
   );
 }

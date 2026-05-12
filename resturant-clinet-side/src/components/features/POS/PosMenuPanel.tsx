@@ -23,6 +23,8 @@ import PosPaymentDialog from "./PosPaymentDialog";
 import PosProductDialog from "./PosProductDialog";
 import PosDeliveryDialog from "./PosDeliveryDialog";
 import PosCustomerDetailsDialog from "./PosCustomerDetallsDialog";
+import { EndPosSessionDialog } from "./PosEndSessionDialog";
+import PosRunningOrdersDialog from "./PosRunningOrdersDialog";
 
 interface PosMenuPanelProps {
   customer: string;
@@ -38,6 +40,15 @@ export function PosMenuPanel({
   onProductClick,
   setItems,
   items,
+  subtotal,
+
+  discount,
+
+  service,
+
+  tax,
+
+  total,
 }: PosMenuPanelProps) {
   // DATA FETCHING
   const { isProductsLoading, productsData: Products } = useGetAllProducts();
@@ -249,12 +260,21 @@ export function PosMenuPanel({
         onProductClicks={onProductClick}
       />
       <PosCalculationsDialog />
-      <PosPaymentDialog />
+      <PosPaymentDialog
+        tax={tax}
+        total={total}
+        subtotal={subtotal}
+        service={service}
+        discount={discount}
+      />
 
       <PosProductDialog onProductClicks={onProductClick} />
       <PosDeliveryDialog />
 
       <PosCustomerDetailsDialog />
+      <EndPosSessionDialog />
+
+      <PosRunningOrdersDialog />
     </div>
   );
 }

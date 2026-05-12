@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
+import { usePosContext } from "@/hooks/usePosContext";
 
 interface PosHeaderProps {
   balance?: number;
@@ -21,8 +22,10 @@ export function PosHeader({
   balance = 0,
   sales = 0,
   orders = 0,
-  onEndSession,
 }: PosHeaderProps) {
+  // POS CONTEXT
+  const { togglePosEndSessionDialog } = usePosContext();
+
   const [dateTime, setDateTime] = useState({ dateStr: "", timeStr: "" });
 
   useEffect(function () {
@@ -119,7 +122,9 @@ export function PosHeader({
           variant="destructive"
           size="sm"
           className="gap-1.5"
-          onClick={onEndSession}
+          onClick={() => {
+            togglePosEndSessionDialog();
+          }}
         >
           <Power className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">End Session</span>

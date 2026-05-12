@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { usePosContext } from "@/hooks/usePosContext";
+import { PosCalculationsDialog } from "./PosCalculationsDialog";
 
 interface PosFooterProps {
   subtotal: number;
@@ -82,7 +83,7 @@ export function PosFooter({
                   {label}
                 </span>
                 <span className="text-sm font-bold text-foreground tabular-nums">
-                  {value.toFixed(2)}
+                  {value ? Number(value).toFixed(2) : "0.00"}
                 </span>
               </div>
             ))}
