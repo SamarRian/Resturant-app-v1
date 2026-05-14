@@ -2,6 +2,23 @@ import { useState } from "react";
 import { PosContext } from "./PosContext";
 
 function PosProvider({ children }) {
+  // POS ORDER TYPE
+
+  const [orderType, setOrderType] = useState("dine-in");
+
+  // POS TABLE DIALOG
+  const [PosSelectTableDialog, setPosSelectTableDialog] = useState(false);
+
+  function togglePosSelectTableDialog() {
+    setPosSelectTableDialog((prev) => !prev);
+  }
+
+  const [PosReportSessionDialog, setPosReportSessionDialog] = useState(false);
+
+  function togglePosReportSessionDialog() {
+    setPosReportSessionDialog((prev) => !prev);
+  }
+
   // POS RNNING ORDERS DIALOG
 
   const [isPosRunningDialog, setIsPosRunningDialog] = useState(false);
@@ -140,6 +157,14 @@ function PosProvider({ children }) {
         isPosRunningDialog,
         setIsPosRunningDialog,
         togglePosRunningDialog,
+        PosReportSessionDialog,
+        setPosReportSessionDialog,
+        togglePosReportSessionDialog,
+        PosSelectTableDialog,
+        setPosSelectTableDialog,
+        togglePosSelectTableDialog,
+        orderType,
+        setOrderType,
       }}
     >
       {children}

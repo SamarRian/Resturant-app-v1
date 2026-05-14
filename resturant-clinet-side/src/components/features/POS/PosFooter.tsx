@@ -10,7 +10,59 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { usePosContext } from "@/hooks/usePosContext";
-import { PosCalculationsDialog } from "./PosCalculationsDialog";
+import {
+  KotPrint,
+  UnpaidBillPrint,
+  type KotPrintData,
+  type UnpaidBillData,
+} from "@/lib/helper";
+
+// UPAID DUMMY DATA
+const dummyUnpaidBill: UnpaidBillData = {
+  restaurantName: "Swad Nagar",
+  address: "Japan Town, Mureedwala Road, Mamu Kanjan",
+  phone: "03357111507",
+
+  customer: "Walk-in Customer",
+  customerPhone: "03325016549",
+  date: "May 13, 2026 11:53",
+  type: "Delivery",
+
+  items: [
+    { name: "Steak Wrap", variant: "Regular", qty: 1, price: 450, total: 450 },
+    { name: "Soft Drink", variant: "H-Liter", qty: 1, price: 140, total: 140 },
+  ],
+
+  subtotal: 590,
+  totalDue: 590,
+  paidAmount: 0.0,
+  balanceDue: 590,
+  paymentStatus: "Unpaid",
+  orderStatus: "Pending",
+};
+
+// PRINT KOT DUMMY DATA
+const dummyKot: KotPrintData = {
+  restaurantName: "Swad Nagar",
+  kotNumber: 4986,
+  type: "Delivery",
+  orderTime: "11:53:04",
+  covers: 2,
+  items: [
+    {
+      name: "Steak Wrap",
+      variant: "Regular",
+      qty: 1,
+    },
+    {
+      name: "Soft Drink",
+      variant: "H-Liter",
+      qty: 1,
+    },
+  ],
+  specialInstructions: "",
+  printedAt: "May 13, 2026 11:53:04",
+};
 
 interface PosFooterProps {
   subtotal: number;
@@ -52,6 +104,7 @@ export function PosFooter({
     togglePosCalculationDialog,
     togglePosPaymentDialog,
     togglePosDeliveryDialog,
+    orderType,
   } = usePosContext();
 
   function handleDialogs(label) {
@@ -62,6 +115,10 @@ export function PosFooter({
       togglePosPaymentDialog();
     } else if (label === "Delivery") {
       togglePosDeliveryDialog();
+    } else if (label === "Print KOT") {
+      KotPrint(dummyKot);
+    } else if (label === "Unpaid") {
+      UnpaidBillPrint(dummyUnpaidBill);
     }
   }
 
@@ -104,6 +161,7 @@ export function PosFooter({
           {ACTION_BUTTONS.map(({ label, icon: Icon, color }) => (
             <Button
               key={label}
+              hidden={orderType !== "delivery" && label === "Delivery"}
               onClick={() => {
                 handleDialogs(label);
               }}

@@ -14,14 +14,13 @@ import { StartPosSessionDialog } from "@/components/features/POS/StartPosSession
 import PosRunningOrdersButton from "@/components/features/POS/PosRunningOrdersButton";
 
 export default function PosPage() {
-  const [startPosSession, setStartPosSession] = useState(false);
+  const [startPosSession, setStartPosSession] = useState(true);
 
   // Pos context
   const { calculatePosDiscount, calculatePosService, calculatePosTax } =
     usePosContext();
   // ── Order state ──────────────────────────────────────────────────────────
   const [orderNo] = useState(14);
-  const [orderType, setOrderType] = useState<OrderType>("dine-in");
   const [customer, setCustomer] = useState("Walk-in Customer");
   const [items, setItems] = useState<OrderItem[]>([]);
 
@@ -149,10 +148,8 @@ export default function PosPage() {
       <main className="flex min-h-0 flex-1 gap-2 p-2">
         <PosOrderPanel
           orderNo={orderNo}
-          orderType={orderType}
           customer={customer}
           items={items}
-          onOrderTypeChange={setOrderType}
           onCustomerChange={setCustomer}
           onQtyChange={handleQtyChange}
           onRemove={handleRemove}

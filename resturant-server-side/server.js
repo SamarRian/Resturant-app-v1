@@ -10,6 +10,8 @@ import staffRouter from "./routes/staffRoutes.js";
 import categoryRouter from "./routes/categoryRoutes.js";
 import settingsRouter from "./routes/settingsRoutes.js";
 import vehicalRouter from "./routes/vehicalRoutes.js";
+import sessionRouter from "./routes/sessionRoutes.js";
+import orderRouter from "./routes/ordersRoutes.js";
 
 dotenv.config();
 
@@ -35,6 +37,10 @@ app.use("/api/category", categoryRouter);
 app.use("/api/settings", settingsRouter);
 // VEHICAL
 app.use("/api/vehical", vehicalRouter);
+// Session
+app.use("/api/session", sessionRouter);
+//  ORDERS
+app.use("/api/orders", orderRouter);
 
 app.use("/images", express.static("assets/productImages"));
 // MongoDB Connect

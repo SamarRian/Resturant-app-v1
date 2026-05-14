@@ -6,13 +6,18 @@ import { AlertTriangle, TriangleAlert, X, PowerOff } from "lucide-react";
 import { usePosContext } from "@/hooks/usePosContext";
 
 export function EndPosSessionDialog() {
-  const { isPosEndSessionDialog, setPosEndSessionDialog } = usePosContext();
+  const {
+    isPosEndSessionDialog,
+    setPosEndSessionDialog,
+    togglePosReportSessionDialog,
+  } = usePosContext();
 
   const [cashCount, setCashCount] = useState("");
   const [closingNotes, setClosingNotes] = useState("");
 
   function handleEnd() {
     setPosEndSessionDialog(false);
+    togglePosReportSessionDialog();
   }
 
   function handleCancel() {

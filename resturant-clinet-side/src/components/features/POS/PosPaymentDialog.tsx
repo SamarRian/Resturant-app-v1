@@ -26,6 +26,42 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useState } from "react";
+import { PosPaymentPrint } from "@/lib/helper";
+
+// BILL PRINT STATIC DATA
+const dummyData: PrintData = {
+  restaurantName: "Swad Nagar",
+  address: "Japan Town, Mureedwala Road, Mamu Kanjan",
+  phone: "03357111507",
+
+  customer: "Walk-in Customer",
+  customerPhone: "03325016549",
+  date: "May 13, 2026 11:53",
+  type: "Delivery",
+
+  items: [
+    {
+      name: "Steak Wrap",
+      variant: "Regular",
+      qty: 1,
+      price: 450,
+      total: 450,
+    },
+    {
+      name: "Soft Drink",
+      variant: "H-Liter",
+      qty: 1,
+      price: 140,
+      total: 140,
+    },
+  ],
+
+  subtotal: 590,
+  total: 590,
+  paid: 590,
+  paymentMethod: "Cash",
+  paymentStatus: "Paid",
+};
 
 export default function PosPaymentDialog({
   subtotal,
@@ -46,7 +82,10 @@ export default function PosPaymentDialog({
 
   return (
     <Dialog open={isPosPaymentDialog} onOpenChange={setPosPaymentDialog}>
-      <DialogContent className="max-w-4xl gap-0 overflow-hidden border-0 p-0">
+      <DialogContent
+        id="payment-print"
+        className="max-w-4xl gap-0 overflow-hidden border-0 p-0"
+      >
         {/* Header */}
         <DialogHeader className="flex flex-row items-center justify-between bg-linear-to-r from-green-500 to-green-600 px-6 py-2">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold text-white">
@@ -227,7 +266,12 @@ export default function PosPaymentDialog({
             <Button variant="outline">Cancel</Button>
           </DialogClose>
 
-          <Button className="bg-cyan-500 hover:bg-cyan-600">
+          <Button
+            className="bg-cyan-500 hover:bg-cyan-600"
+            onClick={() => {
+              PosPaymentPrint(dummyData);
+            }}
+          >
             <CreditCard className="h-4 w-4" />
             Complete Payment
           </Button>

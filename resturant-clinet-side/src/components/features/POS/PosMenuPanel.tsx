@@ -25,6 +25,8 @@ import PosDeliveryDialog from "./PosDeliveryDialog";
 import PosCustomerDetailsDialog from "./PosCustomerDetallsDialog";
 import { EndPosSessionDialog } from "./PosEndSessionDialog";
 import PosRunningOrdersDialog from "./PosRunningOrdersDialog";
+import PosSessionReportDialog from "./PosSessionRepostDialog";
+import PosSelectTableDialog from "./PosSelectTableDialog";
 
 interface PosMenuPanelProps {
   customer: string;
@@ -275,6 +277,10 @@ export function PosMenuPanel({
       <EndPosSessionDialog />
 
       <PosRunningOrdersDialog />
+
+      <PosSessionReportDialog />
+
+      <PosSelectTableDialog />
     </div>
   );
 }

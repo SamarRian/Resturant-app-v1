@@ -1,16 +1,10 @@
-import {
-  Plus,
-  Minus,
-  Trash2,
-  UtensilsCrossed,
-  ChevronDown,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Plus, Minus, Trash2, UtensilsCrossed } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { OrderItem, OrderType } from "../../../../DevData/Types/Postypes";
+import { usePosContext } from "@/hooks/usePosContext";
 
 interface PosOrderPanelProps {
   orderNo: number;
@@ -26,16 +20,13 @@ interface PosOrderPanelProps {
 
 export function PosOrderPanel({
   orderNo,
-  orderType,
-  customer,
   items,
-  onOrderTypeChange,
-  onCustomerChange,
   onQtyChange,
   onRemove,
   onNewOrder,
 }: PosOrderPanelProps) {
-  console.log("ORDER ITEMS LOGS", items);
+  const { togglePosSelectTableDialog, orderType, setOrderType } =
+    usePosContext();
 
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-xl border border-border bg-card md:w-85 md:shrink-0 lg:w-95">
@@ -63,8 +54,9 @@ export function PosOrderPanel({
 
         {/* Order type tabs */}
         <Tabs
+          defaultValue="dine-in"
           value={orderType}
-          onValueChange={(v) => onOrderTypeChange(v as OrderType)}
+          onValueChange={setOrderType}
         >
           <TabsList className="h-8 w-full">
             <TabsTrigger
@@ -91,17 +83,16 @@ export function PosOrderPanel({
 
       {/* ── Customer input ── */}
       <div className="shrink-0 border-b border-border px-3 py-2">
-        <div className="relative">
-          <Input
-            value={customer}
-            onChange={(e) => onCustomerChange(e.target.value)}
-            className="h-8 pr-8 text-sm"
-            placeholder="Walk-in Customer"
-          />
-          <button className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-            <ChevronDown className="h-3.5 w-3.5" />
-          </button>
-        </div>
+        {orderType === "dine-in" && (
+          <Button
+            className="w-full"
+            onClick={() => {
+              togglePosSelectTableDialog();
+            }}
+          >
+            Select Table
+          </Button>
+        )}
       </div>
 
       {/* ── Scrollable order items ── */}

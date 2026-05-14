@@ -5,16 +5,16 @@ const variationSchema = new mongoose.Schema(
     product: {
       type: mongoose.Schema.Types.ObjectId, // ← Foreign Key
       ref: "Product", // ← Product se link
-      required: [true, "Product required hai"],
+      required: [true, "Product is required."],
     },
     variantName: {
       type: String,
-      required: [true, "Variant name required hai"],
+      required: [true, "Variant name is required."],
       trim: true,
     },
     price: {
       type: Number,
-      required: [true, "Price required hai"],
+      required: [true, "Price is required"],
       min: 0,
       default: 0,
     },
@@ -24,7 +24,7 @@ const variationSchema = new mongoose.Schema(
     },
     cost: {
       type: Number,
-      required: [true, "Cost required hai"],
+      required: [true, "Cost is required"],
       min: 0,
       default: 0,
     },

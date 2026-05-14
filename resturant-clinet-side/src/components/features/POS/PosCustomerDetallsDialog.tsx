@@ -10,6 +10,7 @@ import {
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { usePosContext } from "@/hooks/usePosContext";
 
 export default function PosCustomerDetailsDialog() {
@@ -48,10 +49,9 @@ export default function PosCustomerDetailsDialog() {
               </Field>
               <Field>
                 <Label htmlFor="customer-address-1">Address</Label>
-                <Input
+                <Textarea
                   id="customer-address-1"
                   name="customerAddress"
-                  type="text"
                   placeholder="City, Street no ...."
                 />
               </Field>
