@@ -22,9 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -49,6 +47,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { useEffect } from "react";
 const invoices = [
   {
     invoice: "INV001",
@@ -86,7 +85,35 @@ const cards = [
   },
 ];
 function PosSessionReportDialog() {
-  const { PosReportSessionDialog, setPosReportSessionDialog } = usePosContext();
+  const {
+    PosReportSessionDialog,
+    setPosReportSessionDialog,
+    setStartPosSessionDialog,
+  } = usePosContext();
+
+  useEffect(() => {
+    if (!PosReportSessionDialog) return;
+
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    const handlePopState = (e) => {
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.history.pushState(null, "", window.location.href);
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [PosReportSessionDialog]);
+
   const handlePosSessionReportPrint = () => {
     const printWindow = window.open("", "_blank", "width=800,height=600");
 
@@ -116,7 +143,13 @@ function PosSessionReportDialog() {
   return (
     <Dialog
       open={PosReportSessionDialog}
-      onOpenChange={setPosReportSessionDialog}
+      onOpenChange={(open) => {
+        if (!open) {
+          localStorage.removeItem("sessionId");
+          setStartPosSessionDialog(true);
+        }
+        setPosReportSessionDialog(open);
+      }}
     >
       <DialogContent
         id="report-content"
@@ -454,7 +487,14 @@ function PosSessionReportDialog() {
           </div>
           <DialogFooter className="pb-8">
             <DialogClose asChild>
-              <Button size={"lg"} variant={"outline"}>
+              <Button
+                size={"lg"}
+                variant={"outline"}
+                onClick={() => {
+                  localStorage.removeItem("sessionId");
+                  setStartPosSessionDialog(true);
+                }}
+              >
                 <X /> Close
               </Button>
             </DialogClose>

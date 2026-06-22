@@ -12,6 +12,7 @@ import settingsRouter from "./routes/settingsRoutes.js";
 import vehicalRouter from "./routes/vehicalRoutes.js";
 import sessionRouter from "./routes/sessionRoutes.js";
 import orderRouter from "./routes/ordersRoutes.js";
+import orderItemsRouter from "./routes/orderItemsRoutes.js";
 
 dotenv.config();
 
@@ -41,7 +42,8 @@ app.use("/api/vehical", vehicalRouter);
 app.use("/api/session", sessionRouter);
 //  ORDERS
 app.use("/api/orders", orderRouter);
-
+// ORDER ITEMS
+app.use("/api/order-items", orderItemsRouter);
 app.use("/images", express.static("assets/productImages"));
 // MongoDB Connect
 

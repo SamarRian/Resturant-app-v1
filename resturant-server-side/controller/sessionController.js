@@ -40,6 +40,7 @@ export const openSession = async (req, res) => {
 export const closeSession = async (req, res) => {
   try {
     const { id } = req.params;
+
     const { endingBalance, notes } = req.body;
 
     if (!endingBalance) {

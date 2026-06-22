@@ -1,0 +1,70 @@
+export async function createSession(startingBalance, notes) {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch("http://localhost:5000/api/session/open", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ startingBalance, notes }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to create Session");
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    throw error;
+  }
+}
+
+export async function closeSession(id, endingBalance, notes) {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`http://localhost:5000/api/session/close/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ endingBalance, notes }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to Create sessions");
+    }
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    throw error;
+  }
+}
+
+export async function getSingleSession(id) {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/session/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
+    console.log("session response: ", data);
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to Get session");
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    throw error;
+  }
+}

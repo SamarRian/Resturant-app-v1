@@ -1,7 +1,19 @@
 import { useState } from "react";
 import { PosContext } from "./PosContext";
+import { useParams } from "react-router-dom";
 
 function PosProvider({ children }) {
+  const [sessinId, setSessionId] = useState(() => {
+    return localStorage.getItem("sessionId");
+  });
+
+  const [startPosSessionDialog, setStartPosSessionDialog] = useState(false);
+
+  function handleSessionID(id) {
+    localStorage.setItem("sessionId", id);
+    setSessionId(id);
+  }
+
   // POS ORDER TYPE
 
   const [orderType, setOrderType] = useState("dine-in");
@@ -165,6 +177,10 @@ function PosProvider({ children }) {
         togglePosSelectTableDialog,
         orderType,
         setOrderType,
+        sessinId,
+        handleSessionID,
+        startPosSessionDialog,
+        setStartPosSessionDialog,
       }}
     >
       {children}

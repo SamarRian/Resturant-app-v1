@@ -17,7 +17,8 @@ const orderItemSchema = new mongoose.Schema(
       required: true,
     },
     productType: {
-      type: Number,
+      type: String,
+      enum: ["showcase", "cafe"],
       default: null,
     },
 
@@ -49,30 +50,6 @@ const orderItemSchema = new mongoose.Schema(
       default: null,
     },
 
-    // Kitchen tracking
-    kitchenStatus: {
-      type: String,
-      enum: ["pending", "preparing", "ready", "served"],
-      default: "pending",
-      index: true,
-    },
-    preparingAt: {
-      type: Date,
-      default: null,
-    },
-    readyAt: {
-      type: Date,
-      default: null,
-    },
-    servedAt: {
-      type: Date,
-      default: null,
-    },
-
-    sortOrder: {
-      type: Number,
-      default: 0,
-    },
     isCustom: {
       type: Boolean,
       default: false,

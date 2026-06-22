@@ -9,8 +9,8 @@ const posOrderSchema = new mongoose.Schema(
     },
 
     orderNumber: {
-      type: String,
-      required: true,
+      type: Number,
+      // required: true,
       unique: true,
     },
     orderDate: {
@@ -30,6 +30,7 @@ const posOrderSchema = new mongoose.Schema(
       ],
       default: "pending",
       index: true,
+      default: "pending",
     },
     orderSource: {
       type: String,
@@ -139,7 +140,7 @@ const posOrderSchema = new mongoose.Schema(
     // ─── Payment ───────────────────────────────────────────────────────────────
     paymentMethod: {
       type: String,
-      enum: ["cash", "card", "online", null],
+      enum: ["cash", "online", null],
       default: null,
     },
     transactionReference: {

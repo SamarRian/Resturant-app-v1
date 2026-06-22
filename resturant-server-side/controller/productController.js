@@ -63,9 +63,9 @@ export async function createProductWithVariations(req, res) {
       productCode,
       description,
       image,
-      price,
-      cost,
-      quantity,
+      price: productType === "cafe" ? null : price,
+      cost: productType === "cafe" ? null : cost,
+      quantity: productType === "cafe" ? null : quantity,
       enableVariation: isVariationEnabled,
     });
 

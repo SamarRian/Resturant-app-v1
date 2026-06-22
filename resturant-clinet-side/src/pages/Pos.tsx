@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PosHeader } from "@/components/features/POS/PosHeader";
 import { PosOrderPanel } from "../components/features/POS/PosOrderPanel";
 import { PosMenuPanel } from "../components/features/POS/PosMenuPanel";
@@ -12,13 +12,55 @@ import type {
 import { usePosContext } from "@/hooks/usePosContext";
 import { StartPosSessionDialog } from "@/components/features/POS/StartPosSessionDialog";
 import PosRunningOrdersButton from "@/components/features/POS/PosRunningOrdersButton";
+import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
 
 export default function PosPage() {
-  const [startPosSession, setStartPosSession] = useState(true);
-
   // Pos context
-  const { calculatePosDiscount, calculatePosService, calculatePosTax } =
-    usePosContext();
+  const {
+    calculatePosDiscount,
+    calculatePosService,
+    calculatePosTax,
+    sessinId,
+    handlePosSessionDialog,
+    startPosSessionDialog,
+    setStartPosSessionDialog,
+  } = usePosContext();
+
+  const { data, isLoading, isError } = useGetSingleSession(sessinId);
+
+  useEffect(() => {
+    if (isLoading) {
+      setStartPosSessionDialog(false);
+      return;
+    }
+
+    // Case 1: No session ID exists
+    if (!sessinId) {
+      setStartPosSessionDialog(true);
+      return;
+    }
+
+    if (isError) {
+      setStartPosSessionDialog(true);
+      localStorage.removeItem("sessionId"); // Clean invalid session
+      return;
+    }
+    if (data?.success === false) {
+      setStartPosSessionDialog(true);
+    }
+    // Case 3: Session ID exists and data received
+    if (data) {
+      const isActive = data?.data?.status === "active";
+
+      if (isActive) {
+        setStartPosSessionDialog(false);
+      }
+    }
+  }, [sessinId, data, isLoading, isError, setStartPosSessionDialog]);
+  // Fix 5: Loading state handle properly
+
+  console.log("-------------------------------------");
+
   // ── Order state ──────────────────────────────────────────────────────────
   const [orderNo] = useState(14);
   const [customer, setCustomer] = useState("Walk-in Customer");
@@ -180,10 +222,7 @@ export default function PosPage() {
         total={total}
       />
 
-      <StartPosSessionDialog
-        open={startPosSession}
-        onOpenChange={setStartPosSession}
-      />
+      <StartPosSessionDialog />
       <PosRunningOrdersButton />
     </div>
   );

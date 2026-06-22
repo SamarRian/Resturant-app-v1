@@ -4,20 +4,37 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, TriangleAlert, X, PowerOff } from "lucide-react";
 import { usePosContext } from "@/hooks/usePosContext";
+import { useCloseSession } from "@/hooks/QueryHooks/PosSession/useCloseSession";
 
 export function EndPosSessionDialog() {
   const {
     isPosEndSessionDialog,
     setPosEndSessionDialog,
     togglePosReportSessionDialog,
+
+    sessinId,
   } = usePosContext();
 
   const [cashCount, setCashCount] = useState("");
   const [closingNotes, setClosingNotes] = useState("");
 
+  // SESSION DATA FETCHING
+  const { closeSessionFN, isPending } = useCloseSession();
+
   function handleEnd() {
-    setPosEndSessionDialog(false);
-    togglePosReportSessionDialog();
+    closeSessionFN(
+      {
+        id: sessinId,
+        endingBalance: cashCount,
+        notes: closingNotes,
+      },
+      {
+        onSuccess: () => {
+          setPosEndSessionDialog(false);
+          togglePosReportSessionDialog();
+        },
+      }
+    );
   }
 
   function handleCancel() {
@@ -113,6 +130,7 @@ export function EndPosSessionDialog() {
             </Button>
 
             <Button
+              disabled={isPending}
               onClick={handleEnd}
               className="h-11 flex-1 gap-2 rounded-xl bg-red-500 text-white transition-all hover:bg-red-600 active:scale-[0.99] dark:bg-red-600 dark:hover:bg-red-700"
             >

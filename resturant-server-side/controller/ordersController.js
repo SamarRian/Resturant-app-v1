@@ -3,19 +3,47 @@ import PosSession from "../model/sessionModel.js";
 import { updateSessionStats } from "./sessionController.js";
 
 // ─── Helper: Order Number Generate ────────────────────────────────────────────
-const generateOrderNumber = () => {
-  const timestamp = Date.now().toString().slice(-6);
-  const random = Math.floor(Math.random() * 1000)
-    .toString()
-    .padStart(3, "0");
-  return `ORD-${timestamp}-${random}`;
-};
+
+export async function orderNumber() {
+  const orderNumber = await PosOrder.countDocuments();
+  return orderNumber;
+}
+
+// ///////////////////////////////////////////////
+export async function generateOrder(req, res) {
+  try {
+    const activeSession = await PosSession.findOne({
+      status: "active",
+    });
+
+    if (!activeSession) {
+      return res.status(404).json({
+        success: false,
+        message: "Please Active the Session",
+      });
+    }
+
+    const order = await PosOrder.create({
+      posSessionId: activeSession?._id,
+      orderNumber: await orderNumber(),
+      orderDate: new Date(),
+      createdBy: req.user._id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Empty Order created successfully!",
+      order,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
 
 // ─── Create Order ──────────────────────────────────────────────────────────────
-export const createOrder = async (req, res) => {
+export const updateOrder = async (req, res) => {
   try {
     const {
-      posSessionId,
       tableId,
       customerId,
       orderType,
@@ -44,42 +72,47 @@ export const createOrder = async (req, res) => {
       cookingTime,
     } = req.body;
 
-    const order = await PosOrder.create({
-      posSessionId: posSessionId ?? null,
-      orderNumber: generateOrderNumber(),
-      orderDate: new Date(),
-      orderType: orderType ?? "dine-in",
-      orderSource: orderSource ?? "pos",
-      tableId: tableId ?? null,
-      customerId: customerId ?? null,
-      deliveryAddress: deliveryAddress ?? null,
-      deliveryPhone: deliveryPhone ?? null,
-      subTotal: subTotal ?? 0,
-      discountType: discountType ?? null,
-      discountValue: discountValue ?? 0,
-      discountAmount: discountAmount ?? 0,
-      serviceChargeType: serviceChargeType ?? null,
-      serviceChargeValue: serviceChargeValue ?? 0,
-      serviceChargeAmount: serviceChargeAmount ?? 0,
-      taxType: taxType ?? null,
-      taxMethod: taxMethod ?? null,
-      taxValue: taxValue ?? 0,
-      taxAmount: taxAmount ?? 0,
-      totalAmount: totalAmount ?? 0,
-      paymentMethod: paymentMethod ?? null,
-      paymentStatus: paymentStatus ?? "pending",
-      paymentNote: paymentNote ?? null,
-      customerNotes: customerNotes ?? null,
-      kitchenNotes: kitchenNotes ?? null,
-      riderWaiter: riderWaiter ?? null,
-      covers: covers ?? 1,
-      cookingTime: cookingTime ?? null,
-      createdBy: req.user._id,
-    });
+    const { id } = req.params;
+
+    const order = await PosOrder.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          orderType,
+          orderSource,
+          tableId,
+          customerId,
+          deliveryAddress,
+          deliveryPhone,
+          subTotal,
+          discountType,
+          discountValue,
+          discountAmount,
+          serviceChargeType,
+          serviceChargeValue,
+          serviceChargeAmount,
+          taxType,
+          taxMethod,
+          taxValue,
+          taxAmount,
+          totalAmount,
+          paymentMethod,
+          paymentStatus,
+          paymentNote,
+          customerNotes,
+          kitchenNotes,
+          riderWaiter,
+          covers,
+          cookingTime,
+          updatedBy: req.user._id,
+        },
+      },
+      { new: true },
+    );
 
     return res.status(201).json({
       success: true,
-      message: "Order created successfully.",
+      message: "Order updated successfully.",
       data: order,
     });
   } catch (error) {
@@ -141,7 +174,7 @@ export const getOrderById = async (req, res) => {
     const order = await PosOrder.findById(id)
       //   .populate("customerId", "name phone email")
       .populate("tableId", "name")
-      .populate("posSessionId")
+      // .populate("posSessionId")
       .populate("createdBy", "name")
       .populate("updatedBy", "name");
 
@@ -234,13 +267,8 @@ export const updateKitchenStatus = async (req, res) => {
 export const processPayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      paymentMethod,
-      paidAmount,
-      transactionReference,
-      paymentNote,
-      posSessionId,
-    } = req.body;
+    const { paymentMethod, paidAmount, transactionReference, paymentNote } =
+      req.body;
 
     const order = await PosOrder.findById(id);
     if (!order) {
@@ -269,19 +297,16 @@ export const processPayment = async (req, res) => {
     order.orderStatus = due > 0 ? order.orderStatus : "completed";
     order.updatedBy = req.user._id;
 
-    // ✅ posSessionId order mein save karo agar pehle nahi tha
-    if (!order.posSessionId && posSessionId) {
-      order.posSessionId = posSessionId;
-    }
+    // // ✅ posSessionId order mein save karo agar pehle nahi tha
+    // if (!order.posSessionId && posSessionId) {
+    //   order.posSessionId = posSessionId;
+    // }
 
     await order.save();
 
-    // ✅ Session ID — order ka use karo ya body wala fallback
-    const sessionId = order.posSessionId || posSessionId;
-
     // ✅ Full payment
-    if (order.paymentStatus === "paid" && sessionId) {
-      await PosSession.findByIdAndUpdate(sessionId, {
+    if (order.paymentStatus === "paid" && order.posSessionId) {
+      await PosSession.findByIdAndUpdate(order.posSessionId, {
         $inc: {
           totalSales: order.totalAmount,
           totalOrders: 1,
@@ -291,8 +316,8 @@ export const processPayment = async (req, res) => {
     }
 
     // ✅ Partial payment
-    if (order.paymentStatus === "partial" && sessionId) {
-      await PosSession.findByIdAndUpdate(sessionId, {
+    if (order.paymentStatus === "partial" && order.posSessionId) {
+      await PosSession.findByIdAndUpdate(order.posSessionId, {
         $inc: {
           cashInHand: paidAmount,
         },

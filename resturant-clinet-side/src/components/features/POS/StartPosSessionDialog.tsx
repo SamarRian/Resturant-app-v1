@@ -15,18 +15,30 @@ import {
   StickyNote,
   ChevronRight,
 } from "lucide-react";
+import { useCreateSession } from "@/hooks/QueryHooks/PosSession/useCreateSession";
+import { usePosContext } from "@/hooks/usePosContext";
+import { useGenerateEmptyOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGenerateEmptyOrder";
+import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
+import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 
 const QUICK_AMOUNTS = [100, 500, 1000, 2000];
 
-export function StartPosSessionDialog({ open, onOpenChange }) {
+export function StartPosSessionDialog() {
+  const {
+    handleSessionID,
+    startPosSessionDialog,
+    setStartPosSessionDialog,
+    sessinId,
+  } = usePosContext();
+
+  const { handleEmptyOrderID } = usePosOrderContext();
+
   const [cashBalance, setCashBalance] = useState(0);
   const [notes, setNotes] = useState("");
   const [dateTime, setDateTime] = useState(new Date());
 
-  useEffect(() => {
-    const timer = setInterval(() => setDateTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const { createSessionFN, isPending } = useCreateSession();
+  const { generateEmptyOrderFN } = useGenerateEmptyOrder();
 
   const formattedDate = dateTime.toLocaleDateString("en-US", {
     month: "short",
@@ -51,27 +63,44 @@ export function StartPosSessionDialog({ open, onOpenChange }) {
   function handleStart() {
     if (!cashBalance || cashBalance === 0) return;
 
-    onOpenChange?.(false);
+    createSessionFN(
+      { startingBalance: cashBalance, notes },
+      {
+        onSuccess: (data) => {
+          const newSessionId = data?.data?._id;
+          handleSessionID(newSessionId);
+
+          generateEmptyOrderFN(undefined, {
+            onSuccess: (data) => {
+              handleEmptyOrderID(data?.order?._id || "");
+            },
+          });
+
+          setStartPosSessionDialog(false);
+        },
+      }
+    );
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={startPosSessionDialog}
+      onOpenChange={setStartPosSessionDialog}
+    >
       <DialogContent
         onEscapeKeyDown={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
         className={[
           "gap-0 overflow-hidden p-0",
-
           "max-h-[90dvh]",
           "[&>button]:hidden",
-
           "flex flex-col",
-
           "w-full sm:max-w-lg",
         ].join(" ")}
       >
-        {/* ── Header — FIXED, scroll nahi hoga ─────────────────── */}
-        <div className="relative shrink-0 overflow-hidden bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 px-6 pt-8 pb-6 text-center">
+        {/* Rest of your JSX remains exactly the same */}
+        {/* Header */}
+        <div className="relative shrink-0 overflow-hidden bg-linear-to-br from-slate-800 via-slate-700 to-slate-900 px-6 pt-8 pb-6 text-center">
           <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
           <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-white/5" />
 
@@ -91,7 +120,7 @@ export function StartPosSessionDialog({ open, onOpenChange }) {
           </p>
         </div>
 
-        {/* ── Body — SCROLLABLE, baaki space yahi leta hai ─────── */}
+        {/* Body */}
         <div className="flex-1 space-y-5 overflow-y-auto bg-background px-6 pt-5 pb-4">
           {/* Cashier + Date */}
           <div className="grid grid-cols-2 gap-3">
@@ -185,16 +214,17 @@ export function StartPosSessionDialog({ open, onOpenChange }) {
               placeholder="Add any notes for this session..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="min-h-[72px] resize-none rounded-xl text-sm"
+              className="min-h-18 resize-none rounded-xl text-sm"
               rows={3}
             />
           </div>
         </div>
 
-        {/* ── Footer — FIXED, hamesha neeche rahega ────────────── */}
+        {/* Footer */}
         <div className="shrink-0 space-y-3 border-t bg-background px-6 pt-3 pb-5">
           <Button
             onClick={handleStart}
+            disabled={isPending || !cashBalance || cashBalance === 0}
             className="h-12 w-full gap-2 rounded-xl bg-emerald-500 text-base font-semibold text-white shadow-sm shadow-emerald-200 transition-all hover:bg-emerald-600 active:scale-[0.99] dark:shadow-emerald-900"
           >
             <Play className="h-4 w-4 fill-white" />
