@@ -18,7 +18,6 @@ function PosSelectTableDialog() {
 
   //   const { data, isLoading } = PosSelectTableDialog ? useGetAllTables() : {};
   const { data, isLoading } = useGetAllTables();
-  console.log("ALL TABLE ", data);
 
   const tablesData = data?.tablesData;
 

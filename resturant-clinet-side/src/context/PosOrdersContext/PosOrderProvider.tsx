@@ -3,8 +3,11 @@ import { PosOrderContext } from "./PosOrderContext";
 import { useState } from "react";
 
 function PosOrderProvider({ children }: { children: React.ReactNode }) {
-  const [emptyOrderID, setEmptyOrderID] = useState("");
+  const [emptyOrderID, setEmptyOrderID] = useState(() => {
+    return localStorage.getItem("emptyOrderID") || "";
+  });
   function handleEmptyOrderID(id: string) {
+    localStorage.setItem("emptyOrderID", id);
     setEmptyOrderID(id);
   }
 

@@ -18,27 +18,27 @@ import {
 import { useCreateSession } from "@/hooks/QueryHooks/PosSession/useCreateSession";
 import { usePosContext } from "@/hooks/usePosContext";
 import { useGenerateEmptyOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGenerateEmptyOrder";
-import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
+
 import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 
 const QUICK_AMOUNTS = [100, 500, 1000, 2000];
 
 export function StartPosSessionDialog() {
-  const {
-    handleSessionID,
-    startPosSessionDialog,
-    setStartPosSessionDialog,
-    sessinId,
-  } = usePosContext();
+  const { handleSessionID, startPosSessionDialog, setStartPosSessionDialog } =
+    usePosContext();
 
-  const { handleEmptyOrderID } = usePosOrderContext();
+  const { handleEmptyOrderID, handleEmptyOrderData } = usePosOrderContext();
 
   const [cashBalance, setCashBalance] = useState(0);
   const [notes, setNotes] = useState("");
   const [dateTime, setDateTime] = useState(new Date());
 
   const { createSessionFN, isPending } = useCreateSession();
-  const { generateEmptyOrderFN } = useGenerateEmptyOrder();
+  const {
+    generateEmptyOrderFN,
+    data,
+    isPending: isOrderPending,
+  } = useGenerateEmptyOrder();
 
   const formattedDate = dateTime.toLocaleDateString("en-US", {
     month: "short",
@@ -73,6 +73,9 @@ export function StartPosSessionDialog() {
           generateEmptyOrderFN(undefined, {
             onSuccess: (data) => {
               handleEmptyOrderID(data?.order?._id || "");
+              console.log("orderData", data);
+
+              handleEmptyOrderData(data?.order);
             },
           });
 

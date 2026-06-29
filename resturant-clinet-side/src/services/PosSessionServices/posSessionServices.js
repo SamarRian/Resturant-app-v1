@@ -56,7 +56,6 @@ export async function getSingleSession(id) {
       },
     });
     const data = await res.json();
-    console.log("session response: ", data);
 
     if (!res.ok) {
       throw new Error(data.message || "Failed to Get session");

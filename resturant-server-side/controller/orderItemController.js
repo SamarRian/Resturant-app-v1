@@ -29,113 +29,251 @@ export async function generateItems(req, res) {
 export const addOrderItems = async (req, res) => {
   try {
     const { orderId, items } = req.body;
-    console.log("REQUESTED DATA", req.body);
-    // Order exist karta hai?
-    const order = await PosOrder.findById(orderId);
-    console.log("ORDER", order);
 
-    if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found." });
-    }
+    console.log("📥 REQUESTED DATA:", JSON.stringify(req.body, null, 2));
 
-    // Cancelled ya completed order mein items add nahi ho sakti
-    if (["cancelled", "completed"].includes(order.orderStatus)) {
+    // ✅ Validate input
+    if (!orderId) {
       return res.status(400).json({
         success: false,
-        message: `Order ${order.orderStatus},items cannot be added`,
+        message: "Order ID is required",
       });
     }
 
-    const orderItems = [];
+    // if (!items || !Array.isArray(items) || items.length === 0) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Items array is required and cannot be empty",
+    //   });
+    // }
+
+    // ✅ Order exist karta hai?
+    const order = await PosOrder.findById(orderId);
+    console.log("📋 ORDER FOUND:", order);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found.",
+      });
+    }
+
+    // ✅ Cancelled ya completed order mein items add nahi ho sakti
+    if (["cancelled", "completed"].includes(order.orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Order ${order.orderStatus}, items cannot be added`,
+      });
+    }
+
+    // ✅ 🔥 STEP 1: DELETE ALL existing order items
+    console.log(`🗑️ Deleting all existing items for order: ${orderId}`);
+    const deleteResult = await OrderItem.deleteMany({ orderId: orderId });
+    console.log(`✅ Deleted ${deleteResult.deletedCount} items`);
+
+    // ✅ 🔥 STEP 2: CREATE new order items
+    const orderItemsToSave = [];
     let totalAmount = 0;
 
     for (const item of items) {
       const {
         productId,
+        name,
+        unitPrice,
         quantity,
-        variations,
-        addons,
+        description,
+        isDeal,
         specialInstructions,
-        isCustom,
+        isVariant,
+        selectedProductVariaton,
+        isCustom = false,
       } = item;
 
-      // Product DB se fetch karo
-      const product = await Product.findById(productId);
+      console.log(`📦 Processing item: ${name}`, {
+        productId,
+        unitPrice,
+        quantity,
+        isVariant,
+        variantId: selectedProductVariaton?._id || null,
+      });
 
-      if (!product) {
-        return res.status(404).json({
+      // ✅ Validate required fields
+      if (!productId && !isCustom) {
+        return res.status(400).json({
           success: false,
-          message: `Product not found: ${productId}`,
+          message: `Product ID is required for item: ${name}`,
         });
       }
 
-      // Stock check karo
-      // if (product.quantity < quantity) {
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: `${product.name} ka stock kam hai. Available: ${product.quantity}`,
-      //   });
-      // }
-      // if (product.enableVariation) {
-      //   return res.status(400).res({
-      //     success: false,
-      //     message: "Please the quantity of variation",
-      //   });
-      // }
-      const unitPrice = product.price;
+      if (!unitPrice || unitPrice <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid unit price for item: ${name}`,
+        });
+      }
+
+      if (!quantity || quantity <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid quantity for item: ${name}`,
+        });
+      }
+
+      // ✅ Calculate total price
       const totalPrice = unitPrice * quantity;
       totalAmount += totalPrice;
 
-      // Stock kam karo
-      // await Product.findByIdAndUpdate(productId, {
-      //   $inc: { quantity: -quantity },
-      // });
+      // ✅ Fetch product for productType
+      let product = null;
+      if (productId && !productId.startsWith("custom_")) {
+        product = await Product.findById(productId);
+      }
 
-      orderItems.push({
-        orderId,
-        productId: product._id,
-        productName: product.name,
-        productType: product.productType,
-        variations: variations ?? null,
-        addons: addons ?? null,
-        unitPrice,
-        quantity,
-        totalPrice,
-        specialInstructions: specialInstructions ?? null,
+      // ✅ Create variant object WITHOUT the quantity from variant
+      let variantToSave = null;
+      if (selectedProductVariaton) {
+        variantToSave = {
+          _id: selectedProductVariaton._id || null,
+          product: selectedProductVariaton.product || null,
+          variantName: selectedProductVariaton.variantName || "",
+          price: selectedProductVariaton.price || 0,
+          cost: selectedProductVariaton.cost || 0,
+        };
+      }
 
-        isCustom,
-      });
+      const orderItemData = {
+        orderId: orderId,
+        productId: productId,
+        productName: name || "Unknown Product",
+        productType: product?.productType || null,
+        selectedProductVariaton: variantToSave,
+        unitPrice: unitPrice,
+        quantity: quantity,
+        totalPrice: totalPrice,
+        specialInstructions: specialInstructions || null,
+        isCustom: isCustom,
+        isDeal: isDeal || false,
+        isVariant: isVariant || false,
+        description: description || null,
+      };
 
-      console.log("ORDER ITEMS", orderItems);
+      orderItemsToSave.push(orderItemData);
     }
 
-    // Sab items ek saath save karo
-    const savedItems = await OrderItem.insertMany(orderItems);
-    console.log("saved items", savedItems);
+    console.log(`📦 Saving ${orderItemsToSave.length} new items`);
 
-    // Order ka subTotal aur totalAmount update karo
-    console.log(typeof totalAmount);
+    // ✅ 🔥 STEP 3: Insert all new items
+    const savedItems = await OrderItem.insertMany(orderItemsToSave);
+    console.log(`✅ Saved ${savedItems.length} items`);
 
-    // await PosOrder.findByIdAndUpdate(orderId, {
-    //   $inc: {
-    //     subTotal: totalAmount,
-    //     totalAmount: totalAmount,
-    //   },
-    // });
+    // ✅ 🔥 STEP 4: Update order with new items
+    const updatedOrder = await PosOrder.findByIdAndUpdate(
+      orderId,
+      {
+        $set: {
+          subTotal: totalAmount,
+          totalAmount: totalAmount,
+          orderItems: savedItems.map((item) => item._id), // ✅ Replace entire array
+        },
+      },
+      { new: true },
+    );
+
+    console.log("✅ Updated order:", {
+      orderId: updatedOrder._id,
+      subTotal: updatedOrder.subTotal,
+      totalAmount: updatedOrder.totalAmount,
+      itemCount: updatedOrder.orderItems?.length || 0,
+    });
 
     return res.status(201).json({
       success: true,
-      message: "Items added to order successfully.",
+      message: "Order items replaced successfully.",
       data: savedItems,
+      order: updatedOrder,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("❌ Error in addOrderItems:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 
 // ─── Add Custom Item (jo product list mein nahi) ──────────────────────────────
+// export const addOrderItems = async (req, res) => {
+//   try {
+//     const { orderId, items } = req.body;
+
+//     const order = await PosOrder.findById(orderId);
+
+//     if (!order) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Order not found." });
+//     }
+
+//     if (["cancelled", "completed"].includes(order.orderStatus)) {
+//       return res.status(400).json({
+//         success: false,
+//         message: `Order ${order.orderStatus}, items cannot be added`,
+//       });
+//     }
+
+//     const orderItems = [];
+//     let totalAmount = 0;
+
+//     for (const item of items) {
+//       const {
+//         _id: productId,
+//         productName,
+//         productType,
+//         variations,
+//         addons,
+//         unitPrice,
+//         quantity,
+//         specialInstructions,
+//         isCustom,
+//       } = item;
+
+//       const totalPrice = unitPrice * quantity;
+//       totalAmount += totalPrice;
+
+//       orderItems.push({
+//         orderId,
+//         productId,
+//         productName,
+//         productType,
+//         variations,
+//         unitPrice,
+//         quantity,
+//         totalPrice,
+//         specialInstructions,
+//         isCustom,
+//       });
+//     }
+
+//     const savedItems = await OrderItem.insertMany(orderItems);
+
+//     await PosOrder.findByIdAndUpdate(orderId, {
+//       $inc: {
+//         subTotal: totalAmount,
+//         totalAmount: totalAmount,
+//       },
+//     });
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Items added to order successfully.",
+//       data: savedItems,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
 export const addCustomItem = async (req, res) => {
   try {
     const {

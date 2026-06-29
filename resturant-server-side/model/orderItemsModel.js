@@ -23,11 +23,7 @@ const orderItemSchema = new mongoose.Schema(
     },
 
     // Stored as arrays of objects (replaces JSON columns)
-    variations: {
-      type: mongoose.Schema.Types.Mixed,
-      default: null,
-    },
-    addons: {
+    selectedProductVariaton: {
       type: mongoose.Schema.Types.Mixed,
       default: null,
     },
@@ -51,6 +47,10 @@ const orderItemSchema = new mongoose.Schema(
     },
 
     isCustom: {
+      type: Boolean,
+      default: false,
+    },
+    isDeal: {
       type: Boolean,
       default: false,
     },

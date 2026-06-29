@@ -76,7 +76,6 @@ export default function PosPaymentDialog({
   const [amountPaid, setAmountPaid] = useState();
 
   const change = amountPaid ? amountPaid - subtotal : 0;
-  console.log(subtotal, discount, tax, total, amountPaid);
 
   const balanceDue = amountPaid ? subtotal - amountPaid : 0;
 

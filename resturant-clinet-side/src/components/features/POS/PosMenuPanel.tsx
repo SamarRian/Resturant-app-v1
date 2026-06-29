@@ -223,13 +223,6 @@ export function PosMenuPanel({
                         <ShoppingBag className="h-7 w-7 text-muted-foreground/20" />
                       </div>
                     )}
-                    {isSelected && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-accent/25">
-                        <div className="rounded-full bg-accent p-1">
-                          <ShoppingBag className="h-3.5 w-3.5 text-white" />
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Product name + price */}

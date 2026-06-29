@@ -2,8 +2,6 @@ import { getSingleSession } from "@/services/PosSessionServices/posSessionServic
 import { useQuery } from "@tanstack/react-query";
 
 export function useGetSingleSession(id) {
-  console.log("QUERY GET SINGLE SESSIN HOOK ID", id);
-
   const { data, isLoading } = useQuery({
     queryFn: () => getSingleSession(id),
     queryKey: ["single-session", id],

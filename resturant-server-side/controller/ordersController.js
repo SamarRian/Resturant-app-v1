@@ -25,7 +25,7 @@ export async function generateOrder(req, res) {
 
     const order = await PosOrder.create({
       posSessionId: activeSession?._id,
-      orderNumber: await orderNumber(),
+      orderNumber: (await orderNumber()) + 1,
       orderDate: new Date(),
       createdBy: req.user._id,
     });

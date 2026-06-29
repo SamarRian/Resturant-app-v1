@@ -33,6 +33,7 @@ export function PosCustomDialoge({
       name: productName,
       price: Number(price),
       cost: Number(cost),
+      isCustom: true,
       description: "Custom Product",
       _id: `custom_${Date.now()}`,
     };

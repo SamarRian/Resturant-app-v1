@@ -13,6 +13,8 @@ import { usePosContext } from "@/hooks/usePosContext";
 import { StartPosSessionDialog } from "@/components/features/POS/StartPosSessionDialog";
 import PosRunningOrdersButton from "@/components/features/POS/PosRunningOrdersButton";
 import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
+import { useAddOrderItems } from "@/hooks/QueryHooks/PosSession/PosOrder/useAddOrderItems";
+import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 
 export default function PosPage() {
   // Pos context
@@ -21,12 +23,19 @@ export default function PosPage() {
     calculatePosService,
     calculatePosTax,
     sessinId,
-    handlePosSessionDialog,
-    startPosSessionDialog,
+
     setStartPosSessionDialog,
   } = usePosContext();
-
+  const { emptyOrderID } = usePosOrderContext();
   const { data, isLoading, isError } = useGetSingleSession(sessinId);
+
+  const { addOrderItemsFN, isOrderItemsPending } = useAddOrderItems();
+  // ── Order state ──────────────────────────────────────────────────────────
+  const [customer, setCustomer] = useState("Walk-in Customer");
+  const [items, setItems] = useState<OrderItem[]>([]);
+
+  // ── Menu state ───────────────────────────────────────────────────────────
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (isLoading) {
@@ -57,17 +66,6 @@ export default function PosPage() {
       }
     }
   }, [sessinId, data, isLoading, isError, setStartPosSessionDialog]);
-  // Fix 5: Loading state handle properly
-
-  console.log("-------------------------------------");
-
-  // ── Order state ──────────────────────────────────────────────────────────
-  const [orderNo] = useState(14);
-  const [customer, setCustomer] = useState("Walk-in Customer");
-  const [items, setItems] = useState<OrderItem[]>([]);
-
-  // ── Menu state ───────────────────────────────────────────────────────────
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -106,6 +104,8 @@ export default function PosPage() {
   };
 
   const handleProductClick = (product: Product) => {
+    console.log("Product clicked:", product);
+
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(product._id)) next.delete(product._id);
@@ -113,10 +113,10 @@ export default function PosPage() {
       return next;
     });
 
-    setItems((prev) => {
-      const existing = prev.find((it) => {
+    // ✅ Update items state
+    setItems((prevItems) => {
+      const existing = prevItems.find((it) => {
         if (!product.variant) return it._id === product._id;
-
         return (
           it._id === product._id &&
           it.selectedProductVariaton?._id ===
@@ -125,13 +125,12 @@ export default function PosPage() {
       });
 
       if (existing) {
-        return prev.map((it) => {
+        return prevItems.map((it) => {
           if (!product.variant) {
             return it._id === product._id
               ? { ...it, quantity: it.quantity + 1 }
               : it;
           }
-
           return it._id === product._id &&
             it.selectedProductVariaton?._id ===
               product.selectedProductVariaton?._id
@@ -141,30 +140,61 @@ export default function PosPage() {
       }
 
       return [
-        ...prev,
+        ...prevItems,
         {
           _id: product._id,
+          productId: product._id,
           name: product.name,
-          price: product.price || product?.selectedProductVariaton.price,
+          unitPrice:
+            product.price || product?.selectedProductVariaton?.price || 0,
           quantity: 1,
-          description: product.description,
-          isDeal: product?.isDeal,
-          isVariant: product?.variant,
-          selectedProductVariaton: product?.selectedProductVariaton,
+          description: product.description || "",
+          isDeal: product?.isDeal || false,
+          isVariant: product?.variant || false,
+          selectedProductVariaton: product?.selectedProductVariaton || null,
+          specialInstructions: product?.specialInstructions || "",
+          isCustom: product?.isCustom || false,
         },
       ];
     });
   };
 
+  // ✅ Fixed useEffect - Only runs when items actually change
+  useEffect(() => {
+    if (!emptyOrderID) return;
+
+    const formattedItems = items.map((item) => ({
+      productId: item.isCustom ? null : item.productId || item._id,
+      name: item.name,
+      unitPrice: item.unitPrice || item.price || 0,
+      quantity: item.quantity,
+      description: item.description || "",
+      isDeal: item.isDeal || false,
+      isVariant: item.isVariant || false,
+      selectedProductVariaton: item.selectedProductVariaton || null,
+      specialInstructions: item.specialInstructions || "",
+      isCustom: item.isCustom || false,
+    }));
+
+    const timer = setTimeout(() => {
+      addOrderItemsFN({
+        orderID: emptyOrderID,
+        orderItems: formattedItems,
+      });
+    }, 800);
+
+    return () => clearTimeout(timer); // ✅ Cleanup — timer reset
+  }, [items, emptyOrderID]); // ✅ addOrderItemsFN removed
+
   const subtotal = items.reduce((s, it) => {
     const price = it.isVariant
       ? (it.selectedProductVariaton?.price ?? 0)
-      : (it.price ?? 0);
+      : (it.unitPrice ?? 0);
     return s + price * it.quantity;
   }, 0);
 
-  // ✅ Har ek independently calculate ho raha hai
-  // ✅ Property names bhi sahi hain: type aur amount
+  //  Har ek independently calculate ho raha hai
+  //  Property names bhi sahi hain: type aur amount
   const discount =
     calculatePosDiscount.type === "percentage"
       ? (subtotal * (calculatePosDiscount.amount || 0)) / 100
@@ -189,7 +219,6 @@ export default function PosPage() {
 
       <main className="flex min-h-0 flex-1 gap-2 p-2">
         <PosOrderPanel
-          orderNo={orderNo}
           customer={customer}
           items={items}
           onCustomerChange={setCustomer}

@@ -5,6 +5,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { OrderItem, OrderType } from "../../../../DevData/Types/Postypes";
 import { usePosContext } from "@/hooks/usePosContext";
+import { usePosOrderContext } from "@/hooks/usePosOrderContext";
+import { useGetSingleOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGetSingleOrder";
+import { Spinner } from "@/components/ui/spinner";
 
 interface PosOrderPanelProps {
   orderNo: number;
@@ -19,14 +22,16 @@ interface PosOrderPanelProps {
 }
 
 export function PosOrderPanel({
-  orderNo,
   items,
   onQtyChange,
   onRemove,
-  onNewOrder,
 }: PosOrderPanelProps) {
   const { togglePosSelectTableDialog, orderType, setOrderType } =
     usePosContext();
+  const { emptyOrderID } = usePosOrderContext();
+  const { data } = useGetSingleOrder(emptyOrderID);
+
+  const orderData = data ? data.data : {};
 
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-xl border border-border bg-card md:w-85 md:shrink-0 lg:w-95">
@@ -35,18 +40,13 @@ export function PosOrderPanel({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-foreground">
-              Order #: {orderNo}
+              Order #: {orderData.orderNumber}
             </span>
             <Badge className="bg-amber-400 text-[10px] text-amber-950 hover:bg-amber-400">
               Pending
             </Badge>
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-7 gap-1 text-xs"
-            onClick={onNewOrder}
-          >
+          <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
             <Plus className="h-3 w-3" />
             New Order
           </Button>
@@ -134,7 +134,7 @@ export function PosOrderPanel({
                       ? (
                           item?.selectedProductVariaton?.price * item.quantity
                         ).toFixed(2)
-                      : (item.price * item.quantity).toFixed(2)}
+                      : (item.unitPrice * item.quantity).toFixed(2)}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
