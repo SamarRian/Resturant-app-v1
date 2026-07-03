@@ -73,7 +73,7 @@ export async function updateOrder(orderId, orderData) {
     const res = await fetch(
       `http://localhost:5000/api/orders/update/${orderId}`,
       {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

@@ -7,21 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import {
   Select,
   SelectContent,
@@ -31,24 +21,63 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useGetAllStaff } from "@/hooks/QueryHooks/Staff/useGetallStaff";
+import { useGetAllVehicals } from "@/hooks/QueryHooks/Vehical/useGetAllVehicals";
 import { usePosContext } from "@/hooks/usePosContext";
-import { Minus, Plus } from "lucide-react";
+import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 import { useState } from "react";
 
 export default function PosDeliveryDialog() {
-  const { PosDeliveryDialog, setPosDeliveryDialog, togglePosDeliveryDialog } =
-    usePosContext();
+  // CONTEXT
+  const { PosDeliveryDialog, setPosDeliveryDialog } = usePosContext();
+  const { submitOrderData } = usePosOrderContext();
 
-  const [isAddressInputOpen, setIsAddressInputOpen] = useState(false);
+  const [riderName, setRiderName] = useState("");
+  const [deliveryAddress, setdeliveryAddress] = useState("");
+  const [deliveryPhone, setdeliveryPhone] = useState(0);
+  const [vehical, setVehical] = useState("");
+  const [startDistance, setStartDistance] = useState(0);
+  const [endDistance, setEndDistance] = useState(0);
 
-  function toggleAddressInput() {
-    setIsAddressInputOpen((prev) => !prev);
+  // STATE RESETER FUNCTION
+  function resetAllStates() {
+    setRiderName("");
+    setdeliveryAddress("");
+    setdeliveryPhone(0);
+    setVehical("");
+    setStartDistance(0);
+    setEndDistance(0);
   }
 
+  // DATA FETCHING
+  const { staffData } = useGetAllStaff();
+  const { data } = useGetAllVehicals();
+  // AVAILABLE STAFF FILTERED
+  const availableStaff = staffData?.staffData.filter(
+    (staff, i) => staff.status === "Available"
+  );
+  // AVAILABLE VEHICALS FILTERED
+  const availableVehicals = data?.filter(
+    (vehical, i) => vehical.status === "Available"
+  );
+  const submitionData = {
+    riderName,
+    deliveryAddress,
+    deliveryPhone: Number(deliveryPhone),
+    vehical,
+    startDistance: Number(startDistance),
+    endDistance: Number(endDistance),
+  };
+  function handleSubmit(e) {
+    e.preventDefault();
+    submitOrderData("deliveryDetails", submitionData);
+    resetAllStates();
+    setPosDeliveryDialog(false);
+  }
   return (
     <Dialog open={PosDeliveryDialog} onOpenChange={setPosDeliveryDialog}>
-      <form>
-        <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-sm">
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-sm">
+        <form onSubmit={handleSubmit}>
           <DialogHeader className="bg-linear-to-r from-purple-500 to-purple-600 px-6 py-4">
             <DialogTitle className="text-lg font-semibold text-white">
               Configure Delivery
@@ -59,89 +88,83 @@ export default function PosDeliveryDialog() {
             <FieldGroup>
               <Field>
                 <Label htmlFor="vehical">Rider's Name</Label>
-                <Select>
+                <Select
+                  value={riderName}
+                  onValueChange={(value) => setRiderName(value)}
+                  required
+                >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select A Rider..." />
+                    <SelectValue placeholder="Select A Rider" />
                   </SelectTrigger>
                   <SelectContent className="max-h-40" position="popper">
                     <SelectGroup>
-                      <SelectLabel>Rider Name</SelectLabel>
-                      <SelectItem value="apple">Apple</SelectItem>
-                      <SelectItem value="banana">Banana</SelectItem>
-                      <SelectItem value="blueberry">Blueberry</SelectItem>
-                      <SelectItem value="grapes">Grapes</SelectItem>
-                      <SelectItem value="pineapple">Pineapple</SelectItem>
+                      <SelectLabel>Rider's Name</SelectLabel>
+                      {availableStaff?.map((staff) => (
+                        <SelectItem key={staff._id} value={staff.personName}>
+                          {staff.personName}
+                        </SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </Field>
               <Field>
                 {/* DYNAMIC ADDRESS */}
-                <Label htmlFor="customer-address">Customer Address</Label>
-                <div className="flex items-center justify-between gap-1">
-                  <ScrollArea className="h-16 w-full rounded-md border p-2">
-                    <RadioGroup defaultValue="option-one">
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value="option-one" id="option-one" />
-                        <Label htmlFor="option-one">Address 1</Label>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value="option-two" id="option-two" />
-                        <Label htmlFor="option-two">Address 2</Label>
-                      </div>
-                    </RadioGroup>
-                  </ScrollArea>
 
-                  <Button onClick={toggleAddressInput}>
-                    {isAddressInputOpen !== true ? (
-                      <Plus className="h-4 w-4" />
-                    ) : (
-                      <Minus className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <FieldLabel htmlFor="new-address">
+                  Enter Customer Address
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    type="text"
+                    required
+                    value={deliveryAddress}
+                    onChange={(e) => setdeliveryAddress(e.target.value)}
+                    id="new-address"
+                    name="newAddress"
+                    placeholder="Block, Street"
+                  />
+                </InputGroup>
               </Field>
-              {isAddressInputOpen && (
-                <Field>
-                  <FieldLabel htmlFor="new-address">
-                    Enter New Address
-                  </FieldLabel>
-                  <InputGroup>
-                    <InputGroupInput
-                      id="new-address"
-                      name="newAddress"
-                      placeholder="Search..."
-                    />
-                    <InputGroupAddon align="inline-end" className="p-0!">
-                      <Button
-                        size={"icon"}
-                        type="button"
-                        onClick={() => console.log("search clicked")}
-                        className="rounded-l-none border-0"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </InputGroupAddon>
-                  </InputGroup>
-                  <FieldDescription>
-                    Icon positioned at the start.
-                  </FieldDescription>
-                </Field>
-              )}
+
+              <Field>
+                <FieldLabel htmlFor="new-address">
+                  Enter Phone Number
+                </FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    type="number"
+                    required
+                    value={deliveryPhone}
+                    onChange={(e) => setdeliveryPhone(e.target.value)}
+                    id="new-address"
+                    name="newAddress"
+                    placeholder="+92 321"
+                  />
+                </InputGroup>
+              </Field>
+
               <Field>
                 <Label htmlFor="vehical">Vehicle Number</Label>
-                <Select>
+                <Select
+                  value={vehical}
+                  required
+                  onValueChange={(value) => setVehical(value)}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select A Vehicle Number.." />
                   </SelectTrigger>
                   <SelectContent className="max-h-40" position="popper">
                     <SelectGroup>
                       <SelectLabel>Vehicle Number</SelectLabel>
-                      <SelectItem value="apple">Apple</SelectItem>
-                      <SelectItem value="banana">Banana</SelectItem>
-                      <SelectItem value="blueberry">Blueberry</SelectItem>
-                      <SelectItem value="grapes">Grapes</SelectItem>
-                      <SelectItem value="pineapple">Pineapple</SelectItem>
+                      {availableVehicals?.map((vehical) => (
+                        <SelectItem
+                          key={vehical._id}
+                          value={vehical.vehicalNumber}
+                        >
+                          {vehical.vehicalNumber}
+                        </SelectItem>
+                      ))}
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -150,12 +173,18 @@ export default function PosDeliveryDialog() {
                 <Label htmlFor="username-1">Distance</Label>
                 <div className="flex items-center justify-between gap-1">
                   <Input
+                    required
+                    value={startDistance}
+                    onChange={(e) => setStartDistance(e.target.value)}
                     id="username-1"
                     name="startDistance"
                     placeholder="Start KM"
                     type="number"
                   />
                   <Input
+                    value={endDistance}
+                    required
+                    onChange={(e) => setEndDistance(e.target.value)}
                     name="amount"
                     id="endDistance"
                     placeholder="End KM"
@@ -173,8 +202,8 @@ export default function PosDeliveryDialog() {
               <Button type="submit">Submit</Button>
             </DialogFooter>
           </div>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

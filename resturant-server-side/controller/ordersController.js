@@ -74,43 +74,70 @@ export const updateOrder = async (req, res) => {
 
     const { id } = req.params;
 
-    const order = await PosOrder.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          orderType,
-          orderSource,
-          tableId,
-          customerId,
-          deliveryAddress,
-          deliveryPhone,
-          subTotal,
-          discountType,
-          discountValue,
-          discountAmount,
-          serviceChargeType,
-          serviceChargeValue,
-          serviceChargeAmount,
-          taxType,
-          taxMethod,
-          taxValue,
-          taxAmount,
-          totalAmount,
-          paymentMethod,
-          paymentStatus,
-          paymentNote,
-          customerNotes,
-          kitchenNotes,
-          riderWaiter,
-          covers,
-          cookingTime,
-          updatedBy: req.user._id,
-        },
-      },
-      { new: true },
-    );
+    // Base fields jo hamesha update hone chahiye
+    const setFields = {
+      orderType,
+      orderSource,
+      subTotal,
+      discountType,
+      discountValue,
+      discountAmount,
+      serviceChargeType,
+      serviceChargeValue,
+      serviceChargeAmount,
+      taxType,
+      taxMethod,
+      taxValue,
+      taxAmount,
+      totalAmount,
+      paymentMethod,
+      paymentStatus,
+      paymentNote,
+      customerNotes,
+      kitchenNotes,
+      riderWaiter,
+      covers,
+      cookingTime,
+      updatedBy: req.user._id,
+    };
 
-    return res.status(201).json({
+    const unsetFields = {};
+
+    // orderType ke hisaab se decide karo konsa data rakhna hai, konsa hatana hai
+    if (orderType === "delivery") {
+      setFields.deliveryAddress = deliveryAddress;
+      setFields.deliveryPhone = deliveryPhone;
+      unsetFields.tableId = "";
+    } else if (orderType === "dine-in") {
+      setFields.tableId = tableId;
+      unsetFields.deliveryAddress = "";
+      unsetFields.deliveryPhone = "";
+    } else if (orderType === "takeaway") {
+      unsetFields.tableId = "";
+      unsetFields.deliveryAddress = "";
+      unsetFields.deliveryPhone = "";
+    }
+
+    // customerId agar bheja gaya hai to set karo
+    if (customerId !== undefined) setFields.customerId = customerId;
+
+    const updateQuery = { $set: setFields };
+    if (Object.keys(unsetFields).length > 0) {
+      updateQuery.$unset = unsetFields;
+    }
+
+    const order = await PosOrder.findByIdAndUpdate(id, updateQuery, {
+      new: true,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
       success: true,
       message: "Order updated successfully.",
       data: order,

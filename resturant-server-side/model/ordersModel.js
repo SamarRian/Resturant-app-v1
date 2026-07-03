@@ -182,6 +182,12 @@ const posOrderSchema = new mongoose.Schema(
     },
 
     // ─── Additional Info ───────────────────────────────────────────────────────
+
+    customerId: {
+      type: String,
+      default: null,
+    },
+
     customerNotes: {
       type: String,
       default: null,

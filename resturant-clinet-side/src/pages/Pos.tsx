@@ -15,6 +15,7 @@ import PosRunningOrdersButton from "@/components/features/POS/PosRunningOrdersBu
 import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
 import { useAddOrderItems } from "@/hooks/QueryHooks/PosSession/PosOrder/useAddOrderItems";
 import { usePosOrderContext } from "@/hooks/usePosOrderContext";
+import { useUpdateOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useUpdateOrder";
 
 export default function PosPage() {
   // Pos context
@@ -27,11 +28,17 @@ export default function PosPage() {
     setStartPosSessionDialog,
   } = usePosContext();
   const { emptyOrderID } = usePosOrderContext();
+  const { orderData, submitOrderData, getPlainOrderData } =
+    usePosOrderContext();
+  console.log("ORDDER DATA", orderData);
+  // DATA FETCHING
   const { data, isLoading, isError } = useGetSingleSession(sessinId);
 
-  const { addOrderItemsFN, isOrderItemsPending } = useAddOrderItems();
+  const { updateOrderFN } = useUpdateOrder();
+
+  const { addOrderItemsFN } = useAddOrderItems();
   // ── Order state ──────────────────────────────────────────────────────────
-  const [customer, setCustomer] = useState("Walk-in Customer");
+
   const [items, setItems] = useState<OrderItem[]>([]);
 
   // ── Menu state ───────────────────────────────────────────────────────────
@@ -104,8 +111,6 @@ export default function PosPage() {
   };
 
   const handleProductClick = (product: Product) => {
-    console.log("Product clicked:", product);
-
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(product._id)) next.delete(product._id);
@@ -159,7 +164,6 @@ export default function PosPage() {
     });
   };
 
-  // ✅ Fixed useEffect - Only runs when items actually change
   useEffect(() => {
     if (!emptyOrderID) return;
 
@@ -185,6 +189,16 @@ export default function PosPage() {
 
     return () => clearTimeout(timer); // ✅ Cleanup — timer reset
   }, [items, emptyOrderID]); // ✅ addOrderItemsFN removed
+
+  useEffect(() => {
+    if (!emptyOrderID) return;
+    const plainOrderData = getPlainOrderData();
+    console.log("PLAIN ORDER DATA", plainOrderData);
+    const timer = setTimeout(() => {
+      updateOrderFN({ orderId: emptyOrderID, orderData: plainOrderData });
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [orderData, emptyOrderID]);
 
   const subtotal = items.reduce((s, it) => {
     const price = it.isVariant
@@ -212,16 +226,24 @@ export default function PosPage() {
         : (subtotal * calculatePosTax.amount) / 100 // exclusive
       : calculatePosTax.amount || 0; // fixed
   const total = subtotal + service + tax - discount;
+
+  useEffect(() => {
+    submitOrderData("subTotal", subtotal);
+    submitOrderData("discountAmount", discount);
+    submitOrderData("serviceChargeAmount", service);
+    submitOrderData("taxAmount", tax);
+    submitOrderData("totalAmount", total);
+  }, [subtotal, discount, service, tax, total]);
+
   // ── Render ────────────────────────────────────────────────────────────────
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <PosHeader balance={0} sales={subtotal} orders={items.length} />
 
       <main className="flex min-h-0 flex-1 gap-2 p-2">
         <PosOrderPanel
-          customer={customer}
           items={items}
-          onCustomerChange={setCustomer}
           onQtyChange={handleQtyChange}
           onRemove={handleRemove}
           onNewOrder={handleNewOrder}
@@ -229,9 +251,7 @@ export default function PosPage() {
 
         <PosMenuPanel
           items={items}
-          customer={customer}
           selectedIds={selectedIds}
-          onCustomerChange={setCustomer}
           onProductClick={handleProductClick}
           setItems={setItems}
           subtotal={subtotal}

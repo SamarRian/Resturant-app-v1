@@ -30,8 +30,6 @@ export const addOrderItems = async (req, res) => {
   try {
     const { orderId, items } = req.body;
 
-    console.log("📥 REQUESTED DATA:", JSON.stringify(req.body, null, 2));
-
     // ✅ Validate input
     if (!orderId) {
       return res.status(400).json({
@@ -49,7 +47,6 @@ export const addOrderItems = async (req, res) => {
 
     // ✅ Order exist karta hai?
     const order = await PosOrder.findById(orderId);
-    console.log("📋 ORDER FOUND:", order);
 
     if (!order) {
       return res.status(404).json({
@@ -67,9 +64,8 @@ export const addOrderItems = async (req, res) => {
     }
 
     // ✅ 🔥 STEP 1: DELETE ALL existing order items
-    console.log(`🗑️ Deleting all existing items for order: ${orderId}`);
+
     const deleteResult = await OrderItem.deleteMany({ orderId: orderId });
-    console.log(`✅ Deleted ${deleteResult.deletedCount} items`);
 
     // ✅ 🔥 STEP 2: CREATE new order items
     const orderItemsToSave = [];
@@ -88,14 +84,6 @@ export const addOrderItems = async (req, res) => {
         selectedProductVariaton,
         isCustom = false,
       } = item;
-
-      console.log(`📦 Processing item: ${name}`, {
-        productId,
-        unitPrice,
-        quantity,
-        isVariant,
-        variantId: selectedProductVariaton?._id || null,
-      });
 
       // ✅ Validate required fields
       if (!productId && !isCustom) {
@@ -160,37 +148,14 @@ export const addOrderItems = async (req, res) => {
       orderItemsToSave.push(orderItemData);
     }
 
-    console.log(`📦 Saving ${orderItemsToSave.length} new items`);
-
     // ✅ 🔥 STEP 3: Insert all new items
     const savedItems = await OrderItem.insertMany(orderItemsToSave);
     console.log(`✅ Saved ${savedItems.length} items`);
-
-    // ✅ 🔥 STEP 4: Update order with new items
-    const updatedOrder = await PosOrder.findByIdAndUpdate(
-      orderId,
-      {
-        $set: {
-          subTotal: totalAmount,
-          totalAmount: totalAmount,
-          orderItems: savedItems.map((item) => item._id), // ✅ Replace entire array
-        },
-      },
-      { new: true },
-    );
-
-    console.log("✅ Updated order:", {
-      orderId: updatedOrder._id,
-      subTotal: updatedOrder.subTotal,
-      totalAmount: updatedOrder.totalAmount,
-      itemCount: updatedOrder.orderItems?.length || 0,
-    });
 
     return res.status(201).json({
       success: true,
       message: "Order items replaced successfully.",
       data: savedItems,
-      order: updatedOrder,
     });
   } catch (error) {
     console.error("❌ Error in addOrderItems:", error);
@@ -201,78 +166,6 @@ export const addOrderItems = async (req, res) => {
     });
   }
 };
-
-// ─── Add Custom Item (jo product list mein nahi) ──────────────────────────────
-// export const addOrderItems = async (req, res) => {
-//   try {
-//     const { orderId, items } = req.body;
-
-//     const order = await PosOrder.findById(orderId);
-
-//     if (!order) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Order not found." });
-//     }
-
-//     if (["cancelled", "completed"].includes(order.orderStatus)) {
-//       return res.status(400).json({
-//         success: false,
-//         message: `Order ${order.orderStatus}, items cannot be added`,
-//       });
-//     }
-
-//     const orderItems = [];
-//     let totalAmount = 0;
-
-//     for (const item of items) {
-//       const {
-//         _id: productId,
-//         productName,
-//         productType,
-//         variations,
-//         addons,
-//         unitPrice,
-//         quantity,
-//         specialInstructions,
-//         isCustom,
-//       } = item;
-
-//       const totalPrice = unitPrice * quantity;
-//       totalAmount += totalPrice;
-
-//       orderItems.push({
-//         orderId,
-//         productId,
-//         productName,
-//         productType,
-//         variations,
-//         unitPrice,
-//         quantity,
-//         totalPrice,
-//         specialInstructions,
-//         isCustom,
-//       });
-//     }
-
-//     const savedItems = await OrderItem.insertMany(orderItems);
-
-//     await PosOrder.findByIdAndUpdate(orderId, {
-//       $inc: {
-//         subTotal: totalAmount,
-//         totalAmount: totalAmount,
-//       },
-//     });
-
-//     return res.status(201).json({
-//       success: true,
-//       message: "Items added to order successfully.",
-//       data: savedItems,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({ success: false, message: error.message });
-//   }
-// };
 
 export const addCustomItem = async (req, res) => {
   try {

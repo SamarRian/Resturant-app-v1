@@ -6,7 +6,6 @@ export async function getAllStaff() {
     if (!res.ok) {
       throw new Error(data.message || "Failed to fetch staff");
     }
-    console.log("STAFF SERVICES LOGS", data);
 
     return data;
   } catch (error) {

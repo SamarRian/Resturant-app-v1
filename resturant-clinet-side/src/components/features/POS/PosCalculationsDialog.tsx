@@ -27,6 +27,7 @@ import {
 import { usePosContext } from "@/hooks/usePosContext";
 import { PosTaxTabs } from "./PosTaxTabs";
 import { useState } from "react";
+import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 
 function CalculationForm({
   calculationType,
@@ -149,6 +150,8 @@ export function PosCalculationsDialog() {
     setCalculatePosTax,
   } = usePosContext();
 
+  const { submitOrderData } = usePosOrderContext();
+
   // ✅ Current type ki already saved values — dialog open hone pe pre-fill hongi
   const initialValues =
     calculationType === "Discount"
@@ -158,12 +161,15 @@ export function PosCalculationsDialog() {
         : calculatePosTax;
 
   function handleSubmit(localValues) {
-    // ✅ Sirf us type ka data update hoga — baaki types untouched
+    //  Sirf us type ka data update hoga — baaki types untouched
     if (calculationType === "Discount") {
+      submitOrderData("discountDetails", localValues);
       setCalculatePosDiscount(localValues);
     } else if (calculationType === "Service") {
+      submitOrderData("serviceDetails", localValues);
       setCalculatePosService(localValues);
     } else if (calculationType === "Tax") {
+      submitOrderData("taxDetails", localValues);
       setCalculatePosTax(localValues);
     }
     setPosCalculationDialog(false);

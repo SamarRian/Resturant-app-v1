@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   ChevronLeft,
@@ -27,6 +27,7 @@ import { EndPosSessionDialog } from "./PosEndSessionDialog";
 import PosRunningOrdersDialog from "./PosRunningOrdersDialog";
 import PosSessionReportDialog from "./PosSessionRepostDialog";
 import PosSelectTableDialog from "./PosSelectTableDialog";
+import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 
 interface PosMenuPanelProps {
   customer: string;
@@ -36,9 +37,8 @@ interface PosMenuPanelProps {
 }
 
 export function PosMenuPanel({
-  customer,
   selectedIds,
-  onCustomerChange,
+
   onProductClick,
   setItems,
   items,
@@ -65,6 +65,9 @@ export function PosMenuPanel({
     togglePosProductDialog,
     togglePosCustomerDetailDialog,
   } = usePosContext();
+
+  const { submitOrderData } = usePosOrderContext();
+
   // DATA RENAMING
   const renamedDealData = dealsData?.map((deal, index) => {
     return {
@@ -90,6 +93,7 @@ export function PosMenuPanel({
 
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
+  const [customer, setCustomer] = useState("Walk-in Customer");
 
   const [customDialogOpen, setCustomDialog] = useState(false);
   const filteredProducts = combinedData?.filter((p) => {
@@ -103,8 +107,6 @@ export function PosMenuPanel({
   }
 
   function checkCurrentProduct(product) {
-    // console.log("CHECK CURRENT PRODUCT LOGS", product);
-
     if (product.isDeal === true) {
       handleCurrentDealProduct(product);
       togglePosDealDialog();
@@ -115,7 +117,12 @@ export function PosMenuPanel({
       onProductClick(product);
     }
   }
-
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      submitOrderData("customerId", customer);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [customer]);
   return (
     <div className="flex-col overflow-hidden rounded-xl border border-border bg-card md:flex md:flex-1">
       {/* ── Category pills (horizontally scrollable) ── */}
@@ -153,7 +160,7 @@ export function PosMenuPanel({
         <div className="relative min-w-40 flex-1">
           <Input
             value={customer}
-            onChange={(e) => onCustomerChange(e.target.value)}
+            onChange={(e) => setCustomer(e.target.value)}
             className="h-8 pr-8 text-sm"
             placeholder="Walk-in Customer"
           />

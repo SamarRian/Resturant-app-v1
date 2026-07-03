@@ -8,6 +8,7 @@ import { usePosContext } from "@/hooks/usePosContext";
 import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 import { useGetSingleOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGetSingleOrder";
 import { Spinner } from "@/components/ui/spinner";
+import { useEffect } from "react";
 
 interface PosOrderPanelProps {
   orderNo: number;
@@ -28,10 +29,15 @@ export function PosOrderPanel({
 }: PosOrderPanelProps) {
   const { togglePosSelectTableDialog, orderType, setOrderType } =
     usePosContext();
+  const { submitOrderData } = usePosOrderContext();
   const { emptyOrderID } = usePosOrderContext();
   const { data } = useGetSingleOrder(emptyOrderID);
 
   const orderData = data ? data.data : {};
+
+  useEffect(() => {
+    submitOrderData("orderType", orderType);
+  }, [orderType]);
 
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-xl border border-border bg-card md:w-85 md:shrink-0 lg:w-95">

@@ -5,7 +5,7 @@ export async function getAllVehicals() {
     if (!res.ok) {
       throw new Error(data.message || "Failed to get vehical");
     }
-    console.log("GET ALL VEHICAL", data.data);
+
     return data?.data;
   } catch (error) {
     console.error("getVehical Error error:", error.message);

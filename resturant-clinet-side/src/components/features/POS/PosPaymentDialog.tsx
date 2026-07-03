@@ -85,196 +85,211 @@ export default function PosPaymentDialog({
         id="payment-print"
         className="max-w-4xl gap-0 overflow-hidden border-0 p-0"
       >
-        {/* Header */}
-        <DialogHeader className="flex flex-row items-center justify-between bg-linear-to-r from-green-500 to-green-600 px-6 py-2">
-          <DialogTitle className="flex items-center gap-2 text-xl font-bold text-white">
-            <CreditCard className="h-5 w-5" />
-            Complete Payment
-          </DialogTitle>
-        </DialogHeader>
+        <form>
+          {/* Header */}
+          <DialogHeader className="flex flex-row items-center justify-between bg-linear-to-r from-green-500 to-green-600 px-6 py-2">
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold text-white">
+              <CreditCard className="h-5 w-5" />
+              Complete Payment
+            </DialogTitle>
+          </DialogHeader>
 
-        {/* Body */}
-        <div className="grid gap-4 bg-muted/20 p-4 lg:grid-cols-[1fr_320px]">
-          {/* LEFT SIDE */}
-          <Card className="shadow-sm">
-            <CardHeader className="border-b px-5 py-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                <CreditCard className="h-4 w-4" />
-                Payment Method
-              </CardTitle>
-            </CardHeader>
+          {/* Body */}
+          <div className="grid gap-4 bg-muted/20 p-4 lg:grid-cols-[1fr_320px]">
+            {/* LEFT SIDE */}
+            <Card className="shadow-sm">
+              <CardHeader className="border-b px-5 py-2">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                  <CreditCard className="h-4 w-4" />
+                  Payment Method
+                </CardTitle>
+              </CardHeader>
 
-            <CardContent className="space-y-5 p-2">
-              {/* Tabs */}
-              <Tabs
-                defaultValue="cash"
-                className="w-full"
-                value={paymentTab}
-                onValueChange={setPaymentTab}
-              >
-                <TabsList className="w-full">
-                  <TabsTrigger
-                    value="cash"
-                    className="p-4 font-semibold data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
-                  >
-                    <span>PKR</span>
-                    Cash
-                  </TabsTrigger>
+              <CardContent className="space-y-5 p-2">
+                {/* Tabs */}
+                <Tabs
+                  defaultValue="cash"
+                  className="w-full"
+                  value={paymentTab}
+                  onValueChange={setPaymentTab}
+                >
+                  <TabsList className="w-full">
+                    <TabsTrigger
+                      value="cash"
+                      className="p-4 font-semibold data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+                    >
+                      <span>PKR</span>
+                      Cash
+                    </TabsTrigger>
 
-                  <TabsTrigger
-                    value="online"
-                    className="p-4 font-semibold data-[state=active]:bg-sky-500 data-[state=active]:text-white"
-                  >
-                    <Smartphone className="h-4 w-4" />
-                    Online
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+                    <TabsTrigger
+                      value="online"
+                      className="p-4 font-semibold data-[state=active]:bg-sky-500 data-[state=active]:text-white"
+                    >
+                      <Smartphone className="h-4 w-4" />
+                      Online
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
 
-              {/* Amount */}
-              <FieldGroup>
-                {paymentTab === "online" ? (
-                  <>
-                    <FieldLabel className="font-semibold">
-                      Pyayment Refference
-                    </FieldLabel>
+                {/* Amount */}
 
-                    <InputGroup className="flex overflow-hidden rounded-md border bg-background">
-                      <InputGroupInput
-                        type="text"
-                        placeholder="JazzCash or EasyPaisa"
-                        className="border-0 shadow-none focus-visible:ring-0"
-                      />
+                <FieldGroup>
+                  {paymentTab === "online" ? (
+                    <div key="online-payment">
+                      <FieldLabel className="font-semibold">
+                        Payment Refference
+                      </FieldLabel>
 
-                      <InputGroupAddon className="flex items-center border-r bg-muted px-4 text-green-600">
-                        <ReceiptText className="h-4 w-4" />
-                      </InputGroupAddon>
-                    </InputGroup>
-                  </>
-                ) : (
-                  <>
-                    <FieldLabel className="font-semibold">
-                      Amount Received
-                    </FieldLabel>
+                      <InputGroup className="flex overflow-hidden rounded-md border bg-background">
+                        <InputGroupInput
+                          type="text"
+                          name="paymentReference"
+                          id="payment-reference"
+                          placeholder="JazzCash or EasyPaisa"
+                          className="border-0 shadow-none focus-visible:ring-0"
+                        />
 
-                    <InputGroup className="flex overflow-hidden rounded-md border bg-background">
-                      <InputGroupInput
-                        type="number"
-                        defaultValue={subtotal}
-                        value={amountPaid}
-                        onChange={(e) => setAmountPaid(Number(e.target.value))}
-                        placeholder="2431.55"
-                        className="border-0 shadow-none focus-visible:ring-0"
-                      />
+                        <InputGroupAddon className="flex items-center border-r bg-muted px-4 text-green-600">
+                          <ReceiptText className="h-4 w-4" />
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </div>
+                  ) : (
+                    <div key="cash-payment">
+                      <FieldLabel className="font-semibold">
+                        Amount Received
+                      </FieldLabel>
 
-                      <InputGroupAddon className="flex items-center border-r bg-muted px-4 text-green-600">
-                        <span>PKR</span>
-                      </InputGroupAddon>
-                    </InputGroup>
-                  </>
-                )}
-              </FieldGroup>
+                      <InputGroup className="flex overflow-hidden rounded-md border bg-background">
+                        <InputGroupInput
+                          type="number"
+                          name="amountReceived"
+                          id="amount-received"
+                          defaultValue={total}
+                          value={amountPaid}
+                          onChange={(e) =>
+                            setAmountPaid(Number(e.target.value))
+                          }
+                          placeholder="2431.55"
+                          className="border-0 shadow-none focus-visible:ring-0"
+                        />
 
-              {/* Notes */}
-              <div className="space-y-2">
-                <Label className="font-semibold">Payment Note</Label>
+                        <InputGroupAddon className="flex items-center border-r bg-muted px-4 text-green-600">
+                          <span>PKR</span>
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </div>
+                  )}
+                </FieldGroup>
 
-                <Textarea
-                  placeholder="Optional notes..."
-                  className="min-h-27.5 resize-none"
-                />
-              </div>
-            </CardContent>
-          </Card>
+                {/* Notes */}
+                <div className="space-y-2">
+                  <Label className="font-semibold">Payment Note</Label>
 
-          {/* RIGHT SIDE */}
-          <Card className="shadow-sm">
-            <CardHeader className="border-b px-5 py-4">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                <ReceiptText className="h-4 w-4" />
-                Order Summary
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="space-y-5 p-5">
-              {/* Summary */}
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Subtotal:</span>
-
-                  <span className="font-semibold">{subtotal}</span>
+                  <Textarea
+                    placeholder="Optional notes..."
+                    className="min-h-27.5 resize-none"
+                  />
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Discount:</span>
+            {/* RIGHT SIDE */}
+            <Card className="shadow-sm">
+              <CardHeader className="border-b px-5 py-4">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                  <ReceiptText className="h-4 w-4" />
+                  Order Summary
+                </CardTitle>
+              </CardHeader>
 
-                  <span className="font-semibold text-red-500">{discount}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Service Charge:</span>
-
-                  <span className="font-semibold">{service}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Tax:</span>
-
-                  <span className="font-semibold">{tax}</span>
-                </div>
-
-                <div className="border-t pt-4">
+              <CardContent className="space-y-5 p-5">
+                {/* Summary */}
+                <div className="space-y-3 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-base font-bold">Total Payable:</span>
+                    <span className="text-muted-foreground">Subtotal:</span>
 
-                    <span className="text-xl font-bold text-green-600">
-                      {total}
+                    <span className="font-semibold">{subtotal}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Discount:</span>
+
+                    <span className="font-semibold text-red-500">
+                      {discount}
                     </span>
                   </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      Service Charge:
+                    </span>
+
+                    <span className="font-semibold">{service}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Tax:</span>
+
+                    <span className="font-semibold">{tax}</span>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-base font-bold">
+                        Total Payable:
+                      </span>
+
+                      <span className="text-xl font-bold text-green-600">
+                        {total}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Bottom Summary Box */}
-              <div className="space-y-3 rounded-lg bg-muted/50 p-4 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Amount Paid:</span>
+                {/* Bottom Summary Box */}
+                <div className="space-y-3 rounded-lg bg-muted/50 p-4 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Amount Paid:</span>
 
-                  <span className="font-bold">
-                    {amountPaid ? amountPaid : 0}
-                  </span>
+                    <span className="font-bold">
+                      {amountPaid ? amountPaid : 0}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Balance Due:</span>
+
+                    <span className="font-bold text-red-500">{balanceDue}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Change:</span>
+
+                    <span className="font-bold text-green-600">{change}</span>
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Balance Due:</span>
+          <DialogFooter className="mb-2 px-8">
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
 
-                  <span className="font-bold text-red-500">{balanceDue}</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Change:</span>
-
-                  <span className="font-bold text-green-600">{change}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <DialogFooter className="mb-2 px-8">
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-
-          <Button
-            className="bg-cyan-500 hover:bg-cyan-600"
-            onClick={() => {
-              PosPaymentPrint(dummyData);
-            }}
-          >
-            <CreditCard className="h-4 w-4" />
-            Complete Payment
-          </Button>
-        </DialogFooter>
+            <Button
+              className="bg-cyan-500 hover:bg-cyan-600"
+              onClick={() => {
+                PosPaymentPrint(dummyData);
+              }}
+            >
+              <CreditCard className="h-4 w-4" />
+              Complete Payment
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
