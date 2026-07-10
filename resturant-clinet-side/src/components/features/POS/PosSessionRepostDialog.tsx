@@ -492,6 +492,7 @@ function PosSessionReportDialog() {
                 variant={"outline"}
                 onClick={() => {
                   localStorage.removeItem("sessionId");
+                  localStorage.removeItem("emptyOrderID");
                   setStartPosSessionDialog(true);
                 }}
               >

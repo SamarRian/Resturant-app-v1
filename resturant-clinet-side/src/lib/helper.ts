@@ -1,3 +1,5 @@
+import { useGetSingleDeal } from "@/hooks/QueryHooks/Deals/useGetSingleDeal";
+
 // types
 interface OrderItem {
   name: string;
@@ -30,56 +32,97 @@ interface PrintData {
   paymentStatus: string;
 }
 
-export const PosPaymentPrint = (data: PrintData) => {
+export async function PosPaymentPrint(data: PrintData) {
   const printWindow = window.open("", "_blank", "width=400,height=700");
 
   const itemsHTML = data.items
-    .map(
-      (item) => `
+    .map((item) => {
+      const variants = item.selectedProductVariaton ?? [];
+
+      let variantHTML = "";
+
+      if (item.isDeal) {
+        // ✅ Deal ke andar jitne bhi products/variants included hain, sab list kro
+        const includedNames = variants
+          .map((v) => (v.variantName ? `${v.name}: ${v.variantName}` : v.name))
+          .filter(Boolean)
+          .join(", ");
+
+        variantHTML = includedNames
+          ? `<br/><span class="variant">${includedNames}</span>`
+          : "";
+      } else {
+        // ✅ Normal item ka variant naam (agar select hua ho)
+        const variantNames = variants
+          .map((v) => v.variantName)
+          .filter(Boolean)
+          .join(", ");
+
+        variantHTML = variantNames
+          ? `<br/><span class="variant">${variantNames}</span>`
+          : "";
+      }
+
+      return `
       <tr>
         <td class="item-name">
-          <strong>${item.name}</strong>
-          ${item.variant ? `<br/><span class="variant">${item.variant}</span>` : ""}
+          <strong>${item.productName}</strong>
+          ${variantHTML}
         </td>
-        <td class="center">${item.qty}</td>
-        <td class="right">${item.price}</td>
-        <td class="right">${item.total}</td>
+        <td class="center">${item.quantity}</td>
+        <td class="right">${item.unitPrice}</td>
+        <td class="right">${item.totalPrice}</td>
       </tr>
-    `
-    )
+    `;
+    })
     .join("");
+
+  const discountRow =
+    data.discountAmount && data.discountAmount > 0
+      ? `<div class="row total-row"><span>DISCOUNT:</span><span>${data.discountAmount.toFixed(2)}</span></div>`
+      : "";
+
+  const serviceChargeRow =
+    data.serviceChargeAmount && data.serviceChargeAmount > 0
+      ? `<div class="row total-row"><span>SERVICE CHARGE:</span><span>${data.serviceChargeAmount.toFixed(2)}</span></div>`
+      : "";
+
+  const taxRow =
+    data.taxAmount && data.taxAmount > 0
+      ? `<div class="row total-row"><span>TAX:</span><span>${data.taxAmount.toFixed(2)}</span></div>`
+      : "";
 
   printWindow?.document.write(`
     <!DOCTYPE html>
     <html>
-      <head>
+    <head>
         <title>${data.restaurantName} - Invoice</title>
         <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          
-          body {
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
             font-family: 'Courier New', monospace;
             font-size: 13px;
             width: 300px;
             margin: 0 auto;
             padding: 16px 8px;
             color: #000;
-          }
-
+            }
+            
           .center { text-align: center; font-weight: bold
-           }
+          }
           .right   { text-align: right; font-weight: bold }
           .bold    { font-weight: bold;}
 
           .header { text-align: center; margin-bottom: 8px; }
           .header h1 { font-size: 18px; font-weight: bold; }
           .header p  { font-size: 12px; margin-top: 2px; }
-
+          
           .divider {
             border-top: 1px dashed #000;
             margin: 8px 0;
           }
-
+          
           .info-grid {
             display: grid;
             grid-template-columns: auto 1fr;
@@ -88,74 +131,78 @@ export const PosPaymentPrint = (data: PrintData) => {
             font-size: 12px;
           }
           .info-grid .label { font-weight: bold; }
-
+          
           .date-row {
             display: flex;
             justify-content: space-between;
             font-size: 12px;
             margin: 4px 0;
-          }
-
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 4px 0;
-            font-size: 12px;
-          }
-          thead tr th {
+            }
+            
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 4px 0;
+              font-size: 12px;
+              table-layout: fixed;
+              }
+              thead tr th {
             font-weight: bold;
-            padding: 3px 0;
+            padding: 3px 4px;
             border-bottom: 1px dashed #000;
-          }
-          thead th:first-child { text-align: left; }
-          thead th { text-align: center; }
-          thead th:last-child { text-align: right; }
-
-          tbody tr td { padding: 4px 0; }
-          .item-name { text-align: left; }
-          .variant { font-size: 11px; color: #444; }
-
-          tbody tr + tr { border-top: 1px dotted #ccc; }
-
-          .totals { margin-top: 4px; }
+            }
+            thead th:first-child { text-align: left; width: 46%; }
+            thead th:nth-child(2) { text-align: center; width: 16%; }
+            thead th:nth-child(3) { text-align: right; width: 19%; }
+            thead th:last-child { text-align: right; width: 19%; }
+            
+            tbody tr td { padding: 4px; }
+            tbody tr td:first-child { padding-left: 0; }
+            tbody tr td:last-child { padding-right: 0; }
+            .item-name { text-align: left; word-wrap: break-word; }
+            .variant { font-size: 11px; color: #444; }
+            
+            tbody tr + tr { border-top: 1px dotted #ccc; }
+            
+            .totals { margin-top: 4px; }
           .totals .row {
             display: flex;
             justify-content: space-between;
             padding: 3px 0;
             font-size: 13px;
-          }
-          .totals .row.total-row {
-            font-weight: bold;
-            font-size: 15px;
-            border-top: 1px dashed #000;
-            border-bottom: 1px dashed #000;
-            padding: 5px 0;
-          }
-
-          .payment-section { margin-top: 6px; font-size: 12px; }
-          .payment-section .row {
-            display: flex;
-            justify-content: space-between;
-            padding: 2px 0;
-          }
-
-          .footer {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 11px;
-            color: #555;
-          }
-
-          @media print {
-            body { padding: 0; }
-          }
-        </style>
-      </head>
-      <body>
-
-        <!-- Header -->
-        <div class="header">
-          <h1>${data.restaurantName}</h1>
+            }
+            .totals .row.total-row {
+              font-weight: bold;
+              font-size: 15px;
+              border-top: 1px dashed #000;
+              border-bottom: 1px dashed #000;
+              padding: 5px 0;
+              }
+              
+              .payment-section { margin-top: 6px; font-size: 12px; }
+              .payment-section .row {
+                display: flex;
+                justify-content: space-between;
+                padding: 2px 0;
+                }
+                
+                .footer {
+                  text-align: center;
+                  margin-top: 12px;
+                  font-size: 11px;
+                  color: #555;
+                  }
+                  
+                  @media print {
+                    body { padding: 0; }
+                    }
+                    </style>
+                    </head>
+                    <body>
+                    
+                    <!-- Header -->
+                    <div class="header">
+                    <h1>${data.restaurantName}</h1>
           <p>${data.address}</p>
           <p>Tel: ${data.phone}</p>
         </div>
@@ -163,71 +210,72 @@ export const PosPaymentPrint = (data: PrintData) => {
         <div class="divider"></div>
         <p class="center bold" style="font-size:15px;">SALES INVOICE</p>
         <div class="divider"></div>
-
+        
         <!-- Customer Info -->
         <div class="info-grid">
-          <span class="label">Customer:</span> <span>${data.customer}</span>
+          <span class="label">Customer:</span> <span>${data.customerId}</span>
           <span class="label">Phone:</span>    <span>${data.customerPhone}</span>
           <span class="label">Address:</span>  <span></span>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <!-- Date & Type -->
+          <div class="date-row">
+          <div><strong>Date:</strong><br/>${data.orderDate}</div>
+          <div style="text-align:right"><strong>Type:</strong><br/>${data.orderType}</div>
         </div>
-
+        
         <div class="divider"></div>
-
-        <!-- Date & Type -->
-        <div class="date-row">
-          <div><strong>Date:</strong><br/>${data.date}</div>
-          <div style="text-align:right"><strong>Type:</strong><br/>${data.type}</div>
-        </div>
-
-        <div class="divider"></div>
-
+        
         <!-- Items Table -->
         <table>
-          <thead>
-            <tr>
-              <th>Item</th>
+        <thead>
+        <tr>
+        <th>Item</th>
               <th class="center">Qty</th>
               <th class="right">Price</th>
               <th class="right">Total</th>
-            </tr>
-          </thead>
-          <tbody>${itemsHTML}</tbody>
-        </table>
+              </tr>
+              </thead>
+              <tbody>${itemsHTML}</tbody>
+              </table>
+              
+              <div class="divider"></div>
+              
+              <div class="totals">
+              <div class="row"><span>Subtotal:</span><span>${(data.subTotal ?? 0).toFixed(2)}</span></div>
+              ${discountRow}
+              ${serviceChargeRow}
+              ${taxRow}
+              <div class="row total-row"><span>TOTAL:</span><span>${(data.totalAmount ?? 0).toFixed(2)}</span></div>
+                    <div class="row"><span>PAID:</span><span>${(data.paidAmount ?? 0).toFixed(2)}</span></div>
+                    </div>
 
-        <div class="divider"></div>
+                    <div class="divider"></div>
 
-        <!-- Totals -->
-        <div class="totals">
-          <div class="row"><span>Subtotal:</span><span>${data.subtotal}</span></div>
-          <div class="row total-row"><span>TOTAL:</span><span>${data.total}</span></div>
-          <div class="row"><span>PAID:</span><span>${data.paid}</span></div>
-        </div>
+                    <!-- Payment Info -->
+                    <div class="payment-section">
+                    <div class="row"><strong>Payment Method:</strong> <span>${data.paymentMethod}</span></div>
+                    <div class="row"><strong>Payment Status:</strong> <span>${data.paymentStatus}</span></div>
+                    </div>
 
-        <div class="divider"></div>
-
-        <!-- Payment Info -->
-        <div class="payment-section">
-          <div class="row"><strong>Payment Method:</strong> <span>${data.paymentMethod}</span></div>
-          <div class="row"><strong>Payment Status:</strong> <span>${data.paymentStatus}</span></div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- Footer -->
-        <div class="footer">
-          <p>Software Developed by: Devpeller - Software Solutions</p>
-          <p>Mobile: 0336-6667686</p>
-        </div>
-
-      </body>
-    </html>
-  `);
+                    <div class="divider"></div>
+                    
+                    <!-- Footer -->
+                    <div class="footer">
+                    <p>Software Developed by: Devpeller - Software Solutions</p>
+                    <p>Mobile: 0336-6667686</p>
+                    </div>
+                    
+                    </body>
+                    </html>
+                    `);
 
   printWindow?.document.close();
   printWindow?.focus();
   printWindow?.print();
-};
-
+}
 export interface KotItem {
   name: string;
   variant?: string;

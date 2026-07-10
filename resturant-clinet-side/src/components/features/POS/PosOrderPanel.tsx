@@ -7,8 +7,9 @@ import type { OrderItem, OrderType } from "../../../../DevData/Types/Postypes";
 import { usePosContext } from "@/hooks/usePosContext";
 import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 import { useGetSingleOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGetSingleOrder";
-import { Spinner } from "@/components/ui/spinner";
 import { useEffect } from "react";
+import { useGenerateEmptyOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGenerateEmptyOrder";
+import { toast } from "sonner";
 
 interface PosOrderPanelProps {
   orderNo: number;
@@ -26,18 +27,48 @@ export function PosOrderPanel({
   items,
   onQtyChange,
   onRemove,
+  setItems,
 }: PosOrderPanelProps) {
   const { togglePosSelectTableDialog, orderType, setOrderType } =
     usePosContext();
-  const { submitOrderData } = usePosOrderContext();
-  const { emptyOrderID } = usePosOrderContext();
-  const { data } = useGetSingleOrder(emptyOrderID);
+  const {
+    emptyOrderID,
+    handleEmptyOrderID,
+    submitOrderData,
+    viewedOrderId,
+    handleViewedOrderId,
+  } = usePosOrderContext();
+  // MODE VIEW OR REGULAR
+  const viewMode = viewedOrderId ? true : false;
+  const { generateEmptyOrderFN } = useGenerateEmptyOrder();
+  const { data } = useGetSingleOrder(viewMode ? viewedOrderId : emptyOrderID);
 
   const orderData = data ? data.data : {};
+
+  console.log("ITEMS DATA", items);
+  console.log("ORDER DATA", orderData);
+  const mapData = viewMode
+    ? [...(orderData.items ?? []), ...(items ?? [])]
+    : (items ?? []);
+  console.log("MAP DATA", mapData);
 
   useEffect(() => {
     submitOrderData("orderType", orderType);
   }, [orderType]);
+
+  function handleGenerateEmptyOrder() {
+    if (items.length > 0) {
+      handleViewedOrderId("");
+      generateEmptyOrderFN(undefined, {
+        onSuccess: (data) => {
+          handleEmptyOrderID(data?.order?._id || "");
+          setItems([]);
+        },
+      });
+    } else {
+      toast.warning(`First fill the Order # ${orderData.orderNumber}`);
+    }
+  }
 
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-xl border border-border bg-card md:w-85 md:shrink-0 lg:w-95">
@@ -49,10 +80,15 @@ export function PosOrderPanel({
               Order #: {orderData.orderNumber}
             </span>
             <Badge className="bg-amber-400 text-[10px] text-amber-950 hover:bg-amber-400">
-              Pending
+              {orderData.orderStatus}
             </Badge>
           </div>
-          <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1 text-xs"
+            onClick={handleGenerateEmptyOrder}
+          >
             <Plus className="h-3 w-3" />
             New Order
           </Button>
@@ -102,25 +138,22 @@ export function PosOrderPanel({
       </div>
 
       {/* ── Scrollable order items ── */}
-
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-2 p-3">
-          {items.length === 0 ? (
+          {mapData?.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-16 text-center">
               <UtensilsCrossed className="h-8 w-8 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">No items yet</p>
             </div>
           ) : (
-            items.map((item) => (
+            mapData?.map((item) => (
               <div
-                key={item._id}
+                key={item.productId}
                 className="flex items-start gap-2 rounded-lg border border-border bg-background p-2.5 transition-shadow hover:shadow-sm"
               >
                 {/* Item info */}
                 <div className="min-w-0 flex-1">
                   <p className="text-xs leading-tight font-semibold text-foreground">
-                    {/* {item.name} */}
-
                     {item?.selectedProductVariaton?.variantName
                       ? `${item.name} variant ${item?.selectedProductVariaton?.variantName}`
                       : item.name}
@@ -146,7 +179,7 @@ export function PosOrderPanel({
                     <button
                       onClick={() =>
                         onQtyChange(
-                          item._id,
+                          item.productId,
                           -1,
                           item.selectedProductVariaton?._id
                         )
@@ -161,7 +194,7 @@ export function PosOrderPanel({
                     <button
                       onClick={() =>
                         onQtyChange(
-                          item._id,
+                          item.productId,
                           1,
                           item.selectedProductVariaton?._id
                         )
@@ -172,7 +205,10 @@ export function PosOrderPanel({
                     </button>
                     <button
                       onClick={() =>
-                        onRemove(item._id, item.selectedProductVariaton?._id)
+                        onRemove(
+                          item.productId,
+                          item.selectedProductVariaton?._id
+                        )
                       }
                       className="ml-0.5 flex h-5 w-5 items-center justify-center rounded border border-destructive/40 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
                     >

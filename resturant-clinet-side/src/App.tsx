@@ -55,7 +55,7 @@ export function App() {
               </Routes>
             </BrowserRouter>
 
-            <Toaster />
+            <Toaster position="top-right" />
             <ReactQueryDevtools initialIsOpen={false} />
           </FormSwitcherProvider>
         </PosProvider>

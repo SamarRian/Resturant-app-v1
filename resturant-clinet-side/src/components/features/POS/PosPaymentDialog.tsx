@@ -25,8 +25,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PosPaymentPrint } from "@/lib/helper";
+import { useOrderPayment } from "@/hooks/QueryHooks/PosSession/PosOrder/useOrderPayment";
+import { usePosOrderContext } from "@/hooks/usePosOrderContext";
+import { toast } from "sonner";
 
 // BILL PRINT STATIC DATA
 const dummyData: PrintData = {
@@ -69,23 +72,67 @@ export default function PosPaymentDialog({
   service,
   tax,
   total,
+  items,
 }) {
   const { isPosPaymentDialog, setPosPaymentDialog, paymentTab, setPaymentTab } =
     usePosContext();
+  const { emptyOrderID } = usePosOrderContext();
 
-  const [amountPaid, setAmountPaid] = useState();
+  const [amountPaid, setAmountPaid] = useState(total);
+  const [paymentNote, setPaymentNote] = useState("");
+  const [transactionReference, setTransactionReferences] = useState("");
 
-  const change = amountPaid ? amountPaid - subtotal : 0;
+  // calculation of change and balance due
+  const change = amountPaid ? amountPaid - total : 0;
 
-  const balanceDue = amountPaid ? subtotal - amountPaid : 0;
+  const balanceDue = amountPaid ? total - amountPaid : 0;
 
+  // data fetching and submission
+
+  const { isOrderPaymentPending, processOrderPaymentFN } = useOrderPayment();
+
+  // console.log("PAID ORDER DATA", paidOrderData);
+
+  function handlePayment(e) {
+    e.preventDefault();
+    if (items.length > 0) {
+      e.preventDefault();
+      const submitionData = {
+        paymentMethod: paymentTab,
+        paidAmount: amountPaid,
+        paymentNote: paymentNote ? paymentNote : null,
+        transactionReference:
+          paymentTab === "online" ? transactionReference : null,
+      };
+      if (!emptyOrderID || !submitionData) return;
+      processOrderPaymentFN(
+        {
+          orderId: emptyOrderID,
+          paymentData: submitionData,
+        },
+        {
+          onSuccess: (data) => {
+            // console.log("PAYMENT SUCCESS DATA", data);
+            PosPaymentPrint(data?.data);
+          },
+        }
+      );
+    } else {
+      toast.error("Cannot pay empty order");
+    }
+  }
+  useEffect(() => {
+    if (isPosPaymentDialog) {
+      setAmountPaid(total);
+    }
+  }, [total, isPosPaymentDialog]);
   return (
     <Dialog open={isPosPaymentDialog} onOpenChange={setPosPaymentDialog}>
       <DialogContent
         id="payment-print"
         className="max-w-4xl gap-0 overflow-hidden border-0 p-0"
       >
-        <form>
+        <form onSubmit={handlePayment}>
           {/* Header */}
           <DialogHeader className="flex flex-row items-center justify-between bg-linear-to-r from-green-500 to-green-600 px-6 py-2">
             <DialogTitle className="flex items-center gap-2 text-xl font-bold text-white">
@@ -143,6 +190,10 @@ export default function PosPaymentDialog({
 
                       <InputGroup className="flex overflow-hidden rounded-md border bg-background">
                         <InputGroupInput
+                          value={transactionReference}
+                          onChange={(e) =>
+                            setTransactionReferences(e.target.value)
+                          }
                           type="text"
                           name="paymentReference"
                           id="payment-reference"
@@ -166,11 +217,8 @@ export default function PosPaymentDialog({
                           type="number"
                           name="amountReceived"
                           id="amount-received"
-                          defaultValue={total}
                           value={amountPaid}
-                          onChange={(e) =>
-                            setAmountPaid(Number(e.target.value))
-                          }
+                          onChange={(e) => setAmountPaid(e.target.value)}
                           placeholder="2431.55"
                           className="border-0 shadow-none focus-visible:ring-0"
                         />
@@ -188,6 +236,8 @@ export default function PosPaymentDialog({
                   <Label className="font-semibold">Payment Note</Label>
 
                   <Textarea
+                    value={paymentNote}
+                    onChange={(e) => setPaymentNote(e.target.value)}
                     placeholder="Optional notes..."
                     className="min-h-27.5 resize-none"
                   />
@@ -279,12 +329,7 @@ export default function PosPaymentDialog({
               <Button variant="outline">Cancel</Button>
             </DialogClose>
 
-            <Button
-              className="bg-cyan-500 hover:bg-cyan-600"
-              onClick={() => {
-                PosPaymentPrint(dummyData);
-              }}
-            >
+            <Button className="bg-cyan-500 hover:bg-cyan-600">
               <CreditCard className="h-4 w-4" />
               Complete Payment
             </Button>

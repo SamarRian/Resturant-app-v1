@@ -1,12 +1,19 @@
+import Counter from "../model/counterModel.js";
+import OrderItem from "../model/orderItemsModel.js";
 import PosOrder from "../model/ordersModel.js";
 import PosSession from "../model/sessionModel.js";
 import { updateSessionStats } from "./sessionController.js";
 
 // ─── Helper: Order Number Generate ────────────────────────────────────────────
 
-export async function orderNumber() {
-  const orderNumber = await PosOrder.countDocuments();
-  return orderNumber;
+export async function orderNumber(sessionId) {
+  const counter = await Counter.findOneAndUpdate(
+    { _id: `order_${sessionId}` },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true },
+  );
+
+  return counter.seq;
 }
 
 // ///////////////////////////////////////////////
@@ -25,7 +32,7 @@ export async function generateOrder(req, res) {
 
     const order = await PosOrder.create({
       posSessionId: activeSession?._id,
-      orderNumber: (await orderNumber()) + 1,
+      orderNumber: await orderNumber(activeSession?._id),
       orderDate: new Date(),
       createdBy: req.user._id,
     });
@@ -100,7 +107,16 @@ export const updateOrder = async (req, res) => {
       cookingTime,
       updatedBy: req.user._id,
     };
+    const activeSession = await PosSession.findOne({
+      status: "active",
+    });
 
+    if (!activeSession) {
+      return res.status(404).json({
+        success: false,
+        message: "Please Active the Session",
+      });
+    }
     const unsetFields = {};
 
     // orderType ke hisaab se decide karo konsa data rakhna hai, konsa hatana hai
@@ -136,7 +152,12 @@ export const updateOrder = async (req, res) => {
         message: "Order not found",
       });
     }
-
+    if (["cancelled", "completed"].includes(order.orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: `Order ${order.orderStatus}, cannot update.`,
+      });
+    }
     return res.status(200).json({
       success: true,
       message: "Order updated successfully.",
@@ -148,45 +169,40 @@ export const updateOrder = async (req, res) => {
 };
 
 // ─── Get All Orders ────────────────────────────────────────────────────────────
-export const getAllOrders = async (req, res) => {
+export const getAllActiveSessionOrders = async (req, res) => {
   try {
-    const {
-      orderStatus,
-      paymentStatus,
-      orderType,
-      kitchenStatus,
-      page = 1,
-      limit = 10,
-    } = req.query;
+    const activeSession = await PosSession.findOne({
+      status: "active",
+    });
+    if (!activeSession) {
+      return res.status(404).json({
+        success: false,
+        message: "Active Session not found",
+      });
+    }
+    const activeOrders = await PosOrder.find({
+      posSessionId: activeSession._id,
+    });
 
-    const filter = {};
-    if (orderStatus) filter.orderStatus = orderStatus;
-    if (paymentStatus) filter.paymentStatus = paymentStatus;
-    if (orderType) filter.orderType = orderType;
-    if (kitchenStatus) filter.kitchenStatus = kitchenStatus;
+    const filterdOrders = activeOrders.filter(
+      (order) =>
+        order.orderStatus === "pending" || order.paymentStatus === "pending",
+    );
 
-    const skip = (page - 1) * limit;
-
-    const [orders, total] = await Promise.all([
-      PosOrder.find(filter)
-        .populate("customerId", "name phone")
-        .populate("tableId", "name")
-        .populate("createdBy", "name")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Number(limit)),
-      PosOrder.countDocuments(filter),
-    ]);
-
+    const ordersWithItems = await Promise.all(
+      filterdOrders.map(async (order) => {
+        const items = await OrderItem.find({ orderId: order._id });
+        return {
+          ...order.toObject(),
+          items,
+        };
+      }),
+    );
+    console.log(activeSession);
     return res.status(200).json({
       success: true,
-      data: orders,
-      pagination: {
-        total,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(total / limit),
-      },
+      message: "Active session orders found successfully.",
+      data: ordersWithItems,
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -204,14 +220,16 @@ export const getOrderById = async (req, res) => {
       // .populate("posSessionId")
       .populate("createdBy", "name")
       .populate("updatedBy", "name");
-
+    const items = await OrderItem.find({ orderId: order._id });
     if (!order) {
       return res
         .status(404)
         .json({ success: false, message: "Order not found." });
     }
 
-    return res.status(200).json({ success: true, data: order });
+    return res
+      .status(200)
+      .json({ success: true, data: { ...order.toObject(), items } });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -310,6 +328,8 @@ export const processPayment = async (req, res) => {
         .json({ success: false, message: "Order already paid." });
     }
 
+    const orderItems = await OrderItem.find({ orderId: order._id });
+
     const totalPaidSoFar = order.paidAmount + paidAmount;
     const due = order.totalAmount - totalPaidSoFar;
     const change = totalPaidSoFar - order.totalAmount;
@@ -354,7 +374,10 @@ export const processPayment = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Payment processed successfully.",
-      data: order,
+      data: {
+        ...order.toObject(),
+        items: orderItems,
+      },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

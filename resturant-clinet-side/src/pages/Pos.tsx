@@ -16,6 +16,8 @@ import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleS
 import { useAddOrderItems } from "@/hooks/QueryHooks/PosSession/PosOrder/useAddOrderItems";
 import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 import { useUpdateOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useUpdateOrder";
+import { toast } from "sonner";
+import { useGenerateEmptyOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGenerateEmptyOrder";
 
 export default function PosPage() {
   // Pos context
@@ -27,22 +29,40 @@ export default function PosPage() {
 
     setStartPosSessionDialog,
   } = usePosContext();
-  const { emptyOrderID } = usePosOrderContext();
+  const { emptyOrderID, handleEmptyOrderID } = usePosOrderContext();
   const { orderData, submitOrderData, getPlainOrderData } =
     usePosOrderContext();
-  console.log("ORDDER DATA", orderData);
+
   // DATA FETCHING
+  const { generateEmptyOrderFN } = useGenerateEmptyOrder();
   const { data, isLoading, isError } = useGetSingleSession(sessinId);
 
   const { updateOrderFN } = useUpdateOrder();
 
-  const { addOrderItemsFN } = useAddOrderItems();
+  const {
+    addOrderItemsFN,
+    data: orderItemsData,
+    isOrderItemsPending,
+  } = useAddOrderItems();
   // ── Order state ──────────────────────────────────────────────────────────
 
   const [items, setItems] = useState<OrderItem[]>([]);
 
   // ── Menu state ───────────────────────────────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (items.length > 0 && emptyOrderID && sessinId) {
+      generateEmptyOrderFN(undefined, {
+        onSuccess: (data) => {
+          handleEmptyOrderID(data?.order?._id || "");
+          setItems([]);
+        },
+      });
+    } else {
+      toast.warning(`First fill the Order # ${orderData.orderNumber}`);
+    }
+  }, []);
 
   useEffect(() => {
     if (isLoading) {
@@ -111,6 +131,8 @@ export default function PosPage() {
   };
 
   const handleProductClick = (product: Product) => {
+    console.log("PRODUCTS CLICKS", product);
+
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(product._id)) next.delete(product._id);
@@ -151,12 +173,14 @@ export default function PosPage() {
           productId: product._id,
           name: product.name,
           unitPrice:
-            product.price || product?.selectedProductVariaton?.price || 0,
+            product?.price || product?.selectedProductVariaton?.price || 0,
           quantity: 1,
-          description: product.description || "",
+          description: product?.description || "",
           isDeal: product?.isDeal || false,
           isVariant: product?.variant || false,
-          selectedProductVariaton: product?.selectedProductVariaton || null,
+          selectedProductVariaton: product?.isDeal
+            ? product?.dealVariations
+            : product?.selectedProductVariaton,
           specialInstructions: product?.specialInstructions || "",
           isCustom: product?.isCustom || false,
         },
@@ -165,21 +189,22 @@ export default function PosPage() {
   };
 
   useEffect(() => {
-    if (!emptyOrderID) return;
+    if (!emptyOrderID || !sessinId) return;
+    console.log(" ITEMS", items);
 
     const formattedItems = items.map((item) => ({
       productId: item.isCustom ? null : item.productId || item._id,
       name: item.name,
       unitPrice: item.unitPrice || item.price || 0,
       quantity: item.quantity,
-      description: item.description || "",
+      description: item?.description || "",
       isDeal: item.isDeal || false,
-      isVariant: item.isVariant || false,
-      selectedProductVariaton: item.selectedProductVariaton || null,
+      isVariant: item?.isVariant,
+      selectedProductVariaton: item?.selectedProductVariaton,
       specialInstructions: item.specialInstructions || "",
       isCustom: item.isCustom || false,
     }));
-
+    console.log("FORMATED ITEMS", formattedItems);
     const timer = setTimeout(() => {
       addOrderItemsFN({
         orderID: emptyOrderID,
@@ -187,13 +212,12 @@ export default function PosPage() {
       });
     }, 800);
 
-    return () => clearTimeout(timer); // ✅ Cleanup — timer reset
-  }, [items, emptyOrderID]); // ✅ addOrderItemsFN removed
+    return () => clearTimeout(timer);
+  }, [items, emptyOrderID]);
 
   useEffect(() => {
-    if (!emptyOrderID) return;
+    if (!emptyOrderID || !sessinId) return;
     const plainOrderData = getPlainOrderData();
-    console.log("PLAIN ORDER DATA", plainOrderData);
     const timer = setTimeout(() => {
       updateOrderFN({ orderId: emptyOrderID, orderData: plainOrderData });
     }, 800);
@@ -207,8 +231,6 @@ export default function PosPage() {
     return s + price * it.quantity;
   }, 0);
 
-  //  Har ek independently calculate ho raha hai
-  //  Property names bhi sahi hain: type aur amount
   const discount =
     calculatePosDiscount.type === "percentage"
       ? (subtotal * (calculatePosDiscount.amount || 0)) / 100
@@ -243,6 +265,7 @@ export default function PosPage() {
 
       <main className="flex min-h-0 flex-1 gap-2 p-2">
         <PosOrderPanel
+          setItems={setItems}
           items={items}
           onQtyChange={handleQtyChange}
           onRemove={handleRemove}
@@ -271,7 +294,7 @@ export default function PosPage() {
         total={total}
       />
 
-      <StartPosSessionDialog />
+      <StartPosSessionDialog setItems={setItems} />
       <PosRunningOrdersButton />
     </div>
   );

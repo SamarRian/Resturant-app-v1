@@ -15,9 +15,12 @@ import { usePosContext } from "@/hooks/usePosContext";
 
 import { Bike, ForkKnife, Handbag, ListCheck, X } from "lucide-react";
 import PosRunningOrdersTable from "./PosRunningOrdersTable";
+import { useState } from "react";
 
 export default function PosRunningOrdersDialog() {
   const { isPosRunningDialog, setIsPosRunningDialog } = usePosContext();
+
+  const [tab, setTab] = useState("");
 
   return (
     <Dialog open={isPosRunningDialog} onOpenChange={setIsPosRunningDialog}>
@@ -30,7 +33,12 @@ export default function PosRunningOrdersDialog() {
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden p-6">
-          <Tabs defaultValue="dine-in" className="flex h-full flex-col">
+          <Tabs
+            defaultValue="dine-in"
+            className="flex h-full flex-col"
+            value={tab}
+            onValueChange={setTab}
+          >
             <TabsList>
               <TabsTrigger
                 value="dine-in"
@@ -41,7 +49,7 @@ export default function PosRunningOrdersDialog() {
               </TabsTrigger>
 
               <TabsTrigger
-                value="take-away"
+                value="takeaway"
                 className="text-lg data-[state=active]:bg-accent data-[state=active]:text-white"
               >
                 <Handbag className="h-4 w-4" />
@@ -61,21 +69,21 @@ export default function PosRunningOrdersDialog() {
               value="dine-in"
               className="mt-4 flex-1 overflow-hidden"
             >
-              <PosRunningOrdersTable />
+              <PosRunningOrdersTable tab={tab} key={tab} />
             </TabsContent>
 
             <TabsContent
-              value="take-away"
+              value="takeaway"
               className="mt-4 flex-1 overflow-hidden"
             >
-              <PosRunningOrdersTable />
+              <PosRunningOrdersTable tab={tab} key={tab} />
             </TabsContent>
 
             <TabsContent
               value="delivery"
               className="mt-4 flex-1 overflow-hidden"
             >
-              <PosRunningOrdersTable />
+              <PosRunningOrdersTable tab={tab} key={tab} />
             </TabsContent>
           </Tabs>
         </div>

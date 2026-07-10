@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FullPageSpinner, Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -17,218 +19,55 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useGetAllActiveSessionOrders } from "@/hooks/QueryHooks/PosSession/PosOrder/useGetAllActiveSessionOrders";
+import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 import { Eye, MoreHorizontal, Trash } from "lucide-react";
 
-const invoices = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV008",
-    paymentStatus: "Paid",
-    totalAmount: "$500.00",
-    paymentMethod: "Cash",
-  },
-  {
-    invoice: "INV009",
-    paymentStatus: "Pending",
-    totalAmount: "$700.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV010",
-    paymentStatus: "Paid",
-    totalAmount: "$900.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV008",
-    paymentStatus: "Paid",
-    totalAmount: "$500.00",
-    paymentMethod: "Cash",
-  },
-  {
-    invoice: "INV009",
-    paymentStatus: "Pending",
-    totalAmount: "$700.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV010",
-    paymentStatus: "Paid",
-    totalAmount: "$900.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV008",
-    paymentStatus: "Paid",
-    totalAmount: "$500.00",
-    paymentMethod: "Cash",
-  },
-  {
-    invoice: "INV009",
-    paymentStatus: "Pending",
-    totalAmount: "$700.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV010",
-    paymentStatus: "Paid",
-    totalAmount: "$900.00",
-    paymentMethod: "PayPal",
-  },
-];
+export default function PosRunningOrdersTable({ tab }) {
+  const { handleViewedOrderId } = usePosOrderContext();
 
-export default function PosRunningOrdersTable() {
+  const { allOrdersData, isAllOrdersDataLoading } =
+    useGetAllActiveSessionOrders();
+  if (isAllOrdersDataLoading)
+    return (
+      <div className="flex justify-center">
+        <Spinner className="h-6 w-6" />
+      </div>
+    );
+  const filteredData = allOrdersData.filter((order) => order.orderType === tab);
+
   return (
     <div className="max-h-60 overflow-y-auto rounded-md border">
       <Table>
-        <TableCaption>A list of your recent invoices.</TableCaption>
+        <TableCaption>A list of your running orders.</TableCaption>
 
         <TableHeader className="sticky top-0 z-10 bg-background">
           <TableRow>
-            <TableHead className="w-25">Invoice</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Method</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
+            <TableHead className="w-25">Order #</TableHead>
+            <TableHead>Items</TableHead>
+            <TableHead>Total</TableHead>
+            <TableHead className="text-right">Order Status</TableHead>
+            <TableHead className="text-right">Payment Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {invoices.map((invoice, i) => (
+          {filteredData?.map((order, i) => (
             <TableRow key={i}>
-              <TableCell className="font-medium">{invoice.invoice}</TableCell>
+              <TableCell className="font-medium">
+                #TA-{order.orderNumber}
+              </TableCell>
 
-              <TableCell>{invoice.paymentStatus}</TableCell>
+              <TableCell>
+                <Badge className="bg-accent">{order?.items.length} item</Badge>
+              </TableCell>
 
-              <TableCell>{invoice.paymentMethod}</TableCell>
+              <TableCell>{order.totalAmount}</TableCell>
+              <TableCell className="text-right">{order.orderStatus}</TableCell>
 
               <TableCell className="text-right">
-                {invoice.totalAmount}
+                {order.paymentStatus}
               </TableCell>
               <TableCell className="text-right">
                 {" "}
@@ -244,7 +83,9 @@ export default function PosRunningOrdersTable() {
 
                     <DropdownMenuSeparator />
 
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleViewedOrderId(order._id)}
+                    >
                       <Eye /> View
                     </DropdownMenuItem>
                     <DropdownMenuItem variant="destructive">

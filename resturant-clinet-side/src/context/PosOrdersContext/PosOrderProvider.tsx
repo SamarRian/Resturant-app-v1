@@ -7,6 +7,7 @@ function PosOrderProvider({ children }: { children: React.ReactNode }) {
     return localStorage.getItem("emptyOrderID") || "";
   });
   function handleEmptyOrderID(id: string) {
+    localStorage.removeItem("emptyOrderID");
     localStorage.setItem("emptyOrderID", id);
     setEmptyOrderID(id);
   }
@@ -32,36 +33,12 @@ function PosOrderProvider({ children }: { children: React.ReactNode }) {
       }
 
       return updated;
-      // tableId: order.tableId,
-      // orderType: order.orderType,
-      // customerId: order.customerId,
-      // orderSource: order.orderSource,
-      // deliveryAddress: order.deliveryAddress,
-      // deliveryPhone: order.deliveryPhone,
-      // subTotal: order.subTotal,
-      // discountType: order.discountType,
-      // discountValue: order.discountValue,
-      // discountAmount: order.discountAmount,
-      // serviceChargeType: order.serviceChargeType,
-      // serviceChargeValue: order.serviceChargeValue,
-      // serviceChargeAmount: order.serviceChargeAmount,
-      // taxType: order.taxType,
-      // taxMethod: order.taxMethod,
-      // taxValue: order.taxValue,
-      // taxAmount: order.taxAmount,
-      // totalAmount: order.totalAmount,
-      // paymentMethod: order.paymentMethod,
-      // paymentStatus: order.paymentStatus,
-      // paymentNote: order.paymentNote,
-      // customerNotes: order.customerNotes,
-      // kitchenNotes: order.kitchenNotes || "",
-      // riderWaiter: order.riderWaiter || "",
     });
   }
   function getPlainOrderData() {
     const {
       deliveryDetails,
-      taxDetails: { amount: taxValue, taxtype: taxMethod, type: taxType } = {},
+      taxDetails: { amount: taxValue, taxtype: taxType, type: taxMethod } = {},
       discountDetails: { type: discountType, amount: discountValue } = {},
 
       serviceDetails: {
@@ -82,6 +59,13 @@ function PosOrderProvider({ children }: { children: React.ReactNode }) {
       serviceChargeValue,
     };
   }
+
+  const [viewedOrderId, setViewedOrderId] = useState("");
+
+  function handleViewedOrderId(id) {
+    setViewedOrderId(id);
+  }
+
   return (
     <PosOrderContext
       value={{
@@ -90,6 +74,8 @@ function PosOrderProvider({ children }: { children: React.ReactNode }) {
         orderData,
         submitOrderData,
         getPlainOrderData,
+        viewedOrderId,
+        handleViewedOrderId,
       }}
     >
       {children}

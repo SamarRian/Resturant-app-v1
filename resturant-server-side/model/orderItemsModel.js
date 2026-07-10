@@ -28,6 +28,11 @@ const orderItemSchema = new mongoose.Schema(
       default: null,
     },
 
+    isVariant: {
+      type: Boolean,
+      default: false,
+    },
+
     unitPrice: {
       type: Number,
       required: true,
@@ -42,6 +47,11 @@ const orderItemSchema = new mongoose.Schema(
     },
 
     specialInstructions: {
+      type: String,
+      default: null,
+    },
+
+    description: {
       type: String,
       default: null,
     },

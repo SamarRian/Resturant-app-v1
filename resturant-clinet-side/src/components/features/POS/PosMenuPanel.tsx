@@ -268,6 +268,7 @@ export function PosMenuPanel({
         subtotal={subtotal}
         service={service}
         discount={discount}
+        items={items}
       />
 
       <PosProductDialog onProductClicks={onProductClick} />

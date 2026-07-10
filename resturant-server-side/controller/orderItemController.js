@@ -1,6 +1,7 @@
 import OrderItem from "../model/orderItemsModel.js";
 import Product from "../model/productModel.js";
 import PosOrder from "../model/ordersModel.js";
+import PosSession from "../model/sessionModel.js";
 
 // ─── Add Items to Order ────────────────────────────────────────────────────────
 
@@ -29,7 +30,16 @@ export async function generateItems(req, res) {
 export const addOrderItems = async (req, res) => {
   try {
     const { orderId, items } = req.body;
+    const activeSession = await PosSession.findOne({
+      status: "active",
+    });
 
+    if (!activeSession) {
+      return res.status(404).json({
+        success: false,
+        message: "Please Active the Session",
+      });
+    }
     // ✅ Validate input
     if (!orderId) {
       return res.status(400).json({
@@ -118,16 +128,17 @@ export const addOrderItems = async (req, res) => {
       }
 
       // ✅ Create variant object WITHOUT the quantity from variant
-      let variantToSave = null;
-      if (selectedProductVariaton) {
-        variantToSave = {
-          _id: selectedProductVariaton._id || null,
-          product: selectedProductVariaton.product || null,
-          variantName: selectedProductVariaton.variantName || "",
-          price: selectedProductVariaton.price || 0,
-          cost: selectedProductVariaton.cost || 0,
+      const variantsArray = [].concat(selectedProductVariaton || []);
+      const variantToSave = variantsArray?.map((variant) => {
+        return {
+          _id: variant._id || null,
+          product: variant.product || null,
+          variantName: variant.variantName || "",
+          price: variant.price || 0,
+          cost: variant.cost || 0,
+          name: variant.name,
         };
-      }
+      });
 
       const orderItemData = {
         orderId: orderId,
@@ -147,6 +158,7 @@ export const addOrderItems = async (req, res) => {
 
       orderItemsToSave.push(orderItemData);
     }
+    console.log("ORDETITEMSSAVE", orderItemsToSave);
 
     // ✅ 🔥 STEP 3: Insert all new items
     const savedItems = await OrderItem.insertMany(orderItemsToSave);
@@ -223,7 +235,7 @@ export const getOrderItems = async (req, res) => {
     const { orderId } = req.params;
 
     const items = await OrderItem.find({ orderId })
-      .populate("productId", "name price productType image")
+      .populate("productId", "name price productType")
       .sort({ sortOrder: 1 });
 
     return res.status(200).json({

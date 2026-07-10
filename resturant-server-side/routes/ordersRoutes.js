@@ -2,7 +2,7 @@ import express from "express";
 import protect from "../middleware/auth.middleware.js";
 import {
   updateOrder,
-  getAllOrders,
+  getAllActiveSessionOrders,
   getOrderById,
   updateOrderStatus,
   updateKitchenStatus,
@@ -14,7 +14,7 @@ import {
 const router = express.Router();
 router.post("/post", protect, generateOrder);
 router.patch("/update/:id", protect, updateOrder);
-router.get("/all", protect, getAllOrders);
+router.get("/all", protect, getAllActiveSessionOrders);
 router.get("/:id", protect, getOrderById);
 router.patch("/:id/status", protect, updateOrderStatus);
 router.patch("/:id/kitchen-status", protect, updateKitchenStatus);

@@ -23,11 +23,15 @@ import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 
 const QUICK_AMOUNTS = [100, 500, 1000, 2000];
 
-export function StartPosSessionDialog() {
-  const { handleSessionID, startPosSessionDialog, setStartPosSessionDialog } =
-    usePosContext();
+export function StartPosSessionDialog({ setItems }) {
+  const {
+    handleSessionID,
+    startPosSessionDialog,
+    setStartPosSessionDialog,
+    sessinId,
+  } = usePosContext();
 
-  const { handleEmptyOrderID, handleEmptyOrderData } = usePosOrderContext();
+  const { handleEmptyOrderID } = usePosOrderContext();
 
   const [cashBalance, setCashBalance] = useState(0);
   const [notes, setNotes] = useState("");
@@ -73,9 +77,7 @@ export function StartPosSessionDialog() {
           generateEmptyOrderFN(undefined, {
             onSuccess: (data) => {
               handleEmptyOrderID(data?.order?._id || "");
-              console.log("orderData", data);
-
-              handleEmptyOrderData(data?.order);
+              setItems([]);
             },
           });
 
