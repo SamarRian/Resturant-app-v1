@@ -49,6 +49,8 @@ export async function addOrderItems(orderID, orderItems) {
 
 export async function getSingleOrderById(orderId) {
   const token = localStorage.getItem("token");
+  // console.log("order: ", orderId);
+
   try {
     const res = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
       method: "GET",
@@ -58,6 +60,8 @@ export async function getSingleOrderById(orderId) {
       },
     });
     const data = await res.json();
+    // console.log("data from API: ", data);
+
     if (!res.ok) {
       throw new Error(data.message || "Failed to fetch order");
     }

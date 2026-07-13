@@ -133,10 +133,11 @@ export const addOrderItems = async (req, res) => {
         return {
           _id: variant._id || null,
           product: variant.product || null,
-          variantName: variant.variantName || "",
+          variantName: isVariant ? variant.variantName || "" : "",
           price: variant.price || 0,
           cost: variant.cost || 0,
-          name: variant.name,
+          name: variant.name || name || "",
+          dealQuantity: isDeal ? (variant?.dealQuantity ?? null) : null,
         };
       });
 
@@ -157,8 +158,8 @@ export const addOrderItems = async (req, res) => {
       };
 
       orderItemsToSave.push(orderItemData);
+      console.log("VARINAT TO SAVE", variantToSave);
     }
-    console.log("ORDETITEMSSAVE", orderItemsToSave);
 
     // ✅ 🔥 STEP 3: Insert all new items
     const savedItems = await OrderItem.insertMany(orderItemsToSave);

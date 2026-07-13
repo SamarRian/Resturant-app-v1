@@ -8,13 +8,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { FullPageSpinner, Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Table,
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,

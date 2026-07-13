@@ -38,6 +38,7 @@ export function PosOrderPanel({
     viewedOrderId,
     handleViewedOrderId,
   } = usePosOrderContext();
+  const { sessinId } = usePosContext();
   // MODE VIEW OR REGULAR
   const viewMode = viewedOrderId ? true : false;
   const { generateEmptyOrderFN } = useGenerateEmptyOrder();
@@ -45,19 +46,27 @@ export function PosOrderPanel({
 
   const orderData = data ? data.data : {};
 
-  console.log("ITEMS DATA", items);
-  console.log("ORDER DATA", orderData);
-  const mapData = viewMode
-    ? [...(orderData.items ?? []), ...(items ?? [])]
-    : (items ?? []);
-  console.log("MAP DATA", mapData);
-
+  const renamedOrderItems = orderData?.items?.map((item) => {
+    const { productName, selectedProductVariaton, ...rest } = item;
+    return {
+      ...rest,
+      name: productName,
+      selectedProductVariaton: item.isVariant
+        ? selectedProductVariaton?.[0] || item.selectedProductVariaton
+        : item.selectedProductVariaton,
+    };
+  });
+  useEffect(() => {
+    if (viewMode && orderData?.items && sessinId && viewedOrderId) {
+      setItems(renamedOrderItems);
+    }
+  }, [viewMode, orderData?.items]);
   useEffect(() => {
     submitOrderData("orderType", orderType);
   }, [orderType]);
 
   function handleGenerateEmptyOrder() {
-    if (items.length > 0) {
+    if (items.length > 0 && sessinId) {
       handleViewedOrderId("");
       generateEmptyOrderFN(undefined, {
         onSuccess: (data) => {
@@ -80,7 +89,7 @@ export function PosOrderPanel({
               Order #: {orderData.orderNumber}
             </span>
             <Badge className="bg-amber-400 text-[10px] text-amber-950 hover:bg-amber-400">
-              {orderData.orderStatus}
+              {orderData.paymentStatus}
             </Badge>
           </div>
           <Button
@@ -140,28 +149,71 @@ export function PosOrderPanel({
       {/* ── Scrollable order items ── */}
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-2 p-3">
-          {mapData?.length === 0 ? (
+          {items?.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-16 text-center">
               <UtensilsCrossed className="h-8 w-8 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">No items yet</p>
             </div>
           ) : (
-            mapData?.map((item) => (
+            items?.map((item) => (
               <div
-                key={item.productId}
+                key={item._id}
                 className="flex items-start gap-2 rounded-lg border border-border bg-background p-2.5 transition-shadow hover:shadow-sm"
               >
                 {/* Item info */}
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs leading-tight font-semibold text-foreground">
-                    {item?.selectedProductVariaton?.variantName
-                      ? `${item.name} variant ${item?.selectedProductVariaton?.variantName}`
-                      : item.name}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate text-xs leading-tight font-semibold text-foreground">
+                      {item.name}
+                    </p>
+                    {item.isDeal && (
+                      <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-[1px] text-[9px] font-bold tracking-wide text-accent uppercase">
+                        Deal
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Simple variant (isVariant = true, selectedProductVariaton is an object) */}
+                  {item.isVariant &&
+                    !Array.isArray(item.selectedProductVariaton) && (
+                      <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">
+                        Variant:{" "}
+                        <span className="text-foreground/80">
+                          {item.selectedProductVariaton?.variantName}
+                        </span>
+                      </p>
+                    )}
+
+                  {/* Deal breakdown (selectedProductVariaton is an array) */}
+                  {item.isDeal &&
+                    Array.isArray(item.selectedProductVariaton) && (
+                      <ul className="mt-1 space-y-0.5">
+                        {item.selectedProductVariaton.map((v) => (
+                          <li
+                            key={v._id}
+                            className="flex items-center gap-1.5 text-[10px] leading-snug text-muted-foreground"
+                          >
+                            <span className="flex h-3.5 min-w-[14px] items-center justify-center rounded-sm bg-muted px-1 text-[9px] font-bold text-foreground/70 tabular-nums">
+                              {v.dealQuantity}×
+                            </span>
+                            <span className="truncate">
+                              {v.name}
+                              {v.variantName ? ` (${v.variantName})` : ""}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
 
                   {item.description && (
-                    <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-muted-foreground">
+                    <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-muted-foreground/70 italic">
                       {item.description}
+                    </p>
+                  )}
+
+                  {item.specialInstructions && (
+                    <p className="mt-0.5 line-clamp-1 text-[10px] leading-snug text-amber-600 dark:text-amber-500">
+                      Note: {item.specialInstructions}
                     </p>
                   )}
                 </div>
@@ -179,7 +231,7 @@ export function PosOrderPanel({
                     <button
                       onClick={() =>
                         onQtyChange(
-                          item.productId,
+                          item._id,
                           -1,
                           item.selectedProductVariaton?._id
                         )
@@ -194,7 +246,7 @@ export function PosOrderPanel({
                     <button
                       onClick={() =>
                         onQtyChange(
-                          item.productId,
+                          item._id,
                           1,
                           item.selectedProductVariaton?._id
                         )
@@ -205,10 +257,7 @@ export function PosOrderPanel({
                     </button>
                     <button
                       onClick={() =>
-                        onRemove(
-                          item.productId,
-                          item.selectedProductVariaton?._id
-                        )
+                        onRemove(item._id, item.selectedProductVariaton?._id)
                       }
                       className="ml-0.5 flex h-5 w-5 items-center justify-center rounded border border-destructive/40 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
                     >

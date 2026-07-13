@@ -60,9 +60,13 @@ function PosOrderProvider({ children }: { children: React.ReactNode }) {
     };
   }
 
-  const [viewedOrderId, setViewedOrderId] = useState("");
+  const [viewedOrderId, setViewedOrderId] = useState(() => {
+    return localStorage.getItem("viewdOrderID") || "";
+  });
 
   function handleViewedOrderId(id) {
+    localStorage.removeItem("viewdOrderID");
+    localStorage.setItem("viewdOrderID", id);
     setViewedOrderId(id);
   }
 

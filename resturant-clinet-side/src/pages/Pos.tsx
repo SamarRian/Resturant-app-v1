@@ -3,21 +3,17 @@ import { PosHeader } from "@/components/features/POS/PosHeader";
 import { PosOrderPanel } from "../components/features/POS/PosOrderPanel";
 import { PosMenuPanel } from "../components/features/POS/PosMenuPanel";
 import { PosFooter } from "../components/features/POS/PosFooter";
-import { INITIAL_ORDER_ITEMS } from "../../DevData/PosData";
-import type {
-  OrderItem,
-  OrderType,
-  Product,
-} from "../../DevData/Types/Postypes";
+import type { OrderItem, Product } from "../../DevData/Types/Postypes";
 import { usePosContext } from "@/hooks/usePosContext";
 import { StartPosSessionDialog } from "@/components/features/POS/StartPosSessionDialog";
 import PosRunningOrdersButton from "@/components/features/POS/PosRunningOrdersButton";
 import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
-import { useAddOrderItems } from "@/hooks/QueryHooks/PosSession/PosOrder/useAddOrderItems";
+
 import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 import { useUpdateOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useUpdateOrder";
 import { toast } from "sonner";
 import { useGenerateEmptyOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGenerateEmptyOrder";
+import { useAddOrderItems } from "@/hooks/QueryHooks/PosSession/PosOrder/useAddOrderItems";
 
 export default function PosPage() {
   // Pos context
@@ -29,21 +25,24 @@ export default function PosPage() {
 
     setStartPosSessionDialog,
   } = usePosContext();
-  const { emptyOrderID, handleEmptyOrderID } = usePosOrderContext();
-  const { orderData, submitOrderData, getPlainOrderData } =
-    usePosOrderContext();
+
+  const {
+    orderData,
+    submitOrderData,
+    getPlainOrderData,
+    handleViewedOrderId,
+    emptyOrderID,
+    handleEmptyOrderID,
+    viewedOrderId,
+  } = usePosOrderContext();
 
   // DATA FETCHING
+  const { addOrderItemsFN } = useAddOrderItems();
   const { generateEmptyOrderFN } = useGenerateEmptyOrder();
   const { data, isLoading, isError } = useGetSingleSession(sessinId);
 
   const { updateOrderFN } = useUpdateOrder();
 
-  const {
-    addOrderItemsFN,
-    data: orderItemsData,
-    isOrderItemsPending,
-  } = useAddOrderItems();
   // ── Order state ──────────────────────────────────────────────────────────
 
   const [items, setItems] = useState<OrderItem[]>([]);
@@ -53,6 +52,7 @@ export default function PosPage() {
 
   useEffect(() => {
     if (items.length > 0 && emptyOrderID && sessinId) {
+      handleViewedOrderId("");
       generateEmptyOrderFN(undefined, {
         onSuccess: (data) => {
           handleEmptyOrderID(data?.order?._id || "");
@@ -190,7 +190,6 @@ export default function PosPage() {
 
   useEffect(() => {
     if (!emptyOrderID || !sessinId) return;
-    console.log(" ITEMS", items);
 
     const formattedItems = items.map((item) => ({
       productId: item.isCustom ? null : item.productId || item._id,
@@ -204,10 +203,9 @@ export default function PosPage() {
       specialInstructions: item.specialInstructions || "",
       isCustom: item.isCustom || false,
     }));
-    console.log("FORMATED ITEMS", formattedItems);
     const timer = setTimeout(() => {
       addOrderItemsFN({
-        orderID: emptyOrderID,
+        orderID: viewedOrderId ? viewedOrderId : emptyOrderID,
         orderItems: formattedItems,
       });
     }, 800);
@@ -219,8 +217,12 @@ export default function PosPage() {
     if (!emptyOrderID || !sessinId) return;
     const plainOrderData = getPlainOrderData();
     const timer = setTimeout(() => {
-      updateOrderFN({ orderId: emptyOrderID, orderData: plainOrderData });
+      updateOrderFN({
+        orderId: viewedOrderId ? viewedOrderId : emptyOrderID,
+        orderData: plainOrderData,
+      });
     }, 800);
+
     return () => clearTimeout(timer);
   }, [orderData, emptyOrderID]);
 
@@ -285,7 +287,6 @@ export default function PosPage() {
         />
       </main>
 
-      {/* Fixed bottom footer */}
       <PosFooter
         subtotal={subtotal}
         discount={discount}

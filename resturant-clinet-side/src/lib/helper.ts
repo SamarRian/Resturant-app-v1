@@ -34,7 +34,13 @@ interface PrintData {
 
 export async function PosPaymentPrint(data: PrintData) {
   const printWindow = window.open("", "_blank", "width=400,height=700");
-
+  const date = new Date(data.orderDate);
+  const text = date.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   const itemsHTML = data.items
     .map((item) => {
       const variants = item.selectedProductVariaton ?? [];
@@ -222,7 +228,7 @@ export async function PosPaymentPrint(data: PrintData) {
           
           <!-- Date & Type -->
           <div class="date-row">
-          <div><strong>Date:</strong><br/>${data.orderDate}</div>
+          <div><strong>Date:</strong><br/>${text}</div>
           <div style="text-align:right"><strong>Type:</strong><br/>${data.orderType}</div>
         </div>
         
@@ -294,30 +300,66 @@ export interface KotPrintData {
   printedAt: string;
 }
 
-export const KotPrint = (data: KotPrintData) => {
+export const KotPrint = (data: PrintData) => {
   const printWindow = window.open("", "_blank", "width=400,height=600");
 
+  const orderTime = new Date(data.orderDate);
+  const orderTimeStr = orderTime.toLocaleTimeString("en-US", { hour12: false });
+  const printedAtStr = new Date().toLocaleString("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
   const itemsHTML = data.items
-    .map(
-      (item) => `
+    .map((item) => {
+      const variants = item.selectedProductVariaton ?? [];
+
+      let variantHTML = "";
+
+      if (item.isDeal) {
+        const includedNames = variants
+          .map((v) => (v.variantName ? `${v.name}: ${v.variantName}` : v.name))
+          .filter(Boolean)
+          .join(", ");
+
+        variantHTML = includedNames ? `<br/><em>- ${includedNames}</em>` : "";
+      } else {
+        const variantNames = variants
+          .map((v) => v.variantName)
+          .filter(Boolean)
+          .join(", ");
+
+        variantHTML = variantNames ? `<br/><em>- ${variantNames}</em>` : "";
+      }
+
+      const notesHTML = item.specialInstructions
+        ? `<br/><span class="note">${item.specialInstructions}</span>`
+        : "";
+
+      return `
       <tr>
-        <td class="qty">${item.qty}</td>
+        <td class="qty">${item.quantity}</td>
         <td class="item-name">
-          <strong>${item.name}</strong>
-          ${item.variant ? `<br/><em>- ${item.variant}</em>` : ""}
-          ${item.notes ? `<br/><span class="note">${item.notes}</span>` : ""}
+          <strong>${item.productName}</strong>
+          ${variantHTML}
+          ${notesHTML}
         </td>
       </tr>
       <tr><td colspan="2"><div class="item-divider"></div></td></tr>
-    `
-    )
+    `;
+    })
     .join("");
 
   printWindow?.document.write(`
     <!DOCTYPE html>
     <html>
       <head>
-        <title>KOT #${data.kotNumber}</title>
+        <title>KOT #${data.orderNumber ?? ""}</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -348,14 +390,8 @@ export const KotPrint = (data: KotPrintData) => {
             text-transform: uppercase;
           }
 
-          .dashed {
-            border-top: 2px dashed #000;
-            margin: 8px 0;
-          }
-          .dotted {
-            border-top: 1px dotted #000;
-            margin: 4px 0;
-          }
+          .dashed { border-top: 2px dashed #000; margin: 8px 0; }
+          .dotted { border-top: 1px dotted #000; margin: 4px 0; }
 
           .kot-number {
             text-align: center;
@@ -425,16 +461,9 @@ export const KotPrint = (data: KotPrintData) => {
             font-size: 12px;
           }
           .special-box p { font-weight: bold; margin-bottom: 6px; }
-          .special-line {
-            border-top: 1px solid #555;
-            margin: 8px 0;
-          }
+          .special-line { border-top: 1px solid #555; margin: 8px 0; }
 
-          .printed-at {
-            text-align: center;
-            font-size: 11px;
-            margin: 6px 0;
-          }
+          .printed-at { text-align: center; font-size: 11px; margin: 6px 0; }
 
           .stars {
             text-align: center;
@@ -469,20 +498,20 @@ export const KotPrint = (data: KotPrintData) => {
         <div class="dashed"></div>
 
         <!-- KOT Number -->
-        <p class="kot-number">KOT #: ${data.kotNumber}</p>
+        <p class="kot-number">KOT #: ${data.orderNumber ?? ""}</p>
 
         <div class="dashed"></div>
 
         <!-- Order Info -->
         <div class="info-grid">
           <span class="label">Type:</span>
-          <span class="value">${data.type}</span>
+          <span class="value">${data.orderType}</span>
 
           <span class="label">Order Time:</span>
-          <span class="value">${data.orderTime}</span>
+          <span class="value">${orderTimeStr}</span>
 
           <span class="label">Covers:</span>
-          <span class="value">${data.covers}</span>
+          <span class="value">${data.covers ?? 1}</span>
         </div>
 
         <div class="dashed"></div>
@@ -507,13 +536,13 @@ export const KotPrint = (data: KotPrintData) => {
           <div class="special-line"></div>
           <div class="special-line"></div>
           <div class="special-line"></div>
-          ${data.specialInstructions ? `<p style="margin-top:4px; font-weight:normal;">${data.specialInstructions}</p>` : ""}
+          ${data.orderNotes ? `<p style="margin-top:4px; font-weight:normal;">${data.orderNotes}</p>` : ""}
         </div>
 
         <div class="dashed"></div>
 
         <!-- Printed At -->
-        <p class="printed-at">Printed: ${data.printedAt}</p>
+        <p class="printed-at">Printed: ${printedAtStr}</p>
 
         <!-- Stars -->
         <p class="stars">* * * * * * * * * * * * * * * * * * * *</p>
@@ -555,31 +584,81 @@ export interface UnpaidBillData {
   orderStatus: string;
 }
 
-export const UnpaidBillPrint = (data: UnpaidBillData) => {
+export const UnpaidBillPrint = (data: PrintData) => {
   const printWindow = window.open("", "_blank", "width=400,height=650");
+  const date = new Date(data.orderDate);
+  const formattedDate = date.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   const itemsHTML = data.items
-    .map(
-      (item) => `
-      <tr>
-        <td class="item-name">
-          <strong>${item.name}</strong>
-          ${item.variant ? `<br/><span class="variant">${item.variant}</span>` : ""}
-        </td>
-        <td class="center">${item.qty}</td>
-        <td class="right">${item.price}</td>
-        <td class="right">${item.total}</td>
-      </tr>
-      <tr><td colspan="4"><div class="item-divider"></div></td></tr>
-    `
-    )
+    .map((item) => {
+      const variants = item.selectedProductVariaton ?? [];
+
+      let variantHTML = "";
+
+      if (item.isDeal) {
+        // Deal ke andar jitne bhi products/variants included hain, sab list kro
+        const includedNames = variants
+          .map((v) => (v.variantName ? `${v.name}: ${v.variantName}` : v.name))
+          .filter(Boolean)
+          .join(", ");
+
+        variantHTML = includedNames
+          ? `<br/><span class="variant">${includedNames}</span>`
+          : "";
+      } else {
+        // Normal item ka variant naam (agar select hua ho)
+        const variantNames = variants
+          .map((v) => v.variantName)
+          .filter(Boolean)
+          .join(", ");
+
+        variantHTML = variantNames
+          ? `<br/><span class="variant">${variantNames}</span>`
+          : "";
+      }
+
+      return `
+        <tr>
+          <td class="item-name">
+            <strong>${item.productName}</strong>
+            ${variantHTML}
+          </td>
+          <td class="center">${item.quantity}</td>
+          <td class="right">${item.unitPrice}</td>
+          <td class="right">${item.totalPrice}</td>
+        </tr>
+        <tr><td colspan="4"><div class="item-divider"></div></td></tr>
+      `;
+    })
     .join("");
+
+  const balanceDue = (data.totalAmount ?? 0) - (data.paidAmount ?? 0);
+
+  const discountRow =
+    data.discountAmount && data.discountAmount > 0
+      ? `<div class="row"><span>Discount:</span><span>${data.discountAmount.toFixed(2)}</span></div>`
+      : "";
+
+  const serviceChargeRow =
+    data.serviceChargeAmount && data.serviceChargeAmount > 0
+      ? `<div class="row"><span>Service Charge:</span><span>${data.serviceChargeAmount.toFixed(2)}</span></div>`
+      : "";
+
+  const taxRow =
+    data.taxAmount && data.taxAmount > 0
+      ? `<div class="row"><span>Tax:</span><span>${data.taxAmount.toFixed(2)}</span></div>`
+      : "";
 
   printWindow?.document.write(`
     <!DOCTYPE html>
     <html>
       <head>
-        <title>Unpaid Bill</title>
+        <title>${data.restaurantName} - Unpaid Bill</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -601,7 +680,6 @@ export const UnpaidBillPrint = (data: UnpaidBillData) => {
           .header p  { font-size: 12px; margin-top: 2px; }
 
           .dashed  { border-top: 1px dashed #000; margin: 8px 0; }
-          .solid   { border-top: 1px solid #000;  margin: 4px 0; }
 
           .unpaid-badge {
             border: 1px dashed #000;
@@ -642,21 +720,24 @@ export const UnpaidBillPrint = (data: UnpaidBillData) => {
             border-collapse: collapse;
             font-size: 12px;
             margin: 4px 0;
+            table-layout: fixed;
           }
 
           thead th {
             font-weight: bold;
-            padding: 3px 0;
+            padding: 3px 4px;
             text-align: left;
             border-bottom: 1px dashed #000;
           }
-          thead th.center { text-align: center; }
-          thead th.right  { text-align: right; }
+          thead th:first-child { text-align: left; width: 46%; }
+          thead th:nth-child(2) { text-align: center; width: 16%; }
+          thead th:nth-child(3) { text-align: right; width: 19%; }
+          thead th:last-child { text-align: right; width: 19%; }
 
-          tbody td { padding: 4px 0; vertical-align: top; }
-          .item-name { text-align: left; }
+          tbody td { padding: 4px; vertical-align: top; }
+          .item-name { text-align: left; word-wrap: break-word; }
           .variant   { font-size: 11px; color: #444; }
-          .item-divider { border-top: 1px dotted #aaa; }
+          .item-divider { border-top: 1px dotted #ccc; }
 
           .totals { margin-top: 4px; }
           .totals .row {
@@ -668,6 +749,9 @@ export const UnpaidBillPrint = (data: UnpaidBillData) => {
           .totals .row.total-due {
             font-weight: bold;
             font-size: 14px;
+            border-top: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            padding: 5px 0;
           }
           .totals .row.balance {
             font-weight: bold;
@@ -696,15 +780,13 @@ export const UnpaidBillPrint = (data: UnpaidBillData) => {
 
         <div class="dashed"></div>
 
-        <!-- Title -->
         <p class="title">UNPAID BILL</p>
 
-        <!-- Unpaid Badge -->
         <div class="unpaid-badge">UNPAID BILL - PAYMENT DUE</div>
 
         <!-- Customer Info -->
         <div class="info-grid">
-          <span class="label">Customer:</span> <span>${data.customer}</span>
+          <span class="label">Customer:</span> <span>${data.customerId}</span>
           <span class="label">Phone:</span>    <span>${data.customerPhone}</span>
           <span class="label">Address:</span>  <span></span>
         </div>
@@ -713,9 +795,11 @@ export const UnpaidBillPrint = (data: UnpaidBillData) => {
 
         <!-- Date & Type -->
         <div class="date-row">
-          <div><strong>Date:</strong><br/>${data.date}</div>
-          <div style="text-align:right"><strong>Type:</strong><br/>${data.type}</div>
+          <div><strong>Date:</strong><br/>${formattedDate}</div>
+          <div style="text-align:right"><strong>Type:</strong><br/>${data.orderType}</div>
         </div>
+
+        <div class="dashed"></div>
 
         <!-- Items Table -->
         <table>
@@ -730,42 +814,38 @@ export const UnpaidBillPrint = (data: UnpaidBillData) => {
           <tbody>${itemsHTML}</tbody>
         </table>
 
+        <div class="dashed"></div>
+
         <!-- Totals -->
         <div class="totals">
           <div class="row">
             <span>Subtotal:</span>
-            <span>${data.subtotal}</span>
+            <span>${(data.subTotal ?? 0).toFixed(2)}</span>
           </div>
-
-          <div class="dashed"></div>
+          ${discountRow}
+          ${serviceChargeRow}
+          ${taxRow}
 
           <div class="row total-due">
             <span>TOTAL DUE:</span>
-            <span>${data.totalDue}</span>
+            <span>${(data.totalAmount ?? 0).toFixed(2)}</span>
           </div>
-
-          <div class="dashed"></div>
 
           <div class="row">
             <span>Paid Amount:</span>
-            <span>${data.paidAmount.toFixed(2)}</span>
+            <span>${(data.paidAmount ?? 0).toFixed(2)}</span>
           </div>
 
           <div class="dashed"></div>
 
           <div class="row balance">
             <span>Balance Due:</span>
-            <span>${data.balanceDue}</span>
+            <span>${balanceDue.toFixed(2)}</span>
           </div>
 
           <div class="row">
             <span>Payment Status:</span>
             <span>${data.paymentStatus}</span>
-          </div>
-
-          <div class="row">
-            <span>Order Status:</span>
-            <span>${data.orderStatus}</span>
           </div>
         </div>
 

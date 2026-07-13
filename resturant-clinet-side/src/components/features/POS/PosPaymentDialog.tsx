@@ -76,7 +76,8 @@ export default function PosPaymentDialog({
 }) {
   const { isPosPaymentDialog, setPosPaymentDialog, paymentTab, setPaymentTab } =
     usePosContext();
-  const { emptyOrderID } = usePosOrderContext();
+  const { emptyOrderID, viewedOrderId, handleViewedOrderId } =
+    usePosOrderContext();
 
   const [amountPaid, setAmountPaid] = useState(total);
   const [paymentNote, setPaymentNote] = useState("");
@@ -107,12 +108,12 @@ export default function PosPaymentDialog({
       if (!emptyOrderID || !submitionData) return;
       processOrderPaymentFN(
         {
-          orderId: emptyOrderID,
+          orderId: viewedOrderId ? viewedOrderId : emptyOrderID,
           paymentData: submitionData,
         },
         {
           onSuccess: (data) => {
-            // console.log("PAYMENT SUCCESS DATA", data);
+            handleViewedOrderId("");
             PosPaymentPrint(data?.data);
           },
         }
