@@ -25,10 +25,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 0,
+      refetchOnReconnect: true,
     },
   },
 });
-
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>

@@ -14,6 +14,7 @@ export function useOrderPayment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["singleOrder"] });
       queryClient.invalidateQueries({ queryKey: ["activeSessionOrders"] });
+      queryClient.invalidateQueries({ queryKey: ["single-session"] });
 
       toast.success("Payment processed successfully");
     },

@@ -10,21 +10,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { usePosContext } from "@/hooks/usePosContext";
+import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
 
-interface PosHeaderProps {
-  balance?: number;
-  sales?: number;
-  orders?: number;
-  onEndSession?: () => void;
-}
-
-export function PosHeader({
-  balance = 0,
-  sales = 0,
-  orders = 0,
-}: PosHeaderProps) {
+export function PosHeader() {
   // POS CONTEXT
-  const { togglePosEndSessionDialog } = usePosContext();
+  const { togglePosEndSessionDialog, sessinId } = usePosContext();
+  // DATA FETCHING
+  const { data } = useGetSingleSession(sessinId);
+  const activeSessionData = data?.data;
+  const balance =
+    activeSessionData?.cashInHand + activeSessionData?.startingBalance;
 
   const [dateTime, setDateTime] = useState({ dateStr: "", timeStr: "" });
 
@@ -90,13 +85,13 @@ export function PosHeader({
             {
               icon: TrendingUp,
               label: "Sales",
-              value: sales.toFixed(2),
+              value: activeSessionData?.totalSales.toFixed(2),
               prefix: "$",
             },
             {
               icon: ShoppingBag,
-              label: "Orders",
-              value: String(orders),
+              label: "Orders completed",
+              value: activeSessionData?.totalOrders,
               prefix: "",
             },
           ].map(({ icon: Icon, label, value, prefix }) => (

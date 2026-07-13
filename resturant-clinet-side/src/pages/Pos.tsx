@@ -260,10 +260,9 @@ export default function PosPage() {
   }, [subtotal, discount, service, tax, total]);
 
   // ── Render ────────────────────────────────────────────────────────────────
-
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <PosHeader balance={0} sales={subtotal} orders={items.length} />
+      <PosHeader />
 
       <main className="flex min-h-0 flex-1 gap-2 p-2">
         <PosOrderPanel
