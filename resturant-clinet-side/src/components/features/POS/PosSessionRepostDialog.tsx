@@ -27,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
 import { usePosContext } from "@/hooks/usePosContext";
 import {
   Banknote,
@@ -89,8 +90,31 @@ function PosSessionReportDialog() {
     PosReportSessionDialog,
     setPosReportSessionDialog,
     setStartPosSessionDialog,
+    sessinId,
   } = usePosContext();
 
+  const { data } = useGetSingleSession(sessinId);
+  const posActiveSession = data?.data;
+  console.log("POS REPORT SESSION DATA", posActiveSession);
+
+  const startDate = new Date(posActiveSession?.startedAt).toLocaleDateString(
+    "en-US",
+    {
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
+  const endDate = new Date(posActiveSession?.endedAt).toLocaleDateString(
+    "en-US",
+    {
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  );
   useEffect(() => {
     if (!PosReportSessionDialog) return;
 
@@ -152,8 +176,10 @@ function PosSessionReportDialog() {
       }}
     >
       <DialogContent
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
         id="report-content"
-        className="max-h-[90vh] overflow-y-scroll p-0"
+        className="max-h-[90vh] overflow-y-scroll p-0 [&>button]:hidden"
       >
         <DialogHeader className="bg-linear-to-r from-cyan-500 to-cyan-600 px-6 py-4 text-white">
           <DialogTitle className="flex items-center gap-1 text-lg">
@@ -164,15 +190,15 @@ function PosSessionReportDialog() {
         <div className="overflow-hidden px-6">
           <div className="bg-cyan-800 py-4 text-center text-white">
             <TypographyH2 className={"mb-1.5! p-0!"}>
-              Session Report #8
+              Session Report
             </TypographyH2>
             <TypographyH3 className={"mb-1.5! p-0! font-medium"}>
-              Start date to end Date
+              {startDate} to {endDate}
             </TypographyH3>
             <TypographyH3 className={"m-0! p-0! font-medium"}>
               <div className="flex items-center justify-center gap-1">
-                <Clock10 className="h-4 w-4" /> Duration "Total Hours an mins" |
-                <User className="h-6 w-6" /> Cashier: Admin
+                <User className="h-6 w-6" /> Cashier:{" "}
+                {posActiveSession?.userId?.name}
               </div>
             </TypographyH3>
           </div>
