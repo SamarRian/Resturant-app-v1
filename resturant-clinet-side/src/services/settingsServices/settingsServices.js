@@ -4,7 +4,6 @@ export async function createSettings(settingsData) {
   try {
     const res = await fetch(`${API_URL}/api/settings/post`, {
       method: "POST",
-
       body: settingsData,
     });
 
