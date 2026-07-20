@@ -69,11 +69,11 @@ export const useDealsColumns = (): ColumnDef<Deal>[] => {
       header: "Image",
       cell: ({ row }) => {
         const image = row.getValue("image") as string;
-
+        console.log("deals table image", image);
         return (
           <div className="flex w-full items-center">
             <Avatar>
-              <AvatarImage src={`http://localhost:5000/images/${image}`} />
+              <AvatarImage src={image} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
           </div>

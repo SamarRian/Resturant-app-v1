@@ -32,7 +32,6 @@ export function AppSidebar() {
   const { data, isSettingsLoading } = useGetAllSettings();
 
   const settings = data?.settingsData[0];
-  // console.log("SDIE BAR LOOGSS",);
 
   return (
     <Sidebar>
@@ -47,9 +46,7 @@ export function AppSidebar() {
           // ⬅️ Data loaded
           <>
             <Avatar className="h-10 w-10">
-              <AvatarImage
-                src={`http://localhost:5000/images/${settings?.logoImage}`}
-              />
+              <AvatarImage src={settings?.logoImage} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             <h2 className="text-lg font-semibold">

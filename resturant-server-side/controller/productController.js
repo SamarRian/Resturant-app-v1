@@ -25,8 +25,7 @@ export async function createProductWithVariations(req, res) {
         ? JSON.parse(req.body.variations)
         : [];
 
-    const image = req.file?.filename || "";
-
+    const image = req.file?.path || "";
     // Validation
     if (
       !name ||

@@ -60,7 +60,7 @@ export async function createDeal(req, res) {
 
     dealName = dealName.toLowerCase().trim();
     dealTitle = dealTitle.toLowerCase().trim();
-    const image = req.file?.filename || "";
+    const image = req.file?.path || "";
 
     // Validation
 
@@ -296,7 +296,7 @@ export async function updateDeal(req, res) {
       }
     }
 
-    const imagePath = req.file ? req.file.filename : undefined;
+    const imagePath = req.file ? req.file.path : undefined;
 
     const updates = {
       ...(dealName && { dealName }),

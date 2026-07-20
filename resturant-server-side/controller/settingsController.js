@@ -129,7 +129,7 @@ export async function updateSettingsById(req, res) {
       updateFields.buisnessName = req.body.buisnessName.trim();
     }
     if (req.file) {
-      updateFields.logoImage = req.file?.filename || "";
+      updateFields.logoImage = req.file?.path || "";
     }
     if (req.body.deliveryChargePerKM) {
       updateFields.deliveryChargePerKM = req.body.deliveryChargePerKM;

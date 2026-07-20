@@ -57,13 +57,11 @@ export const columns: ColumnDef<Payment>[] = [
 
     cell: ({ row }) => {
       const image = row.getValue("image") as string;
-      console.log(image);
 
       return (
         <div className="flex w-full items-center">
           <Avatar>
-            <AvatarImage src={`http://localhost:5000/images/${image}`} />
-            {/* assets/productsImages */}
+            <AvatarImage src={image} alt="product-image" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
         </div>
