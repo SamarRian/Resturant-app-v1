@@ -5,7 +5,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
   Table,
@@ -27,12 +25,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useGetAllPaidOrders } from "@/hooks/QueryHooks/PosSession/PosOrder/useGetAllPaidOrders";
 import { useGetSingleSession } from "@/hooks/QueryHooks/PosSession/useGetSingleSession";
 import { usePosContext } from "@/hooks/usePosContext";
+import { SessionReportPrint } from "@/lib/helper";
 import {
   Banknote,
   Calculator,
-  Clock10,
   CreditCard,
   LayoutGrid,
   ListCheck,
@@ -48,43 +47,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useEffect } from "react";
-const invoices = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-    percentage: 100,
-  },
-];
-const cards = [
-  {
-    icon: <Banknote className="h-5 w-5 text-blue-500" />,
-    amount: "PKR 23,372.05",
-    label: "Total Sales",
-    sub: "6 orders",
-  },
-  {
-    icon: <Receipt className="h-5 w-5 text-green-500" />,
-    amount: "PKR 23,372.05",
-    label: "Cash Sales",
-    sub: "6 orders",
-  },
-  {
-    icon: <CreditCard className="h-5 w-5 text-muted-foreground" />,
-    amount: "PKR 0.00",
-    label: "Online Sales",
-    sub: "0 orders",
-  },
-  {
-    icon: <Scale className="h-5 w-5 text-green-500" />,
-    amount: "+PKR 627.95",
-    label: "Cash Difference",
-    badge: "Overage",
-    green: true,
-  },
-];
+import { useEffect, useState } from "react";
+
 function PosSessionReportDialog() {
   const {
     PosReportSessionDialog,
@@ -93,28 +57,115 @@ function PosSessionReportDialog() {
     sessinId,
   } = usePosContext();
 
+  const [cashDifference, setCashDifference] = useState(0);
+
   const { data } = useGetSingleSession(sessinId);
   const posActiveSession = data?.data;
-  console.log("POS REPORT SESSION DATA", posActiveSession);
+  const { paidOrders } = useGetAllPaidOrders(sessinId);
 
-  const startDate = new Date(posActiveSession?.startedAt).toLocaleDateString(
-    "en-US",
-    {
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }
+  const startingBalance = posActiveSession?.startingBalance || 0;
+  const endingBalance = posActiveSession?.endingBalance ?? null;
+  console.log("Report session data", posActiveSession);
+  console.log("PAID ORDERS", paidOrders);
+
+  const cashOrders = paidOrders?.filter(
+    (order) => order.paymentMethod === "cash"
   );
-  const endDate = new Date(posActiveSession?.endedAt).toLocaleDateString(
-    "en-US",
-    {
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }
+  const onlineOrders = paidOrders?.filter(
+    (order) => order.paymentMethod === "online"
   );
+
+  const cashSales =
+    cashOrders?.reduce((acc, order) => acc + (order.totalAmount || 0), 0) || 0;
+  const onlineSales =
+    onlineOrders?.reduce((acc, order) => acc + (order.totalAmount || 0), 0) ||
+    0;
+
+  // Expected cash = starting balance + cash sales (online payments never touch the drawer)
+  const expectedCash = startingBalance + cashSales;
+
+  const totalOrdersCount =
+    (cashOrders?.length || 0) + (onlineOrders?.length || 0);
+  const averageSale =
+    totalOrdersCount > 0
+      ? (posActiveSession?.totalSales || 0) / totalOrdersCount
+      : 0;
+
+  const cashPercentage =
+    posActiveSession?.totalSales > 0
+      ? (cashSales / posActiveSession.totalSales) * 100
+      : 0;
+  const onlinePercentage =
+    posActiveSession?.totalSales > 0
+      ? (onlineSales / posActiveSession.totalSales) * 100
+      : 0;
+
+  const cashAccuracy =
+    expectedCash > 0
+      ? Math.max(0, 100 - (Math.abs(cashDifference) / expectedCash) * 100)
+      : 100;
+
+  // CASH DIFFERENCE — endingBalance seedha session se aata hai
+  console.log("EXPETEDD CASH", expectedCash);
+  console.log("endingbalance", endingBalance);
+
+  useEffect(() => {
+    if (endingBalance === null || endingBalance === undefined) {
+      setCashDifference(0);
+      return;
+    }
+    setCashDifference(endingBalance - expectedCash);
+  }, [endingBalance, expectedCash]);
+
+  const cards = [
+    {
+      icon: <Banknote className="h-5 w-5 text-blue-500" />,
+      amount: `PKR ${(posActiveSession?.totalSales || 0).toFixed(2)}`,
+      label: "Total Sales",
+      sub: `${posActiveSession?.totalOrders || 0} orders`,
+    },
+    {
+      icon: <Receipt className="h-5 w-5 text-green-500" />,
+      amount: `PKR ${cashSales.toFixed(2)}`,
+      label: "Cash Sales",
+      sub: `${cashOrders?.length || 0} orders`,
+    },
+    {
+      icon: <CreditCard className="h-5 w-5 text-muted-foreground" />,
+      amount: `PKR ${onlineSales.toFixed(2)}`,
+      label: "Online Sales",
+      sub: `${onlineOrders?.length || 0} orders`,
+    },
+    {
+      icon: <Scale className="h-5 w-5 text-green-500" />,
+      amount: `PKR ${cashDifference.toFixed(2)}`,
+      label: "Cash Difference",
+      badge:
+        (cashDifference > 0 && "Overage") ||
+        (cashDifference < 0 && "Shortage") ||
+        "No Cash Difference",
+      green: cashDifference >= 0,
+    },
+  ];
+
+  const startDate = posActiveSession?.startedAt
+    ? new Date(posActiveSession.startedAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "-";
+
+  const endDate = posActiveSession?.endedAt
+    ? new Date(posActiveSession.endedAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Ongoing";
+
   useEffect(() => {
     if (!PosReportSessionDialog) return;
 
@@ -123,7 +174,7 @@ function PosSessionReportDialog() {
       e.returnValue = "";
     };
 
-    const handlePopState = (e) => {
+    const handlePopState = () => {
       window.history.pushState(null, "", window.location.href);
     };
 
@@ -138,32 +189,19 @@ function PosSessionReportDialog() {
     };
   }, [PosReportSessionDialog]);
 
-  const handlePosSessionReportPrint = () => {
-    const printWindow = window.open("", "_blank", "width=800,height=600");
+  const cashierStats = paidOrders?.length
+    ? [
+        {
+          name: posActiveSession?.userId?.name || "Unknown",
+          orders: paidOrders.length,
+          totalAmount: paidOrders.reduce(
+            (acc, o) => acc + (o.totalAmount || 0),
+            0
+          ),
+        },
+      ]
+    : [];
 
-    printWindow?.document.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Report</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: sans-serif; padding: 24px; font-size: 14px; }
-          @media print {
-            body { padding: 0; }
-          }
-        </style>
-      </head>
-      <body>
-        ${document.getElementById("report-content")?.innerHTML}
-      </body>
-    </html>
-  `);
-
-    printWindow?.document.close();
-    printWindow?.focus();
-    printWindow?.print();
-  };
   return (
     <Dialog
       open={PosReportSessionDialog}
@@ -236,6 +274,7 @@ function PosSessionReportDialog() {
               </Card>
             ))}
           </div>
+
           <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2">
             {/* ── Left Panel: Cash Reconciliation ── */}
             <Card>
@@ -254,7 +293,6 @@ function PosSessionReportDialog() {
               </CardHeader>
 
               <CardContent className="space-y-4">
-                {/* Starting Balance */}
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-semibold">Starting Balance</p>
@@ -263,47 +301,44 @@ function PosSessionReportDialog() {
                     </p>
                   </div>
                   <span className="text-sm font-semibold text-blue-500">
-                    PKR 1000.00
+                    PKR {startingBalance.toFixed(2)}
                   </span>
                 </div>
 
                 <Separator />
 
-                {/* Cash Sales */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <PlusCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
                     <div>
                       <p className="text-sm font-medium">Cash Sales</p>
                       <p className="text-xs text-muted-foreground">
-                        6 cash orders
+                        {cashOrders?.length || 0} cash orders
                       </p>
                     </div>
                   </div>
                   <span className="text-sm font-semibold text-green-500">
-                    +PKR 23372.05
+                    +PKR {cashSales.toFixed(2)}
                   </span>
                 </div>
 
-                {/* Online Sales */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <PlusCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
                     <div>
                       <p className="text-sm font-medium">Online Sales</p>
                       <p className="text-xs text-muted-foreground">
-                        0 online orders
+                        {onlineOrders?.length || 0} online orders
                       </p>
                     </div>
                   </div>
                   <span className="text-sm font-semibold text-green-500">
-                    +PKR 0.00
+                    +PKR {onlineSales.toFixed(2)}
                   </span>
                 </div>
 
                 <Separator />
 
-                {/* Expected Cash */}
                 <div className="flex items-center justify-between rounded-lg bg-muted p-3">
                   <div className="flex items-center gap-2">
                     <Calculator className="h-4 w-4 text-muted-foreground" />
@@ -315,42 +350,72 @@ function PosSessionReportDialog() {
                     </div>
                   </div>
                   <span className="text-sm font-semibold text-blue-500">
-                    PKR 24372.05
+                    PKR {expectedCash.toFixed(2)}
                   </span>
                 </div>
 
-                {/* Actual Cash Count */}
+                {/* Actual Cash Count — seedha posActiveSession.endingBalance se */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex shrink-0 items-center gap-2">
                       <User className="h-4 w-4 text-muted-foreground" />
                       <p className="text-sm font-semibold">Actual Cash Count</p>
                     </div>
-                    <Input
-                      defaultValue="25000.00"
-                      className="h-8 w-32 text-right text-sm"
-                    />
+                    <span className="text-sm font-semibold">
+                      PKR{" "}
+                      {endingBalance !== null
+                        ? endingBalance.toFixed(2)
+                        : "0.00"}
+                    </span>
                   </div>
                   <p className="pl-6 text-xs text-muted-foreground">
                     Physical cash counted at session end
                   </p>
                 </div>
 
-                {/* Cash Difference */}
-                <div className="flex items-start justify-between rounded-lg border border-green-200 bg-green-50 p-3">
+                <div
+                  className={`flex items-start justify-between rounded-lg border p-3 ${
+                    cashDifference >= 0
+                      ? "border-green-200 bg-green-50"
+                      : "border-red-200 bg-red-50"
+                  }`}
+                >
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                    <TrendingUp
+                      className={`mt-0.5 h-4 w-4 shrink-0 ${
+                        cashDifference >= 0 ? "text-green-600" : "text-red-600"
+                      }`}
+                    />
                     <div>
-                      <p className="text-sm font-semibold text-green-800">
+                      <p
+                        className={`text-sm font-semibold ${
+                          cashDifference >= 0
+                            ? "text-green-800"
+                            : "text-red-800"
+                        }`}
+                      >
                         Cash Difference
                       </p>
-                      <p className="text-xs text-green-600">
-                        Overage: Extra cash found in drawer
+                      <p
+                        className={`text-xs ${
+                          cashDifference >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {cashDifference >= 0
+                          ? "Overage: Extra cash found in drawer"
+                          : "Shortage: Cash missing from drawer"}
                       </p>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-green-600">
-                    +PKR 627.95
+                  <span
+                    className={`text-sm font-bold ${
+                      cashDifference >= 0 ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {cashDifference >= 0 ? "+" : ""}
+                    PKR {cashDifference.toFixed(2)}
                   </span>
                 </div>
               </CardContent>
@@ -367,59 +432,83 @@ function PosSessionReportDialog() {
                     </CardTitle>
                   </div>
                   <Badge className="bg-green-500 text-xs text-white hover:bg-green-500">
-                    6 Orders
+                    {totalOrdersCount} Orders
                   </Badge>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-4">
-                {/* Payment Method Distribution */}
                 <div>
                   <p className="mb-2 text-xs text-muted-foreground">
                     Payment Method Distribution
                   </p>
-                  <div className="w-full rounded-md bg-green-500 py-2 text-center text-xs font-bold tracking-wide text-white">
-                    CASH 100%
+                  <div className="flex w-full overflow-hidden rounded-md text-xs font-bold tracking-wide text-white">
+                    {cashPercentage > 0 && (
+                      <div
+                        className="bg-green-500 py-2 text-center"
+                        style={{ width: `${cashPercentage}%` }}
+                      >
+                        CASH {cashPercentage.toFixed(0)}%
+                      </div>
+                    )}
+                    {onlinePercentage > 0 && (
+                      <div
+                        className="bg-blue-500 py-2 text-center"
+                        style={{ width: `${onlinePercentage}%` }}
+                      >
+                        ONLINE {onlinePercentage.toFixed(0)}%
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Cash / Online breakdown */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1 rounded-lg border p-3">
                     <p className="text-xs font-bold text-foreground">CASH</p>
-                    <p className="text-sm font-semibold">PKR 23372.05</p>
-                    <p className="text-xs text-muted-foreground">6 orders</p>
+                    <p className="text-sm font-semibold">
+                      PKR {cashSales.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {cashOrders?.length || 0} orders
+                    </p>
                   </div>
                   <div className="space-y-1 rounded-lg border p-3">
                     <p className="text-xs font-bold text-foreground">ONLINE</p>
-                    <p className="text-sm font-semibold">PKR 0.00</p>
-                    <p className="text-xs text-muted-foreground">0 orders</p>
+                    <p className="text-sm font-semibold">
+                      PKR {onlineSales.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {onlineOrders?.length || 0} orders
+                    </p>
                   </div>
                 </div>
 
                 <Separator />
 
-                {/* Performance Metrics */}
                 <p className="text-xs text-muted-foreground">
                   Performance Metrics
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1 rounded-lg border p-3">
-                    <p className="text-sm font-semibold">PKR 3895.34</p>
+                    <p className="text-sm font-semibold">
+                      PKR {averageSale.toFixed(2)}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       Average Sale
                     </p>
                   </div>
 
                   <div className="space-y-1 rounded-lg border p-3">
-                    <p className="text-sm font-semibold">6</p>
+                    <p className="text-sm font-semibold">{totalOrdersCount}</p>
                     <p className="text-xs text-muted-foreground">
                       Total Orders
                     </p>
                   </div>
 
                   <div className="space-y-1 rounded-lg border p-3">
-                    <p className="text-sm font-semibold">PKR 23372.05</p>
+                    <p className="text-sm font-semibold">
+                      PKR {(posActiveSession?.totalSales || 0).toFixed(2)}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       Total Revenue
                     </p>
@@ -427,6 +516,9 @@ function PosSessionReportDialog() {
 
                   <div className="flex flex-col items-start space-y-1 rounded-lg border p-3">
                     <TrendingUp className="h-4 w-4 text-amber-500" />
+                    <p className="text-sm font-semibold">
+                      {cashAccuracy.toFixed(1)}%
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       Cash Accuracy
                     </p>
@@ -447,10 +539,13 @@ function PosSessionReportDialog() {
                 </div>
               </CardHeader>
               <CardContent>
-                <h4>Session clossing notes</h4>
+                <h4>
+                  {posActiveSession?.notes || "No notes for this session."}
+                </h4>
               </CardContent>
             </Card>
           </div>
+
           <div className="p-4">
             <Card>
               <CardHeader className="border-b pb-2">
@@ -460,7 +555,10 @@ function PosSessionReportDialog() {
                     Orders By Cashier
                   </CardTitle>
                   <CardAction>
-                    <Badge className="bg-blue-500">1 Cashier</Badge>
+                    <Badge className="bg-blue-500">
+                      {cashierStats.length} Cashier
+                      {cashierStats.length !== 1 ? "s" : ""}
+                    </Badge>
                   </CardAction>
                 </div>
               </CardHeader>
@@ -476,28 +574,36 @@ function PosSessionReportDialog() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invoices.map((invoice) => (
-                      <TableRow key={invoice.invoice}>
-                        <TableCell className="font-medium">
-                          {invoice.invoice}
-                        </TableCell>
-                        <TableCell>{invoice.paymentStatus}</TableCell>
-                        <TableCell>{invoice.paymentMethod}</TableCell>
-                        <TableCell>{invoice.totalAmount}</TableCell>
-                        <TableCell>
-                          <Badge>
-                            {invoice.percentage.toFixed(1)} <Percent />
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {cashierStats.map((cashier, i) => {
+                      const avg =
+                        cashier.orders > 0
+                          ? cashier.totalAmount / cashier.orders
+                          : 0;
+                      const pct =
+                        posActiveSession?.totalSales > 0
+                          ? (cashier.totalAmount /
+                              posActiveSession.totalSales) *
+                            100
+                          : 0;
+                      return (
+                        <TableRow key={i}>
+                          <TableCell className="font-medium">
+                            {cashier.name}
+                          </TableCell>
+                          <TableCell>{cashier.orders}</TableCell>
+                          <TableCell>
+                            PKR {cashier.totalAmount.toFixed(2)}
+                          </TableCell>
+                          <TableCell>PKR {avg.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <Badge>
+                              {pct.toFixed(1)} <Percent className="h-3 w-3" />
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
-                  {/* <TableFooter>
-                    <TableRow>
-                      <TableCell colSpan={3}>Total</TableCell>
-                      <TableCell className="text-right">$2,500.00</TableCell>
-                    </TableRow>
-                  </TableFooter> */}
                 </Table>
               </CardContent>
             </Card>
@@ -505,12 +611,31 @@ function PosSessionReportDialog() {
             <div className="flex items-center justify-center p-4">
               <Button
                 className="p-5 text-lg"
-                onClick={handlePosSessionReportPrint}
+                onClick={() =>
+                  SessionReportPrint({
+                    restaurantName: "Your Restaurant Name",
+                    cashierName: posActiveSession?.userId?.name || "Unknown",
+                    startedAt: posActiveSession?.startedAt,
+                    endedAt: posActiveSession?.endedAt,
+                    startingBalance,
+                    endingBalance,
+                    totalSales: posActiveSession?.totalSales || 0,
+                    totalOrders: posActiveSession?.totalOrders || 0,
+                    cashSales,
+                    cashOrdersCount: cashOrders?.length || 0,
+                    onlineSales,
+                    onlineOrdersCount: onlineOrders?.length || 0,
+                    expectedCash,
+                    cashDifference,
+                    notes: posActiveSession?.notes,
+                  })
+                }
               >
                 <Printer className="h-4 w-4" /> Print Thermal Recipt
               </Button>
             </div>
           </div>
+
           <DialogFooter className="pb-8">
             <DialogClose asChild>
               <Button

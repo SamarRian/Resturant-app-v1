@@ -865,3 +865,303 @@ export const UnpaidBillPrint = (data: PrintData) => {
   printWindow?.focus();
   printWindow?.print();
 };
+export type SessionReportPrintData = {
+  restaurantName: string;
+  cashierName: string;
+  startedAt: string; // ISO date
+  endedAt: string | null; // ISO date or null if still active
+  startingBalance: number;
+  endingBalance: number | null;
+  totalSales: number;
+  totalOrders: number;
+  cashSales: number;
+  cashOrdersCount: number;
+  onlineSales: number;
+  onlineOrdersCount: number;
+  expectedCash: number;
+  cashDifference: number;
+  notes?: string;
+};
+
+export const SessionReportPrint = (data: SessionReportPrintData) => {
+  const printWindow = window.open("", "_blank", "width=400,height=600");
+
+  const startedAtStr = new Date(data.startedAt).toLocaleString("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const endedAtStr = data.endedAt
+    ? new Date(data.endedAt).toLocaleString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+    : "Ongoing";
+
+  const printedAtStr = new Date().toLocaleString("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+
+  const diffLabel =
+    data.cashDifference > 0
+      ? "OVERAGE"
+      : data.cashDifference < 0
+        ? "SHORTAGE"
+        : "BALANCED";
+
+  const diffSign = data.cashDifference >= 0 ? "+" : "-";
+  const diffAmount = Math.abs(data.cashDifference).toFixed(2);
+
+  const endingBalanceHTML =
+    data.endingBalance !== null
+      ? `PKR ${data.endingBalance.toFixed(2)}`
+      : "Not recorded";
+
+  printWindow?.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Session Report</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+
+          body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            width: 300px;
+            margin: 0 auto;
+            padding: 16px 8px;
+            color: #000;
+          }
+
+          .center { text-align: center; }
+          .right   { text-align: right; }
+          .bold    { font-weight: bold; }
+
+          .header { text-align: center; margin-bottom: 6px; }
+          .header h1 {
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+          }
+          .header h2 {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+          }
+
+          .dashed { border-top: 2px dashed #000; margin: 8px 0; }
+          .dotted { border-top: 1px dotted #000; margin: 4px 0; }
+
+          .report-title {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 6px 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+          }
+
+          .info-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 3px 8px;
+            font-size: 12px;
+            margin: 6px 0;
+          }
+          .info-grid .label { font-weight: normal; }
+          .info-grid .value { text-align: right; }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 4px 0;
+            font-size: 12px;
+          }
+
+          tbody td { padding: 4px 0; vertical-align: top; }
+          .row-label { text-align: left; }
+          .row-value { text-align: right; }
+
+          .section-heading {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 8px 0 4px;
+            letter-spacing: 0.5px;
+          }
+
+          .highlight-box {
+            border: 1px dashed #000;
+            padding: 8px;
+            margin: 8px 0;
+            font-size: 13px;
+          }
+          .highlight-box .diff-label {
+            font-weight: bold;
+            text-transform: uppercase;
+          }
+          .highlight-box .diff-amount {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 4px;
+          }
+
+          .notes-box {
+            border: 1px dashed #000;
+            padding: 8px;
+            margin: 8px 0;
+            min-height: 40px;
+            font-size: 12px;
+          }
+          .notes-box p.notes-title { font-weight: bold; margin-bottom: 6px; }
+
+          .printed-at { text-align: center; font-size: 11px; margin: 6px 0; }
+
+          .stars {
+            text-align: center;
+            font-size: 11px;
+            letter-spacing: 2px;
+            margin: 4px 0;
+          }
+
+          .footer-line {
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 4px;
+            margin-top: 2px;
+          }
+
+          @media print {
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+
+        <!-- Header -->
+        <div class="header">
+          <h1>Session Summary Report</h1>
+          <h2>${data.restaurantName}</h2>
+        </div>
+
+        <div class="dashed"></div>
+
+        <p class="report-title">POS Session Report</p>
+
+        <div class="dashed"></div>
+
+        <!-- Session Info -->
+        <div class="info-grid">
+          <span class="label">Cashier:</span>
+          <span class="value">${data.cashierName}</span>
+
+          <span class="label">Started:</span>
+          <span class="value">${startedAtStr}</span>
+
+          <span class="label">Ended:</span>
+          <span class="value">${endedAtStr}</span>
+        </div>
+
+        <div class="dashed"></div>
+
+        <!-- Sales Summary -->
+        <p class="section-heading">Sales Summary</p>
+        <table>
+          <tbody>
+            <tr>
+              <td class="row-label">Total Sales</td>
+              <td class="row-value">PKR ${data.totalSales.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td class="row-label">Total Orders</td>
+              <td class="row-value">${data.totalOrders}</td>
+            </tr>
+            <tr><td colspan="2"><div class="dotted"></div></td></tr>
+            <tr>
+              <td class="row-label">Cash Sales (${data.cashOrdersCount} orders)</td>
+              <td class="row-value">PKR ${data.cashSales.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td class="row-label">Online Sales (${data.onlineOrdersCount} orders)</td>
+              <td class="row-value">PKR ${data.onlineSales.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="dashed"></div>
+
+        <!-- Cash Reconciliation -->
+        <p class="section-heading">Cash Reconciliation</p>
+        <table>
+          <tbody>
+            <tr>
+              <td class="row-label">Starting Balance</td>
+              <td class="row-value">PKR ${data.startingBalance.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td class="row-label">Expected Cash</td>
+              <td class="row-value">PKR ${data.expectedCash.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td class="row-label">Actual Cash Count</td>
+              <td class="row-value">${endingBalanceHTML}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="highlight-box">
+          <div style="display:flex; justify-content:space-between;">
+            <span class="diff-label">Cash Difference</span>
+            <span class="diff-label">${diffLabel}</span>
+          </div>
+          <p class="diff-amount">${diffSign}PKR ${diffAmount}</p>
+        </div>
+
+        <div class="dashed"></div>
+
+        <!-- Notes -->
+        <div class="notes-box">
+          <p class="notes-title">Session Notes:</p>
+          ${data.notes ? `<p>${data.notes}</p>` : `<p style="color:#888;">No notes recorded</p>`}
+        </div>
+
+        <div class="dashed"></div>
+
+        <!-- Printed At -->
+        <p class="printed-at">Printed: ${printedAtStr}</p>
+
+        <!-- Stars -->
+        <p class="stars">* * * * * * * * * * * * * * * * * * * *</p>
+
+        <!-- Footer -->
+        <p class="footer-line">*** END OF SESSION REPORT ***</p>
+
+      </body>
+    </html>
+  `);
+
+  printWindow?.document.close();
+  printWindow?.focus();
+  printWindow?.print();
+};

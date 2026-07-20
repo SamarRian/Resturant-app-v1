@@ -9,12 +9,14 @@ import {
   processPayment,
   deleteOrder,
   generateOrder,
+  getAllPaidOrders,
 } from "../controller/ordersController.js";
 
 const router = express.Router();
 router.post("/post", protect, generateOrder);
 router.patch("/update/:id", protect, updateOrder);
 router.get("/all", protect, getAllActiveSessionOrders);
+router.get("/all/paid/:id", protect, getAllPaidOrders);
 router.get("/:id", protect, getOrderById);
 router.patch("/:id/status", protect, updateOrderStatus);
 router.patch("/:id/kitchen-status", protect, updateKitchenStatus);

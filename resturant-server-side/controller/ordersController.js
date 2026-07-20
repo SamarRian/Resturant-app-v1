@@ -198,10 +198,45 @@ export const getAllActiveSessionOrders = async (req, res) => {
         };
       }),
     );
-    console.log(activeSession);
     return res.status(200).json({
       success: true,
       message: "Active session orders found successfully.",
+      data: ordersWithItems,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const getAllPaidOrders = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const activeSession = await PosSession.findById(id);
+    if (!activeSession) {
+      return res.status(404).json({
+        success: false,
+        message: "Active Session not found",
+      });
+    }
+    const activeOrders = await PosOrder.find({
+      posSessionId: activeSession._id,
+    });
+
+    const filteredOrders = activeOrders.filter(
+      (order) =>
+        order.paymentStatus === "paid" && order.orderStatus === "completed",
+    );
+    const ordersWithItems = await Promise.all(
+      filteredOrders.map(async (order) => {
+        const items = await OrderItem.find({ orderId: order._id });
+        return {
+          ...order.toObject(),
+          items,
+        };
+      }),
+    );
+    return res.status(200).json({
+      success: true,
+      message: "Paid orders found successfully.",
       data: ordersWithItems,
     });
   } catch (error) {

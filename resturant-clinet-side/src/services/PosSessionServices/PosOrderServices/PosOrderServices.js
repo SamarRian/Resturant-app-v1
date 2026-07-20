@@ -142,3 +142,23 @@ export async function getAllActiveSessionOrders() {
     throw error;
   }
 }
+export async function getAllPaidOrders(id) {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/orders/all/paid/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to process payment");
+    }
+    return data?.data;
+  } catch (error) {
+    console.error(error.message);
+    throw error;
+  }
+}
