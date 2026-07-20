@@ -1,6 +1,8 @@
+import { API_URL } from "../../../DevData/CONSTANTS";
+
 export async function getAllDeals() {
   try {
-    const res = await fetch("http://localhost:5000/api/deals/all");
+    const res = await fetch(`${API_URL}/api/deals/all`);
     const data = await res.json();
 
     if (!res.ok) return;
@@ -13,7 +15,7 @@ export async function getAllDeals() {
 
 export async function createDeal(deal) {
   try {
-    const res = await fetch("http://localhost:5000/api/deals/post", {
+    const res = await fetch(`${API_URL}/api/deals/post`, {
       method: "POST",
       body: deal,
     });
@@ -33,7 +35,7 @@ export async function createDeal(deal) {
 
 export async function updateDealVariation(id, variant) {
   try {
-    const res = await fetch(`http://localhost:5000/api/deals/post/${id}`, {
+    const res = await fetch(`${API_URL}/api/deals/post/${id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(variant),
@@ -53,7 +55,7 @@ export async function updateDealVariation(id, variant) {
 
 export async function getSingleDeal(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/deals/get/${id}`);
+    const res = await fetch(`${API_URL}/api/deals/get/${id}`);
     const data = await res.json();
 
     if (!res.ok) {
@@ -70,7 +72,7 @@ export async function getSingleDeal(id) {
 
 export async function deleteDeal(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/deals/delete/${id}`, {
+    const res = await fetch(`${API_URL}/api/deals/delete/${id}`, {
       method: "DELETE",
     });
 
@@ -90,7 +92,7 @@ export async function deleteDeal(id) {
 export async function deleteDealVariant(dealId, variantId) {
   try {
     const res = await fetch(
-      `http://localhost:5000/api/deals/delete/${dealId}/variant/${variantId}`,
+      `${API_URL}/api/deals/delete/${dealId}/variant/${variantId}`,
       {
         method: "DELETE",
       }
@@ -111,7 +113,7 @@ export async function deleteDealVariant(dealId, variantId) {
 
 export async function udpateDeal(id, updatedDealData) {
   try {
-    const res = await fetch(`http://localhost:5000/api/deals/update/${id}`, {
+    const res = await fetch(`${API_URL}/api/deals/update/${id}`, {
       method: "PUT",
       body: updatedDealData,
     });

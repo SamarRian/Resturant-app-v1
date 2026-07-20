@@ -1,8 +1,10 @@
+import { API_URL } from "../../../DevData/CONSTANTS";
+
 export async function createSession(startingBalance, notes) {
   const token = localStorage.getItem("token");
 
   try {
-    const res = await fetch("http://localhost:5000/api/session/open", {
+    const res = await fetch(`${API_URL}/api/session/open`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -25,7 +27,7 @@ export async function createSession(startingBalance, notes) {
 export async function closeSession(id, endingBalance, notes) {
   const token = localStorage.getItem("token");
   try {
-    const res = await fetch(`http://localhost:5000/api/session/close/${id}`, {
+    const res = await fetch(`${API_URL}/api/session/close/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -49,7 +51,7 @@ export async function getSingleSession(id) {
   const token = localStorage.getItem("token");
 
   try {
-    const res = await fetch(`http://localhost:5000/api/session/${id}`, {
+    const res = await fetch(`${API_URL}/api/session/${id}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

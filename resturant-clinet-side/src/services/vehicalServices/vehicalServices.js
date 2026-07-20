@@ -1,6 +1,8 @@
+import { API_URL } from "../../../DevData/CONSTANTS";
+
 export async function getAllVehicals() {
   try {
-    const res = await fetch("http://localhost:5000/api/vehical/all");
+    const res = await fetch(`${API_URL}/api/vehical/all`);
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || "Failed to get vehical");
@@ -14,7 +16,7 @@ export async function getAllVehicals() {
 }
 export async function createVehical(vehicalNumber) {
   try {
-    const res = await fetch("http://localhost:5000/api/vehical/post", {
+    const res = await fetch(`${API_URL}/api/vehical/post`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,7 +39,7 @@ export async function createVehical(vehicalNumber) {
 
 export async function updateVehical(id, updateData) {
   try {
-    const res = await fetch(`http://localhost:5000/api/vehical/update/${id}`, {
+    const res = await fetch(`${API_URL}/api/vehical/update/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -60,7 +62,7 @@ export async function updateVehical(id, updateData) {
 
 export async function deleteVehical(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/vehical/delete/${id}`, {
+    const res = await fetch(`${API_URL}/api/vehical/delete/${id}`, {
       method: "DELETE",
     });
 
@@ -79,7 +81,7 @@ export async function deleteVehical(id) {
 
 export async function getSingleVehical(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/vehical/get/${id}`);
+    const res = await fetch(`${API_URL}/api/vehical/get/${id}`);
     const data = await res.json();
 
     if (!res.ok) {

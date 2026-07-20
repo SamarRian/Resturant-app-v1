@@ -1,6 +1,8 @@
+import { API_URL } from "../../../DevData/CONSTANTS";
+
 export async function getAllCategories() {
   try {
-    const res = await fetch("http://localhost:5000/api/category/all");
+    const res = await fetch(`${API_URL}/api/category/all`);
     const data = await res.json();
 
     if (!res.ok) {
@@ -16,7 +18,7 @@ export async function getAllCategories() {
 
 export async function createCategory(categoryName) {
   try {
-    const res = await fetch("http://localhost:5000/api/category/post", {
+    const res = await fetch(`${API_URL}/api/category/post`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +41,7 @@ export async function createCategory(categoryName) {
 
 export async function updateCategoryById(id, categoryName) {
   try {
-    const res = await fetch(`http://localhost:5000/api/category/update/${id}`, {
+    const res = await fetch(`${API_URL}/api/category/update/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -62,7 +64,7 @@ export async function updateCategoryById(id, categoryName) {
 
 export async function deleteCategoryById(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/category/delete/${id}`, {
+    const res = await fetch(`${API_URL}/api/category/delete/${id}`, {
       method: "DELETE",
     });
 
@@ -81,7 +83,7 @@ export async function deleteCategoryById(id) {
 
 export async function getSingleCategory(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/category/get/${id}`);
+    const res = await fetch(`${API_URL}/api/category/get/${id}`);
 
     const data = await res.json();
 

@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:5000/api/auth"
+import { API_URL as SERVER_URL } from "../../../DevData/CONSTANTS";
+
+const API_URL = `${SERVER_URL}/api/auth`;
 
 export const loginUser = async (data) => {
   const res = await fetch(`${API_URL}/login`, {
@@ -7,12 +9,12 @@ export const loginUser = async (data) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-  })
+  });
 
-  if (!res.ok) throw new Error("Login failed")
+  if (!res.ok) throw new Error("Login failed");
 
-  return res.json()
-}
+  return res.json();
+};
 
 export const signUpUser = async (data) => {
   const res = await fetch(`${API_URL}/register`, {
@@ -21,9 +23,9 @@ export const signUpUser = async (data) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
-  })
+  });
 
-  if (!res.ok) throw new Error("Signup failed")
+  if (!res.ok) throw new Error("Signup failed");
 
-  return res.json()
-}
+  return res.json();
+};

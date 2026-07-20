@@ -220,7 +220,7 @@ export function PosMenuPanel({
                   <div className="relative w-full overflow-hidden bg-muted/40 pt-[72%]">
                     {product.image ? (
                       <img
-                        src={`http://localhost:5000/images/${product.image}`}
+                        src={product?.image}
                         alt={product.name}
                         loading="lazy"
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"

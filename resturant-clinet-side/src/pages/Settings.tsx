@@ -161,7 +161,7 @@ export default function Settings() {
               {logoPreview ? (
                 <>
                   <img
-                    src={`http://localhost:5000/images/${settings?.logoImage}`}
+                    src={settings?.logoImage}
                     alt="Logo preview"
                     className="h-16 w-16 rounded-lg border bg-white object-contain"
                   />

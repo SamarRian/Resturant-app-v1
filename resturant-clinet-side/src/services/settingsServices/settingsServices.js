@@ -1,6 +1,8 @@
+import { API_URL } from "../../../DevData/CONSTANTS";
+
 export async function createSettings(settingsData) {
   try {
-    const res = await fetch("http://localhost:5000/api/settings/post", {
+    const res = await fetch(`${API_URL}/api/settings/post`, {
       method: "POST",
 
       body: settingsData,
@@ -21,7 +23,7 @@ export async function createSettings(settingsData) {
 
 export async function getAllSettings() {
   try {
-    const res = await fetch("http://localhost:5000/api/settings/all");
+    const res = await fetch(`${API_URL}/api/settings/all`);
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || "Failed to create settings");
@@ -37,7 +39,7 @@ export async function getAllSettings() {
 
 export async function updateSettingsById(id, formData) {
   try {
-    const res = await fetch(`http://localhost:5000/api/settings/update/${id}`, {
+    const res = await fetch(`${API_URL}/api/settings/update/${id}`, {
       method: "PUT",
 
       body: formData,

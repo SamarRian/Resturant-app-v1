@@ -1,6 +1,8 @@
+import { API_URL } from "../../../DevData/CONSTANTS";
+
 export async function getAllProducts() {
   try {
-    const res = await fetch("http://localhost:5000/api/product/all");
+    const res = await fetch(`${API_URL}/api/product/all`);
     const data = await res.json();
     return data;
   } catch (error) {
@@ -11,7 +13,7 @@ export async function getAllProducts() {
 
 export async function createProduct(data) {
   try {
-    const res = await fetch("http://localhost:5000/api/product/post", {
+    const res = await fetch(`${API_URL}/api/product/post`, {
       method: "POST",
       body: data,
     });
@@ -34,7 +36,7 @@ export async function getSingleProduct(id) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const res = await fetch(`http://localhost:5000/api/product/${id}`, {
+    const res = await fetch(`${API_URL}/api/product/${id}`, {
       signal: controller.signal,
       headers: {
         "Content-Type": "application/json",

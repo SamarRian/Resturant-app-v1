@@ -1,6 +1,8 @@
+import { API_URL } from "../../../DevData/CONSTANTS";
+
 export async function getAllTables() {
   try {
-    const res = await fetch("http://localhost:5000/api/tables/all");
+    const res = await fetch(`${API_URL}/api/tables/all`);
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || "Failed to delete deal");
@@ -14,7 +16,7 @@ export async function getAllTables() {
 
 export async function createTable(tableName) {
   try {
-    const res = await fetch("http://localhost:5000/api/tables/post", {
+    const res = await fetch(`${API_URL}/api/tables/post`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +40,7 @@ export async function createTable(tableName) {
 export async function updateTableById(id, tableName) {
   console.log("UDPATETABLE id", id);
   try {
-    const res = await fetch(`http://localhost:5000/api/tables/update/${id}`, {
+    const res = await fetch(`${API_URL}/api/tables/update/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -61,16 +63,13 @@ export async function updateTableById(id, tableName) {
 export async function updateTableStatusById(id, status) {
   console.log("UDPATETABLE id", id);
   try {
-    const res = await fetch(
-      `http://localhost:5000/api/tables/update/${id}/status`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      }
-    );
+    const res = await fetch(`${API_URL}/api/tables/update/${id}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    });
 
     const data = await res.json();
 
@@ -87,7 +86,7 @@ export async function updateTableStatusById(id, status) {
 
 export async function deleteTable(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/tables/delete/${id}`, {
+    const res = await fetch(`${API_URL}/api/tables/delete/${id}`, {
       method: "DELETE",
     });
 
@@ -106,7 +105,7 @@ export async function deleteTable(id) {
 
 export async function getSingleTable(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/tables/get/${id}`);
+    const res = await fetch(`${API_URL}/api/tables/get/${id}`);
 
     const data = await res.json();
 

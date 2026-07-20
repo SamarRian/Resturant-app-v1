@@ -1,6 +1,8 @@
+import { API_URL } from "../../../DevData/CONSTANTS";
+
 export async function getAllStaff() {
   try {
-    const res = await fetch("http://localhost:5000/api/staff/all");
+    const res = await fetch(`${API_URL}/api/staff/all`);
     const data = await res.json();
 
     if (!res.ok) {
@@ -16,7 +18,7 @@ export async function getAllStaff() {
 
 export async function createStaff(personName) {
   try {
-    const res = await fetch("http://localhost:5000/api/staff/post", {
+    const res = await fetch(`${API_URL}/api/staff/post`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,7 +41,7 @@ export async function createStaff(personName) {
 
 export async function updateStaffById(id, personName) {
   try {
-    const res = await fetch(`http://localhost:5000/api/staff/update/${id}`, {
+    const res = await fetch(`${API_URL}/api/staff/update/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -62,7 +64,7 @@ export async function updateStaffById(id, personName) {
 
 export async function deleteStaffById(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/staff/delete/${id}`, {
+    const res = await fetch(`${API_URL}/api/staff/delete/${id}`, {
       method: "DELETE",
     });
 
@@ -81,7 +83,7 @@ export async function deleteStaffById(id) {
 
 export async function getSingleStaff(id) {
   try {
-    const res = await fetch(`http://localhost:5000/api/staff/get/${id}`);
+    const res = await fetch(`${API_URL}/api/staff/get/${id}`);
 
     const data = await res.json();
 
@@ -98,16 +100,13 @@ export async function getSingleStaff(id) {
 
 export async function updateStaffStatus(id, status) {
   try {
-    const res = await fetch(
-      `http://localhost:5000/api/staff/update/${id}/status`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      }
-    );
+    const res = await fetch(`${API_URL}/api/staff/update/${id}/status`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    });
 
     const data = await res.json();
 

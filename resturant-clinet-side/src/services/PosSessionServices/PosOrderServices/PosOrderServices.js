@@ -1,8 +1,10 @@
+import { API_URL } from "../../../../DevData/CONSTANTS";
+
 export async function generateOrder() {
   try {
     const token = localStorage.getItem("token");
 
-    const res = await fetch("http://localhost:5000/api/orders/post", {
+    const res = await fetch(`${API_URL}/api/orders/post`, {
       method: "POST",
 
       headers: {
@@ -24,10 +26,9 @@ export async function generateOrder() {
 }
 
 export async function addOrderItems(orderID, orderItems) {
-  console.log("ORDET ITEMS APIII", orderItems);
   const token = localStorage.getItem("token");
   try {
-    const res = await fetch(`http://localhost:5000/api/order-items/post`, {
+    const res = await fetch(`${API_URL}/api/order-items/post`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,10 +50,9 @@ export async function addOrderItems(orderID, orderItems) {
 
 export async function getSingleOrderById(orderId) {
   const token = localStorage.getItem("token");
-  // console.log("order: ", orderId);
 
   try {
-    const res = await fetch(`http://localhost:5000/api/orders/${orderId}`, {
+    const res = await fetch(`${API_URL}/api/orders/${orderId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -60,7 +60,6 @@ export async function getSingleOrderById(orderId) {
       },
     });
     const data = await res.json();
-    // console.log("data from API: ", data);
 
     if (!res.ok) {
       throw new Error(data.message || "Failed to fetch order");
@@ -75,17 +74,14 @@ export async function getSingleOrderById(orderId) {
 export async function updateOrder(orderId, orderData) {
   const token = localStorage.getItem("token");
   try {
-    const res = await fetch(
-      `http://localhost:5000/api/orders/update/${orderId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(orderData),
-      }
-    );
+    const res = await fetch(`${API_URL}/api/orders/update/${orderId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(orderData),
+    });
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || "Failed to update order");
@@ -101,17 +97,14 @@ export async function processOrderPayment(orderId, paymentData) {
   const token = localStorage.getItem("token");
 
   try {
-    const res = await fetch(
-      `http://localhost:5000/api/orders/${orderId}/payment`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(paymentData),
-      }
-    );
+    const res = await fetch(`${API_URL}/api/orders/${orderId}/payment`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(paymentData),
+    });
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || "Failed to process payment");
@@ -126,7 +119,7 @@ export async function getAllActiveSessionOrders() {
   const token = localStorage.getItem("token");
 
   try {
-    const res = await fetch(`http://localhost:5000/api/orders/all`, {
+    const res = await fetch(`${API_URL}/api/orders/all`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -146,7 +139,7 @@ export async function getAllPaidOrders(id) {
   const token = localStorage.getItem("token");
 
   try {
-    const res = await fetch(`http://localhost:5000/api/orders/all/paid/${id}`, {
+    const res = await fetch(`${API_URL}/api/orders/all/paid/${id}`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
