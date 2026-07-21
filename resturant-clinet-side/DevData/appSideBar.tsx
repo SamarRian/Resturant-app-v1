@@ -3,14 +3,8 @@ import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   ShoppingCart,
-  ArrowRightLeft,
-  Tag,
   Users,
-  BarChart2,
   Package,
-  ShoppingBag,
-  Receipt,
-  UserCheck,
   Settings,
   FileText,
   HandCoins,
@@ -20,8 +14,6 @@ import {
 export const topItems: NavItems[] = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "POS", url: "/pos", icon: ShoppingCart },
-  { title: "Transfer Stock", url: "/transfer-stock", icon: ArrowRightLeft },
-  { title: "Deals", url: "/deals", icon: Tag },
 ];
 
 // Data dropdown items
@@ -36,23 +28,7 @@ export const dropdownItems: dropdownItemsTypes[] = [
       { title: "Category", url: "/category" },
     ],
   },
-  {
-    title: "Manage Users",
-    icon: Users,
-    children: [
-      { title: "All Users", url: "/users" },
-      { title: "Add User", url: "/users/add" },
-      { title: "Roles", url: "/users/roles" },
-    ],
-  },
-  {
-    title: "Sales",
-    icon: BarChart2,
-    children: [
-      { title: "Sales List", url: "/sales" },
-      { title: "New Sale", url: "/sales/new" },
-    ],
-  },
+
   {
     title: "Products",
     icon: Package,
@@ -70,31 +46,7 @@ export const dropdownItems: dropdownItemsTypes[] = [
       { title: "Add Deals", url: "/deals/add" },
     ],
   },
-  {
-    title: "Manage Purchase",
-    icon: ShoppingBag,
-    children: [
-      { title: "Purchases", url: "/purchases" },
-      { title: "New Purchase", url: "/purchases/new" },
-    ],
-  },
-  {
-    title: "Expenses",
-    icon: Receipt,
-    children: [
-      { title: "All Expenses", url: "/expenses" },
-      { title: "Add Expense", url: "/expenses/add" },
-    ],
-  },
-  {
-    title: "Employees",
-    icon: UserCheck,
-    children: [
-      { title: "All Employees", url: "/employees" },
-      { title: "Add Employee", url: "/employees/add" },
-      { title: "Attendance", url: "/employees/attendance" },
-    ],
-  },
+
   {
     title: "Settings",
     icon: Settings,

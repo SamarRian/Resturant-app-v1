@@ -36,14 +36,12 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="items-center">
-        {/* <img src="/logo.jfif" alt="Logo" className="h-10 w-10 rounded-full" /> */}
         {isSettingsLoading ? (
           <>
             <Skeleton className="h-10 w-10 rounded-full" />{" "}
             <Skeleton className="h-5 w-24" />
           </>
         ) : (
-          // ⬅️ Data loaded
           <>
             <Avatar className="h-10 w-10">
               <AvatarImage src={settings?.logoImage} />

@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginForm from "./pages/loginForm";
 import HomePage from "./pages/Home";
-import SignUpForm from "./pages/signUp";
 import AddProduct from "./pages/AddProduct";
 
 import { Toaster } from "sonner";
@@ -37,21 +36,25 @@ export function App() {
           <FormSwitcherProvider>
             <BrowserRouter>
               <Routes>
-                <Route element={<Layout />}>
-                  <Route index element={<Navigate replace to="dashboard" />} />
-                  <Route path="dashboard" element={<HomePage />} />
-                  <Route path="products/add" element={<AddProduct />} />
-                  <Route path="products" element={<AllProduct />} />
-                  <Route path="deals" element={<AllDeals />} />
-                  <Route path="table" element={<Table />} />
-                  <Route path="staff" element={<Staff />} />
-                  <Route path="vehical" element={<Vehical />} />
-                  <Route path="category" element={<Category />} />
-                  <Route path="settings" element={<Settings />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<Layout />}>
+                    <Route
+                      index
+                      element={<Navigate replace to="dashboard" />}
+                    />
+                    <Route path="dashboard" element={<HomePage />} />
+                    <Route path="products/add" element={<AddProduct />} />
+                    <Route path="products" element={<AllProduct />} />
+                    <Route path="deals" element={<AllDeals />} />
+                    <Route path="table" element={<Table />} />
+                    <Route path="staff" element={<Staff />} />
+                    <Route path="vehical" element={<Vehical />} />
+                    <Route path="category" element={<Category />} />
+                    <Route path="settings" element={<Settings />} />
+                  </Route>
+                  <Route path="pos" element={<Pos />} />
                 </Route>
                 <Route path="login" element={<LoginForm />} />
-                <Route path="signup" element={<SignUpForm />} />
-                <Route path="pos" element={<Pos />} />
               </Routes>
             </BrowserRouter>
 
