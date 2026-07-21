@@ -22,10 +22,7 @@ connectDB();
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      process.env.CLIENT_URL, // production client URL, Vercel env var se aayega
-    ],
+    origin: ["http://localhost:5173", process.env.CLIENT_URL],
     credentials: true,
   }),
 );
