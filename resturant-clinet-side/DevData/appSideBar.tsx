@@ -50,10 +50,7 @@ export const dropdownItems: dropdownItemsTypes[] = [
   {
     title: "Settings",
     icon: Settings,
-    children: [
-      { title: "General", url: "/settings" },
-      { title: "Profile", url: "/settings/profile" },
-    ],
+    children: [{ title: "General", url: "/settings" }],
   },
   {
     title: "Reports",
