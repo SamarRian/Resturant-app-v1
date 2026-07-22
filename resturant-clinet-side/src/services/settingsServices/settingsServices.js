@@ -27,7 +27,6 @@ export async function getAllSettings() {
     if (!res.ok) {
       throw new Error(data.message || "Failed to create settings");
     }
-    console.log("GETSETTINGS LOOGS", data);
 
     return data;
   } catch (error) {

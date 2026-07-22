@@ -29,3 +29,24 @@ export const signUpUser = async (data) => {
 
   return res.json();
 };
+
+export async function getMe() {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch("https://resturant-app-v1.vercel.app/api/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to Get session");
+    }
+    return data;
+  } catch (error) {
+    onsole.error(error.message);
+    throw error;
+  }
+}

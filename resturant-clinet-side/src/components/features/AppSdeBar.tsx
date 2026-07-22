@@ -105,7 +105,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser settings={settings} />
       </SidebarFooter>
     </Sidebar>
   );
