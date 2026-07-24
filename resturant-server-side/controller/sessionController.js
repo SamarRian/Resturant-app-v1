@@ -172,3 +172,31 @@ export const updateSessionStats = async (sessionId, saleAmount) => {
     console.error("Session stats update failed:", error.message);
   }
 };
+
+export const getWeeklySessions = async (req, res) => {
+  try {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const sessions = await PosSession.find({
+      createdAt: { $gte: sevenDaysAgo },
+    })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    const totalWeekSales = sessions.reduce(
+      (sum, session) => sum + (session.totalSales || 0),
+      0,
+    );
+
+    res.status(200).json({
+      success: true,
+      totalWeekSales,
+      totalSessions: sessions.length,
+      sessions, // agar list bhi chahiye frontend pe to ye bhi bhej do
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

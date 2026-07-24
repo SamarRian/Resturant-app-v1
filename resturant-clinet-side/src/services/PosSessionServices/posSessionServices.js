@@ -69,3 +69,26 @@ export async function getSingleSession(id) {
     throw error;
   }
 }
+export async function getWeeklySessions() {
+  const token = localStorage.getItem("token");
+
+  try {
+    const res = await fetch(`${API_URL}/api/session/sales/weekly`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
+    console.log("posservice ", data);
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to Get session");
+    }
+
+    return data;
+  } catch (error) {
+    console.error(error.message);
+    throw error;
+  }
+}

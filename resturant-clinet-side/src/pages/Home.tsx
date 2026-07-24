@@ -48,6 +48,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { useGetWeeklySessions } from "@/hooks/QueryHooks/PosSession/useGetWeeklySessions";
 
 // ---------------------------------------------------------------------------
 // Placeholder data — replace with your real queries
@@ -138,6 +139,9 @@ const paymentBadge = (payment: string) =>
     : "bg-rose-50 text-rose-700 border-rose-200";
 
 export default function DashboardOverview() {
+  const { data, isLoading } = useGetWeeklySessions();
+  console.log("weeklySessinsData", data);
+
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Page heading */}
