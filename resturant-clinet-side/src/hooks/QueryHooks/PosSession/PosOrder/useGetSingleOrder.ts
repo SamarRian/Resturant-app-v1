@@ -2,10 +2,10 @@ import { getSingleOrderById } from "@/services/PosSessionServices/PosOrderServic
 import { useQuery } from "@tanstack/react-query";
 
 export function useGetSingleOrder(orderId: string) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isRefetching, refetch } = useQuery({
     queryKey: ["singleOrder", orderId],
     queryFn: () => getSingleOrderById(orderId),
     enabled: !!orderId,
   });
-  return { data, isLoading };
+  return { data, isLoading, refetch, isRefetching };
 }

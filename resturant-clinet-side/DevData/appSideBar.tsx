@@ -6,7 +6,6 @@ import {
   Users,
   Package,
   Settings,
-  FileText,
   HandCoins,
 } from "lucide-react";
 
@@ -51,15 +50,6 @@ export const dropdownItems: dropdownItemsTypes[] = [
     title: "Settings",
     icon: Settings,
     children: [{ title: "General", url: "/settings" }],
-  },
-  {
-    title: "Reports",
-    icon: FileText,
-    children: [
-      { title: "Sales Report", url: "/reports/sales" },
-      { title: "Stock Report", url: "/reports/stock" },
-      { title: "Expense Report", url: "/reports/expenses" },
-    ],
   },
 ];
 

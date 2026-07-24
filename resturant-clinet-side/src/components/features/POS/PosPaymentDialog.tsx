@@ -30,6 +30,7 @@ import { PosPaymentPrint } from "@/lib/helper";
 import { useOrderPayment } from "@/hooks/QueryHooks/PosSession/PosOrder/useOrderPayment";
 import { usePosOrderContext } from "@/hooks/usePosOrderContext";
 import { toast } from "sonner";
+import { useGetAllSettings } from "@/hooks/QueryHooks/Settings/useGetAllSettings";
 
 // BILL PRINT STATIC DATA
 const dummyData: PrintData = {
@@ -90,8 +91,12 @@ export default function PosPaymentDialog({
 
   // data fetching and submission
 
-  const { isOrderPaymentPending, processOrderPaymentFN } = useOrderPayment();
+  const { data, isSettingsLoading } = useGetAllSettings();
 
+  const { isOrderPaymentPending, processOrderPaymentFN } = useOrderPayment();
+  const settingsData = data?.settingsData[0];
+
+  console.log("settings payment", settingsData);
   // console.log("PAID ORDER DATA", paidOrderData);
 
   function handlePayment(e) {
@@ -114,6 +119,9 @@ export default function PosPaymentDialog({
         {
           onSuccess: (data) => {
             handleViewedOrderId("");
+            setPosPaymentDialog(false);
+            data.data.restaurantName = settingsData.buisnessName;
+            data.data.phone = settingsData.phoneNumbers[0];
             PosPaymentPrint(data?.data);
           },
         }
@@ -195,6 +203,7 @@ export default function PosPaymentDialog({
                           onChange={(e) =>
                             setTransactionReferences(e.target.value)
                           }
+                          required
                           type="text"
                           name="paymentReference"
                           id="payment-reference"
@@ -332,7 +341,7 @@ export default function PosPaymentDialog({
 
             <Button className="bg-cyan-500 hover:bg-cyan-600">
               <CreditCard className="h-4 w-4" />
-              Complete Payment
+              {isOrderPaymentPending ? "Paying..." : "Complete Payment"}
             </Button>
           </DialogFooter>
         </form>

@@ -209,7 +209,7 @@ export async function PosPaymentPrint(data: PrintData) {
                     <!-- Header -->
                     <div class="header">
                     <h1>${data.restaurantName}</h1>
-          <p>${data.address}</p>
+         
           <p>Tel: ${data.phone}</p>
         </div>
 
@@ -220,8 +220,6 @@ export async function PosPaymentPrint(data: PrintData) {
         <!-- Customer Info -->
         <div class="info-grid">
           <span class="label">Customer:</span> <span>${data.customerId}</span>
-          <span class="label">Phone:</span>    <span>${data.customerPhone}</span>
-          <span class="label">Address:</span>  <span></span>
           </div>
           
           <div class="divider"></div>
@@ -302,6 +300,7 @@ export interface KotPrintData {
 
 export const KotPrint = (data: PrintData) => {
   const printWindow = window.open("", "_blank", "width=400,height=600");
+  console.log("kotprint data", data);
 
   const orderTime = new Date(data.orderDate);
   const orderTimeStr = orderTime.toLocaleTimeString("en-US", { hour12: false });

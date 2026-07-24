@@ -43,26 +43,33 @@ export function PosFooter({
     orderType,
   } = usePosContext();
   const { emptyOrderID, viewedOrderId } = usePosOrderContext();
-  const { data } = useGetSingleOrder(
+  const { refetch } = useGetSingleOrder(
     viewedOrderId ? viewedOrderId : emptyOrderID
   );
 
-  const billData = data?.data;
-  function handleDialogs(label) {
+  async function handleDialogs(label) {
     if (!blockedActions.has(label)) {
       handleCalculationType(label);
       togglePosCalculationDialog();
-    } else if (label === "Payment") {
-      togglePosPaymentDialog();
-    } else if (label === "Delivery") {
-      togglePosDeliveryDialog();
-    } else if (label === "Print KOT") {
-      KotPrint(billData);
-    } else if (label === "Unpaid") {
-      UnpaidBillPrint(billData);
+      return;
+    }
+
+    if (label === "Payment") return togglePosPaymentDialog();
+    if (label === "Delivery") return togglePosDeliveryDialog();
+
+    if (label === "Print KOT" || label === "Unpaid") {
+      const result = await refetch();
+      const freshBillData = result.data?.data;
+
+      if (!freshBillData) {
+        console.error("No order data available to print");
+        return;
+      }
+
+      if (label === "Print KOT") KotPrint(freshBillData);
+      else UnpaidBillPrint(freshBillData);
     }
   }
-
   return (
     <footer className="shrink-0 border-t border-border bg-card shadow-[0_-1px_4px_rgba(0,0,0,0.06)]">
       {/* ── Totals row ── */}
