@@ -18,7 +18,7 @@ function AllProduct() {
       <div className="flex items-center justify-between">
         <TypographyH2>All Products</TypographyH2>
         <Button onClick={() => navigate("/products/add")}>
-          Create New Deal
+          Create New Product
         </Button>
       </div>
       <DataTable

@@ -9,8 +9,17 @@ import { FullPageSpinner } from "@/components/ui/spinner";
 import { useFormContext } from "@/hooks/useFormContext";
 
 function AllDeals() {
-  const { isUpdateDealOpen, setUpdateDealOpen, toggleUpdateDialoge } =
-    useFormContext();
+  const {
+    isUpdateDealOpen,
+    setUpdateDealOpen,
+    toggleUpdateDialoge,
+    handleDealID,
+  } = useFormContext();
+
+  function handleClick() {
+    handleDealID("");
+    toggleUpdateDialoge();
+  }
   const columns = useDealsColumns();
   const { dealsData, isDealLoading } = useGetDeals();
 
@@ -20,7 +29,7 @@ function AllDeals() {
     <div className="container mx-auto px-4 py-10">
       <div className="flex items-center justify-between">
         <TypographyH2>Deals Management</TypographyH2>
-        <Button onClick={toggleUpdateDialoge}>Create New Deal</Button>
+        <Button onClick={handleClick}>Create New Deal</Button>
       </div>
       <div className="overflow-x-auto">
         <DataTable

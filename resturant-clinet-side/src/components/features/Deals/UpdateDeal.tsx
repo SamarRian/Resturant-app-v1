@@ -108,9 +108,9 @@ export default function UpdateDeal() {
     <Dialog open={isDialogeOpen} onOpenChange={setOpenDialoge}>
       <DialogContent className="sm:max-w-2xl md:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Edit Deal</DialogTitle>
+          <DialogTitle>Add Variations To Deal</DialogTitle>
           <DialogDescription>
-            Update deal details below. Click save when done.
+            Add variations to deal below. Click save when done.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleAddItem}>

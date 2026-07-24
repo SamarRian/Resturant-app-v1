@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useCreateProduct } from "@/hooks/QueryHooks/Product/useCreateProduct";
 import { useFormContext } from "@/hooks/useFormContext";
 import { List, Power } from "lucide-react";
+import clsx from "clsx";
 
 function AddProduct() {
   const { formState, enableVariations, dispatch } = useFormContext();
@@ -66,7 +67,12 @@ function AddProduct() {
         <FileUploaderComp dispatch={dispatch} />
 
         <DynamicFields />
-        <div>
+        <div
+          className={clsx(
+            "flex justify-end",
+            enableVariations ? "mt-3" : "mt-0"
+          )}
+        >
           <Button type="submit" size={"lg"}>
             {isPending ? <Spinner /> : "Submit"}
           </Button>

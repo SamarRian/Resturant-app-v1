@@ -34,16 +34,12 @@ export const dropdownItems: dropdownItemsTypes[] = [
     children: [
       { title: "All Products", url: "/products" },
       { title: "Add Product", url: "/products/add" },
-      { title: "Categories", url: "/products/categories" },
     ],
   },
   {
     title: "Deals",
     icon: HandCoins,
-    children: [
-      { title: "All Deals", url: "/deals" },
-      { title: "Add Deals", url: "/deals/add" },
-    ],
+    children: [{ title: "All Deals", url: "/deals" }],
   },
 
   {

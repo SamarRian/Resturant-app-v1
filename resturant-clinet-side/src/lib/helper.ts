@@ -773,7 +773,6 @@ export const UnpaidBillPrint = (data: PrintData) => {
         <!-- Header -->
         <div class="header">
           <h1>${data.restaurantName}</h1>
-          <p>${data.address}</p>
           <p>Tel: ${data.phone}</p>
         </div>
 
@@ -786,8 +785,7 @@ export const UnpaidBillPrint = (data: PrintData) => {
         <!-- Customer Info -->
         <div class="info-grid">
           <span class="label">Customer:</span> <span>${data.customerId}</span>
-          <span class="label">Phone:</span>    <span>${data.customerPhone}</span>
-          <span class="label">Address:</span>  <span></span>
+         
         </div>
 
         <div class="dashed"></div>

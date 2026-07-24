@@ -91,12 +91,11 @@ export default function PosPaymentDialog({
 
   // data fetching and submission
 
-  const { data, isSettingsLoading } = useGetAllSettings();
+  const { data } = useGetAllSettings();
 
   const { isOrderPaymentPending, processOrderPaymentFN } = useOrderPayment();
   const settingsData = data?.settingsData[0];
 
-  console.log("settings payment", settingsData);
   // console.log("PAID ORDER DATA", paidOrderData);
 
   function handlePayment(e) {

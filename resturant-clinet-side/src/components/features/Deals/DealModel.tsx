@@ -27,7 +27,7 @@ import { useUpdateSinlgeDeal } from "@/hooks/QueryHooks/Deals/useUpdateSingleDea
 import { Spinner } from "../../ui/spinner";
 import { toast } from "sonner";
 import { useGetSingleDeal } from "@/hooks/QueryHooks/Deals/useGetSingleDeal";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function AddDeal({ open, onOpenchange }) {
   const { dealFormState, dispatchDeal, dealId } = useFormContext();
@@ -124,7 +124,7 @@ export default function AddDeal({ open, onOpenchange }) {
         onOpenchange(isOpen);
       }}
     >
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-md md:max-w-xl">
         <DialogHeader>
           <DialogTitle>
             {dealId && singleDeal ? "Update Deal" : "Create your Deal"}

@@ -5,6 +5,7 @@ import { usePosContext } from "@/hooks/usePosContext";
 import { KotPrint, UnpaidBillPrint, type KotPrintData } from "@/lib/helper";
 import { useGetSingleOrder } from "@/hooks/QueryHooks/PosSession/PosOrder/useGetSingleOrder";
 import { usePosOrderContext } from "@/hooks/usePosOrderContext";
+import { useGetAllSettings } from "@/hooks/QueryHooks/Settings/useGetAllSettings";
 
 interface PosFooterProps {
   subtotal: number;
@@ -46,7 +47,11 @@ export function PosFooter({
   const { refetch } = useGetSingleOrder(
     viewedOrderId ? viewedOrderId : emptyOrderID
   );
+  const { data } = useGetAllSettings();
 
+  const settingsData = data?.settingsData[0];
+
+  console.log("SETTINGS DAA UNPAID BILL", settingsData);
   async function handleDialogs(label) {
     if (!blockedActions.has(label)) {
       handleCalculationType(label);
@@ -60,7 +65,8 @@ export function PosFooter({
     if (label === "Print KOT" || label === "Unpaid") {
       const result = await refetch();
       const freshBillData = result.data?.data;
-
+      freshBillData.restaurantName = settingsData.buisnessName;
+      freshBillData.phone = settingsData.phoneNumbers[0];
       if (!freshBillData) {
         console.error("No order data available to print");
         return;
